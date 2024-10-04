@@ -29,7 +29,7 @@ Please check out the paper for more details, and this repo will detail how to ru
 
 ## Setup
 
-Please install the necesary packages with
+Please install the necessary packages with
 ```bash
 pip install -r requirements.txt
 ```
@@ -48,7 +48,7 @@ You should also set the environmental variables accordingly so the API calls can
 <img width="1354" alt="image" src="https://github.com/user-attachments/assets/db748c54-57c5-41f2-8d02-576555a44a1f">
 
 Data will be uploaded soon :)
-In the mean time, please contact me to get access
+In the meantime, please contact me to get access
 
 ## Running evaluation
 
@@ -57,6 +57,8 @@ To run the evaluation, simply use one of the config files in the `configs` direc
 python eval.py --config configs/cite.yaml --model_name_or_path {local model path or huggingface model name} --output_dir {output directory}
 ```
 This will output the results file under the output directory. 
+
+The full results from our evaluation is [here](https://shorturl.at/u7fgY).
 
 ### Model-based evaluation
 
@@ -77,9 +79,9 @@ You may also use Claude, Gemini, or other models for model-based evaluation by m
 
 To add a new task/dataset, you just need to modify the `data.py` file:
 
-Create a function that specify how to load the data:
+Create a function that specifies how to load the data:
 1. Specify the string templates for the task through `user_template`, `system_template`, and `prompt_template` (which is usually just the concatenation of the two)
-2. Process each sample to fit the specified templates (the tokenization code will call `user_template.format(**test_sample)` and same for `system_template`). Importantly, each sample should have a `context` field, which will be truncated automatically if the input is too long (e.g., for QA, this is the retrieved passasges; for NarrativeQA, this is the book/script). You should use the `question` and `answer` field to make evaluation/printing easier.
+2. Process each sample to fit the specified templates (the tokenization code will call `user_template.format(**test_sample)` and same for `system_template`). Importantly, each sample should have a `context` field, which will be truncated automatically if the input is too long (e.g., for QA, this is the retrieved passages; for NarrativeQA, this is the book/script). You should use the `question` and `answer` field to make evaluation/printing easier.
 3. Optionally, add a `post_process` function to process the model output (e.g., for MS MARCO, we use a ranking parse function; for RULER, we calculate the recall). There is also a `default_post_process` function that parses and calculate simple metrics like EM and F1 that you may use. This function should take in the model output and the test sample and return a tuple of `(metrics, changed_output)`, the `metrics` (e.g., EM, ROUGE) are aggregated across all samples, and the `changed_output` are added to the test_sample and saved to the output file.
 4. The function should return `{'data': [list of data samples], 'prompt_template': prompt_template, 'user_template': user_template, 'system_template': system_template, 'post_process': [optional custom function]}`.
 
@@ -102,7 +104,7 @@ The code will be released soon.
 ## Contacts
 
 If you have any questions, please email me at `hyen@cs.princeton.edu`.
-If you encounter any problems, you also also open an issue here. Please try to specify the problem with details so we can help you better and quicker!
+If you encounter any problems, you can also open an issue here. Please try to specify the problem with details so we can help you better and quicker!
 
 ## Citation
 
