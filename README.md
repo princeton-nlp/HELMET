@@ -1,11 +1,10 @@
-# HELMET
-
-How to Evaluate Long-context Language Models Effectively and Thoroughly
+# HELMET: How to Evaluate Long-context Language Models Effectively and Thoroughly
 
 ---
 
-[Paper](https://arxiv.org/abs/2410.02694)
-HELMET is a comprehensive benchmark for long-context language models covering a seven diverse categories of tasks.
+[[Paper](https://arxiv.org/abs/2410.02694)]
+
+HELMET is a comprehensive benchmark for long-context language models covering seven diverse categories of tasks.
 The datasets are application-centric and are designed to evaluate models at different lengths and levels of complexity.
 Please check out the paper for more details, and this repo will detail how to run the evaluation.
 
@@ -23,7 +22,8 @@ Please check out the paper for more details, and this repo will detail how to ru
 
 - [x] HELMET Code
 - [ ] HELMET data
-- [ ] Retrievel setup
+- [ ] Correlation analysis notebook
+- [ ] Retrieval setup
 - [ ] VLLM Support
 
 
@@ -41,8 +41,11 @@ pip install anthropic # Anthropic API
 pip install google-generativeai # Google GenerativeAI API
 pip install together # Together API
 ```
+You should also set the environmental variables accordingly so the API calls can be made correctly. To see the variable that you should set up, check out `model_utils.py` and the corresponding class (e.g., `GeminiModel`).
 
 ## Data
+
+<img width="1354" alt="image" src="https://github.com/user-attachments/assets/db748c54-57c5-41f2-8d02-576555a44a1f">
 
 Data will be uploaded soon :)
 In the mean time, please contact me to get access
@@ -53,7 +56,22 @@ To run the evaluation, simply use one of the config files in the `configs` direc
 ```bash
 python eval.py --config configs/cite.yaml --model_name_or_path {local model path or huggingface model name} --output_dir {output directory}
 ```
+This will output the results file under the output directory. 
 
+### Model-based evaluation
+
+To run the model-based evaluation for LongQA and Summarization, please make sure that you have set the environmental variables for OpenAI so you can make calls to GPT-4o, then you can run:
+```bash
+python scripts/eval_gpt4_longqa.py
+python scripts/eval_gpt4_summ.py
+
+# Alternatively, if you want to shard the process
+bash scripts/eval_gpt4_longqa.sh
+bash scripts/eval_gpt4_summ.sh
+```
+
+To specify which model/paths you want to run model-based evaluation for, check out the python scripts and modify the `model_to_check` field.
+You may also use Claude, Gemini, or other models for model-based evaluation by modifying the class but we have tested for `gpt-4o-2024-05-13`.
 
 ## Adding new tasks
 
@@ -73,6 +91,13 @@ You can refer to the existing tasks for examples (e.g., `load_json_kv`, `load_na
 The existing code supports using HuggingFace-supported models and API models (OpenAI, Anthropic, Google, and Together). To add a new model or use a different framework (e.g., VLLM), you can modify the `model_utils.py` file.
 Specifically, you need to create a new class that implements `prepare_inputs` (how the inputs are processed) and `generate` functions. Then, you can add a new case to `load_LLM`.
 Please refer to the existing classes for examples.
+
+## Dataset correlation analysis 
+
+<img width="838" alt="image" src="https://github.com/user-attachments/assets/7b2dcb8e-ee1b-4e87-acf6-978db99df0b1">
+
+We also analyze the correlation between performance on different datasets.
+The code will be released soon.
 
 ## Contacts
 
