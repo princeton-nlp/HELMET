@@ -1,0 +1,9 @@
+wheel
+ninja
+packaging
+torch
+datasets
+transformers
+accelerate
+sentencepiece
+flash-attn
