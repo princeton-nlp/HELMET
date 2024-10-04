@@ -6,18 +6,12 @@ import json
 import time
 
 from tqdm import tqdm
-import pytrec_eval
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
 from arguments import parse_arguments
-from utils import (
-    LLM,
-    calculate_retrieval_metrics,
-)
 from model_utils import load_LLM
-from retriever import Retriever
 
 from data import (
     load_data, 
@@ -31,13 +25,11 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-def run_test(args, model, dataset, test_file, demo_file, retriever=None):
+def run_test(args, model, dataset, test_file, demo_file):
     logger.info(f"running test on {dataset} with test {test_file} and demo {demo_file}")
     # dataset specific changes tag
     tag = args.tag
-    if "flenqa" in dataset:
-        tag += f"_ctx{args.flenqa_ctx_size}"
-    elif dataset == "popqa":
+    if dataset == "popqa":
         tag += f"_pop{args.popularity_threshold}"
 
     test_name = os.path.splitext(os.path.basename(test_file))[0]
@@ -49,11 +41,6 @@ def run_test(args, model, dataset, test_file, demo_file, retriever=None):
     random.seed(args.seed)
     data = load_data(args, dataset, test_file, demo_file)
     logger.info(f"loaded {len(data['data'])} samples from {dataset}")
-    
-    if retriever is not None:
-        retrieved_data = data['data'].map(lambda x: retriever.retrieve(x["question"], x["context"]))
-        if args.save_retrieval:
-            retrieved_data.save_to_disk(f"data/{dataset}/{test_name}_{os.path.basename(retriever.model_name)}_k{retriever.k}_mode{retriever.chunk_mode}_ctx{retriever.ctx_size}_overlap{retriever.overlap}")
 
     dataloader = DataLoader(
         TestItemDataset(data, model, model.tokenizer), 
@@ -175,15 +162,9 @@ def main():
         args.output_dir = args.model_name_or_path
     os.makedirs(args.output_dir, exist_ok=True)
 
-    # if not args.do_sample:
-    #     if args.temperature != 0.0:
-    #         logger.warning("setting temperature to 0.0 since do_sample is False")
-    #         args.temperature = 0.0
-
-    retriever = None
-    if args.retriever_model_name_or_path is not None:
-        logger.info(f"loading retriever from {args.retriever_model_name_or_path}")
-        retriever = Retriever(args.retriever_model_name_or_path, args.retriever_topk, args.retriever_chunk_mode, args.retriever_ctx_size, args.retriever_overlap)
+    if not args.do_sample:
+        if args.temperature != 0.0:
+            logger.warning("do_sample is set to false but temperature is not 0, do_sample will overwrite temperature")
 
     model = load_LLM(args)
 
@@ -204,7 +185,7 @@ def main():
         model.generation_max_length = gen_length
 
         try: 
-            output_path = run_test(args, model, dataset, test_file, demo_file, retriever=retriever)
+            output_path = run_test(args, model, dataset, test_file, demo_file)
 
             if "alce" in dataset and not args.count_tokens and (not os.path.exists(output_path+".score") or args.overwrite):
                 import eval_alce

@@ -259,69 +259,6 @@ def load_qasper(dataset, path=None, shots=0, max_samples=None, seed=42):
     return {"data": data, "prompt_template": prompt_template, "user_template": user_template, "system_template": system_template}
 
 
-def load_qmsum(dataset, path=None, shots=0, max_samples=None, seed=42):
-    # https://github.com/Yale-LILY/QMSum/blob/main/data_process.ipynb
-    def clean_data(text):
-        text = text.replace('{ vocalsound } ', '')
-        text = text.replace('{ disfmarker } ', '')
-        text = text.replace('a_m_i_', 'ami')
-        text = text.replace('l_c_d_', 'lcd')
-        text = text.replace('p_m_s', 'pms')
-        text = text.replace('t_v_', 'tv')
-        text = text.replace('{ pause } ', '')
-        text = text.replace('{ nonvocalsound } ', '')
-        text = text.replace('{ gap } ', '')
-        return text
-    
-    all_data = load_dataset("json", data_files={"train": "/scratch/gpfs/hyen/QMSum/data/ALL/jsonl/train.jsonl", "validation": "/scratch/gpfs/hyen/QMSum/data/ALL/jsonl/val.jsonl", "test": "/scratch/gpfs/hyen/QMSum/data/ALL/jsonl/test.jsonl"})
-    all_data = all_data.map(lambda x: {
-        "context": clean_data("\n".join([f"{s['speaker']}: {s['content']}" for s in x["meeting_transcripts"]]))
-    })
-    all_data = truncate_llama2(dataset, all_data)
-
-    demos = {"specific_query_list": [], "general_query_list": []}
-    for d in all_data["train"]:
-        for t in ["specific_query_list", "general_query_list"]:
-            demos[t] += d[t]
-
-    test_data = []
-    for d in all_data["validation"]:
-        for t in ["specific_query_list", "general_query_list"]:
-            for q in d[t]:
-                demo_text = ""
-                if shots > 0:
-                    demo = random.sample(demos[t], shots)
-                    demo_text = "For example:\n\n" + "\n\n".join(["Question: {}\nAnswer: {}".format(ex['query'], ex['answer']) for ex in demo]) + "\n\nNow, use the following transcript to answer the question:\n\n"
-
-                test_data.append({
-                    "context": d["context"],
-                    "question": q["query"],
-                    "answer": q["answer"],
-                    "demo": demo_text,
-                    "relevant_span": [clean_data("\n".join([f"{s['speaker']}: {s['content']}" for s in d["meeting_transcripts"][int(x[0]):int(x[1])+1]])) for x in q["relevant_text_span"]] if "relevant_text_span" in q else None,
-                    "type": t,
-                })
-    
-    user_template = "You are given a meeting transcript and a query containing a question or instruction. Answer the query in one or more sentences.\n\n{demo}{context}\n\nQuestion: {question}"
-    system_template = "Answer:"
-    prompt_template = user_template + "\n" + system_template
-
-    if "specific" in dataset:
-        test_data = [x for x in test_data if x["type"] == "specific_query_list"]
-    elif "general" in dataset:
-        test_data = [x for x in test_data if x["type"] == "general_query_list"]
-
-    if max_samples is not None and len(test_data) > max_samples:
-        test_data = random.sample(test_data, max_samples)
-
-    return {
-        "data": test_data, 
-        "prompt_template": prompt_template, 
-        "user_template": user_template, 
-        "system_template": system_template
-    }
-
-
 def load_multi_lexsum(dataset, path=None, shots=0, max_samples=None, seed=42):
     all_data = load_dataset("allenai/multi_lexsum", name="v20230518")
     all_data = all_data.filter(lambda x: x["summary/short"] is not None)
@@ -354,64 +291,6 @@ def load_multi_lexsum(dataset, path=None, shots=0, max_samples=None, seed=42):
     if max_samples is not None and len(test_data) > max_samples:
         test_data = test_data.shuffle(seed=seed).select(range(max_samples))
     
-    return {
-        "data": test_data,
-        "prompt_template": prompt_template,
-        "user_template": user_template,
-        "system_template": system_template,
-        "post_process": post_process,
-    }
-
-
-def load_flenqa(path, dataset="flenqa", flenqa_ctx_size=512):
-    user_template = "{question}\n\n{context}\n\n{instruction}\n\n{question}"
-    system_template = "Answer:" if "cot" not in dataset else "Reasoning:"
-    prompt_template = user_template + "\n" + system_template
-
-    all_data = load_dataset("alonj/flenqa")
-    def process_example(example):
-        vanilla = "Answer the question with only 'True.' or 'False.'"
-        cot = "Think step by step. First, recall the relevant information from the text, and then reason about the text to answer the question. Write your answer in the following format:\nReasoning: [Reasoning]\nAnswer: [True/False]."
-        if example["dataset"] == "PIR":
-            question = f"Question: {example['assertion/question']}"
-            context = f"{example['mixin']}"
-            instruction = "Answer the question as it appears exactly based on the given text." + (f" {cot}" if "cot" in dataset else f" {vanilla}")
-
-        elif example["dataset"] == "Simplified RuleTaker":
-            question = f"Statement: {example['assertion/question']}"
-            context = f"Rules: {example['rule']}\nFacts: {example['mixin']}"
-            instruction = "Answer whether the statement can be derived from the given rule and facts." + (f" {cot}" if "cot" in dataset else f" {vanilla}")
-
-        elif example["dataset"] == "MonoRel":
-            question = f"Question: {example['assertion/question']}"
-            context = f"{example['mixin']}"
-            instruction = "Answer the question as it appears exactly based on the given text." + (f" {cot}" if "cot" in dataset else f" {vanilla}")
-
-        else:
-            raise ValueError(f"Unknown dataset {example['dataset']}")
-
-        return {
-            "context": context,
-            "question": question,
-            "answer": example["label"],
-            "instruction": instruction,
-        }
-
-    # we only want to parse one word
-    def post_process(output, example):
-        prediction = output["output"]
-        answer = example["answer"]
-        patterns = [re.compile(r"(?:answer:)(?:\s+)(\w*)", flags=re.IGNORECASE), re.compile(r"(?:^)(?:\s+)(\w*)")]
-        for pat in patterns:
-            matches = pat.search(prediction)
-            if matches is not None:
-                prediction = matches[1].strip() # 0 index includes the non-capturing group
-                break
-        mets = calculate_metrics(prediction, answer)
-        return mets, {"parsed_output": prediction}
-
-    test_data = all_data["eval"].map(process_example)
-    test_data = test_data.filter(lambda x: x['ctx_size'] == flenqa_ctx_size)
     return {
         "data": test_data,
         "prompt_template": prompt_template,
@@ -663,123 +542,6 @@ def load_icl(dataset, max_test_sample=None, seed=42):
     }
 
 
-def load_longicl(dataset):
-    keys = {"1r": "1 Round Prompt", "2r": "2 Round Prompt", "3r": "3 Round Prompt", "4r": "4 Round Prompt", "5r": "5 Round Prompt"}
-    field = [v for k, v in keys.items() if k in dataset.lower()][0]
-
-    def replace_label_name(s, label2id):
-        for old_label, new_label in label2id.items():
-            s = s.replace(old_label, str(new_label))
-        return s
-
-    if "banking77" in dataset.lower():
-        # in total 77 classes
-        label2id = {'unable_to_verify_identity': 0, 'transfer_not_received_by_recipient': 1, 'get_disposable_virtual_card': 2, 'pending_top_up': 3, 'lost_or_stolen_card': 4, 'card_payment_wrong_exchange_rate': 5, 'exchange_rate': 6, 'cash_withdrawal_charge': 7, 'request_refund': 8, 'receiving_money': 9, 'automatic_top_up': 10, 'wrong_exchange_rate_for_cash_withdrawal': 11, 'terminate_account': 12, 'disposable_card_limits': 13, 'getting_virtual_card': 14, 'card_about_to_expire': 15, 'balance_not_updated_after_bank_transfer': 16, 'verify_source_of_funds': 17, 'declined_card_payment': 18, 'exchange_via_app': 19, 'card_arrival': 20, 'apple_pay_or_google_pay': 21, 'card_acceptance': 22, 'card_payment_fee_charged': 23, 'card_not_working': 24, 'cash_withdrawal_not_recognised': 25, 'virtual_card_not_working': 26, 'get_physical_card': 27, 'cancel_transfer': 28, 'top_up_reverted': 29, 'activate_my_card': 30, 'declined_cash_withdrawal': 31, 'card_delivery_estimate': 32, 'change_pin': 33, 'card_payment_not_recognised': 34, 'balance_not_updated_after_cheque_or_cash_deposit': 35, 'direct_debit_payment_not_recognised': 36, 'pin_blocked': 37, 'top_up_limits': 38, 'edit_personal_details': 39, 'transaction_charged_twice': 40, 'supported_cards_and_currencies': 41, 'pending_transfer': 42, 'atm_support': 43, 'why_verify_identity': 44, 'age_limit': 45, 'order_physical_card': 46, 'declined_transfer': 47, 'exchange_charge': 48, 'country_support': 49, 'Refund_not_showing_up': 50, 'verify_my_identity': 51, 'pending_card_payment': 52, 'card_swallowed': 53, 'reverted_card_payment?': 54, 'fiat_currency_support': 55, 'verify_top_up': 56, 'top_up_by_cash_or_cheque': 57, 'getting_spare_card': 58, 'passcode_forgotten': 59, 'topping_up_by_card': 60, 'contactless_not_working': 61, 'card_linking': 62, 'beneficiary_not_allowed': 63, 'top_up_failed': 64, 'extra_charge_on_statement': 65, 'wrong_amount_of_cash_received': 66, 'transfer_timing': 67, 'transfer_into_account': 68, 'top_up_by_card_charge': 69, 'visa_or_mastercard': 70, 'compromised_card': 71, 'failed_transfer': 72, 'transfer_fee_charged': 73, 'lost_or_stolen_phone': 74, 'top_up_by_bank_transfer_charge': 75, 'pending_cash_withdrawal': 76}
-        user_template = "{context}\n{question}"
-        system_template = "intent category:"
-        prompt_template = user_template + "\n" + system_template
-        def process_example(example):
-            context = example[field]
-            query = context.split("\n")[-2]
-            context = "\n".join(context.split("\n")[:-2])
-            if "numlabel" in dataset:
-                return {"context": replace_label_name(context, label2id), "question": query, "answer": replace_label_name(example["label"], label2id)}
-            else:
-                return {"context": context, "question": query, "answer": example["label"]}
-        data = load_dataset("tiger-lab/longiclbench", split="BANKING77")
-        data = data.map(process_example, remove_columns=data.column_names)
-
-        def post_process(output, example):
-            prediction = output["output"]
-            answer = example["answer"]
-            prediction = parse_output(prediction, "intent category:")
-            mets = calculate_metrics(prediction, answer)
-            return mets, {"parsed_output": prediction}
-    elif "tacred" in dataset.lower():
-        # in total 41 classes
-        label2id = {'per:title': 0, 'per:stateorprovince_of_birth': 1, 'per:stateorprovince_of_death': 2, 'org:top_members/employees': 3, 'org:subsidiaries': 4, 'per:city_of_birth': 5, 'org:city_of_headquarters': 6, 'org:founded_by': 7, 'per:religion': 8, 'per:siblings': 9, 'per:date_of_birth': 10, 'org:shareholders': 11, 'per:countries_of_residence': 12, 'org:political/religious_affiliation': 13, 'per:origin': 14, 'org:parents': 15, 'per:other_family': 16, 'per:parents': 17, 'org:member_of': 18, 'org:stateorprovince_of_headquarters': 19, 'per:age': 20, 'per:cause_of_death': 21, 'per:cities_of_residence': 22, 'org:founded': 23, 'per:children': 24, 'org:dissolved': 25, 'per:stateorprovinces_of_residence': 26, 'per:country_of_birth': 27, 'per:spouse': 28, 'per:alternate_names': 29, 'per:city_of_death': 30, 'per:country_of_death': 31, 'org:number_of_employees/members': 32, 'per:schools_attended': 33, 'per:date_of_death': 34, 'per:charges': 35, 'org:website': 36, 'org:country_of_headquarters': 37, 'org:members': 38, 'org:alternate_names': 39, 'per:employee_of': 40}
-        user_template = "{context}\n{question}"
-        system_template = "the relation between the two entities is:"
-        prompt_template = user_template + "\n" + system_template
-        def process_example(example):
-            context = example[field]
-            query = context.split("\n")[-3] + "\n" + context.split("\n")[-2] 
-            context = "\n".join(context.split("\n")[:-3])
-            if "numlabel" in dataset:
-                return {"context": replace_label_name(context, label2id), "question": query, "answer": replace_label_name(example["label"], label2id)}
-            else:
-                return {"context": context, "question": query, "answer": example["label"]}
-        data = load_dataset("tiger-lab/longiclbench", split="TacRED")
-        data = data.map(process_example, remove_columns=data.column_names)
-
-        def post_process(output, example):
-            prediction = output["output"]
-            answer = example["answer"]
-            prediction = parse_output(prediction, system_template)
-            mets = calculate_metrics(prediction, answer)
-            return mets, {"parsed_output": prediction} 
-
-    elif "dialogre" in dataset.lower():
-        # a major difference between how we calculate the scores vs. the original longiclbench paper is that
-        # they calculate the precision and recall over all predictions and labels
-        # https://github.com/TIGER-AI-Lab/LongICLBench/blob/main/dialogueRE_evaluate.py
-        # but we calculate the precision and recall for example data sample and then average over all examples
-        # this should not affect the findings much but the absolute numbers will be different
-
-        # in total 34 classes
-        label2id = {'per:major': 0, 'per:girl/boyfriend': 1, 'org:students': 2, 'per:pet': 3, 'per:place_of_work': 4, 'per:place_of_residence': 5, 'per:roommate': 6, 'per:boss': 7, 'per:client': 8, 'per:subordinate': 9, 'per:date_of_birth': 10, 'per:visited_place': 11, 'per:other_family': 12, 'gpe:visitors_of_place': 13, 'per:negative_impression': 14, 'per:dates': 15, 'per:works': 16, 'per:title': 17, 'per:positive_impression': 18, 'per:schools_attended': 19, 'per:friends': 20, 'org:employees_or_members': 21, 'per:alumni': 22, 'per:spouse': 23, 'per:origin': 24, 'per:siblings': 25, 'per:children': 26, 'per:employee_or_member_of': 27, 'per:alternate_names': 28, 'per:acquaintance': 29, 'gpe:residents_of_place': 30, 'per:neighbor': 31, 'per:parents': 32, 'per:age': 33}
-
-        user_template = "{context}{question}"
-        system_template = "The {n} respective relations between each entity pair are:"
-        prompt_template = user_template + "\n" + system_template
-
-        def post_process(output, example):
-            prediction = output["output"]
-            answer = example["answer"]
-
-            labels = answer.split(",")
-            labels = [l.strip() for l in labels]
-            # we can try to parse the prediction first
-            prediction = parse_output(prediction, "respective relations between each entity pair are:")
-            preds = prediction.split(",")
-            preds = [p.strip() for p in preds]
-            for i, p in enumerate(preds):
-                # try to parse in the format of "type:relation" and disregard the starting and ending strings
-                matches = re.findall(r"(\w+:\w+)", p)
-                if len(matches) > 0:
-                    preds[i] = matches[0]
-            # zip makes sure that we only compare the same number of predictions and labels
-            correct = sum([l in p for p, l in zip(preds, labels)]) # longicl eval allows label to be substring of p
-            num_preds = len(preds)
-            num_labels = len(labels)
-            precision = correct / num_preds if num_preds > 0 else 0
-            recall = correct / num_labels if num_labels > 0 else 0 # although labels should not be empty
-            f1 = 2 * precision * recall / (precision + recall) if precision + recall > 0 else 0
-
-            return {"precision": precision, "recall": recall, "f1": f1, "num_preds": num_preds, "num_labels": num_labels}, {"parsed_output": preds, "labels": labels}
-
-        def process_example(example):
-            context = example[field]
-            idx = context.rfind("Dialogue: \n")
-            query = context[idx:].strip()
-            context = context[:idx]
-            query = query[:query.rfind("\n")]
-            if "numlabel" in dataset:
-                return {"context": replace_label_name(context, label2id), "question": query, "answer": replace_label_name(example["label"], label2id), "n": len(example["label"].split(","))}
-            else:
-                return {"context": context, "question": query, "answer": example["label"], "n": len(example["label"].split(","))}
-        data = load_dataset("tiger-lab/longiclbench", split="DialogRE")
-        data = data.map(process_example, remove_columns=data.column_names)
-
-    return {
-        "data": data,
-        "prompt_template": prompt_template,
-        "user_template": user_template,
-        "system_template": system_template,
-        "post_process": post_process,
-    }
-
-
 def load_ruler(dataset, path, max_test_samples=None, seed=42):
     data = load_dataset("json", data_files=path)["train"]
     user_template = "{context}\n\n{question}"
@@ -1022,24 +784,14 @@ def load_data(args, dataset, path=None, demo_path=None):
         data = load_narrativeqa(dataset, path, args.shots, args.max_test_samples, args.seed)
     elif "qasper" in dataset:
         data = load_qasper(dataset, path, args.shots, args.max_test_samples, args.seed)
-    elif "flenqa" in dataset:
-        data = load_flenqa(path, dataset, args.flenqa_ctx_size)
-        if args.max_test_samples is not None:
-            data["data"] = data["data"].shuffle(seed=args.seed).select(range(min(args.max_test_samples, len(data["data"]))))
     elif "msmarco" in dataset:
         data = load_msmarco_rerank(path, demo_path, args.max_test_samples, args.shots)
-    elif "longicl" in dataset:
-        data = load_longicl(dataset)
-        if args.max_test_samples is not None:
-            data["data"] = data["data"].shuffle(seed=args.seed).select(range(min(args.max_test_samples, len(data["data"]))))
     elif "alce" in dataset:
         data = load_alce(dataset, path, demo_path, args.shots)
         if args.max_test_samples is not None:
             data["data"] = data["data"].shuffle(seed=args.seed).select(range(min(args.max_test_samples, len(data["data"]))))
     elif "icl" in dataset:
         data = load_icl(dataset, max_test_sample=args.max_test_samples, seed=args.seed)
-    elif "qmsum" in dataset:
-        data = load_qmsum(dataset, path, args.shots, args.max_test_samples, seed=args.seed)
     elif "multi_lexsum" in dataset:
         data = load_multi_lexsum(dataset, path, args.shots, args.max_test_samples, seed=args.seed)
     elif "ruler" in dataset:
