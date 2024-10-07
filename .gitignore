@@ -169,14 +169,7 @@ cython_debug/
 data
 output
 configs/_*
-*.sh
 slurm
-longicl_labels.py
-print_icl.py
-print.py
-print_chat.py
-print_chat_qa.py
-print_qa.py
 
 *.ipynb
 gty*

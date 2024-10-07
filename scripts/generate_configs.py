@@ -89,6 +89,7 @@ master_mapping = {
         } for i, (k, v) in enumerate(lengths_mapping.items())
     },
 
+    # RAG tasks, using KILT's datasets and retrieval corpus
     "kilt_nq": {
         k: {
             "input_length": v, "generation_max_length": 20, 
@@ -106,15 +107,15 @@ master_mapping = {
     "kilt_hotpotqa": {
         k: {
             "input_length": v, "generation_max_length": 20,
-            "test_files": "data/kilt/hotpotqa-dev-multikilt_1000_k" + ["20", "50", "105", "220", "440", "1000"][i] + "_dep6.jsonl",
-            "demo_files": "data/kilt/hotpotqa-train-multikilt_1000_k3_dep6.jsonl"
+            "test_files": "data/kilt/hotpotqa-dev-multikilt_1000_k" + ["20", "50", "105", "220", "440", "1000"][i] + "_dep3.jsonl",
+            "demo_files": "data/kilt/hotpotqa-train-multikilt_1000_k3_dep3.jsonl"
         } for i, (k, v) in enumerate(lengths_mapping.items())
     },
     "kilt_popqa": {
         k: {
             "input_length": v, "generation_max_length": 20, "name_postfix": "_3",
             "test_files": "data/kilt/popqa_test_1000_k" + ["20", "50", "105", "220", "440", "1000"][i] + "_dep6.jsonl", 
-            "demo_files": "data/kilt/popqa_train_1000_k3_dep6.jsonl"
+            "demo_files": "data/kilt/popqa_test_1000_k3_dep6.jsonl"
         } for i, (k, v) in enumerate(lengths_mapping.items())
     },
 
@@ -150,8 +151,8 @@ master_mapping = {
     "msmarco_rerank_psg": {
         k: {
             "input_length": v, "generation_max_length": 200, 
-            "test_files": "data/msmarco/trec2019psg_preprocessed/test_reranking_data_k" + ["14", "50", "130", "285", "600", "1000"][i] + "_dep3.jsonl",
-            "demo_files": "data/msmarco/trec2019psg_preprocessed/test_reranking_data_k10_dep3.jsonl"
+            "test_files": "data/msmarco/test_reranking_data_k" + ["14", "50", "130", "285", "600", "1000"][i] + "_dep3.jsonl",
+            "demo_files": "data/msmarco/test_reranking_data_k10_dep3.jsonl"
         } for i, (k, v) in enumerate(lengths_mapping.items())
     },
 
@@ -207,53 +208,54 @@ def process_configs(config_name, datasets, input_lengths, **kwargs):
         out_config.update({
             **kwargs,
             "model_name_or_path": "meta-llama/Llama-3.1-8B-Instruct",
-            "output_dir": "output/Llama-3.1-8B-Instruct"
+            "output_dir": "output/Llama-3.1-8B-Instruct",
+            "model_name_or_path": "meta-llama/Llama-3.2-1B-Instruct",
+            "output_dir": "output/Llama-3.2-1B-Instruct",
         })
     with open(config_name, "w") as f:
         yaml.dump(out_config, f, sort_keys=False)
 
-def helmet_configs():
-    input_lengths = ["128k"]
+def helmet_configs(input_lengths = ["128k"], fname_postfix = ""):
     synthetic = ["ruler_niah_mk_2", "ruler_niah_mk_3", "ruler_niah_mv", "json_kv"]
     # ruler actually doesn't support demos so it defaults to 0, json kv uses 2
     process_configs(
-        "configs/helmet_recall.yaml", synthetic, input_lengths, 
+        f"configs/recall{fname_postfix}.yaml", synthetic, input_lengths, 
         use_chat_template=False, max_test_samples=100, shots=2, stop_new_line=False
     ) 
 
     rag = ['kilt_nq', 'kilt_triviaqa', 'kilt_hotpotqa', 'kilt_popqa']
     process_configs(
-        "configs/helmet_rag.yaml", rag, input_lengths,
+        f"configs/rag{fname_postfix}.yaml", rag, input_lengths,
         use_chat_template=False, max_test_samples=100, shots=2, stop_new_line=True # could be false but set to true so it runs faster
     )
 
     longqa = ['narrativeqa', 'infbench_qa_eng', 'infbench_choice_eng']
     process_configs(
-        "configs/helmet_longqa.yaml", longqa, input_lengths,
+        f"configs/longqa{fname_postfix}.yaml", longqa, input_lengths,
         use_chat_template=True, max_test_samples=100, shots=2, stop_new_line=False
     )
 
     summ = ['infbench_sum_eng', 'multi_lexsum']
     process_configs(
-        "configs/helmet_summ.yaml", summ, input_lengths,
+        f"configs/summ{fname_postfix}.yaml", summ, input_lengths,
         use_chat_template=True, max_test_samples=100, shots=2, stop_new_line=False
     )
 
     icl = ['icl_trec_coarse', 'icl_trec_fine', 'icl_banking77', 'icl_clinic150', 'icl_nlu']
     process_configs(
-        "configs/helmet_icl.yaml", icl, input_lengths,
+        f"configs/icl{fname_postfix}.yaml", icl, input_lengths,
         use_chat_template=False, max_test_samples=100, shots=0, stop_new_line=True
     )
 
     rerank = ["msmarco_rerank_psg"]
     process_configs(
-        "configs/helmet_rerank.yaml", rerank, input_lengths,
+        f"configs/rerank{fname_postfix}.yaml", rerank, input_lengths,
         use_chat_template=False, max_test_samples=100, shots=2, stop_new_line=True
     )
 
     cite = ["alce_asqa", "alce_qampari"]
     process_configs(
-        "configs/helmet_cite.yaml", cite, input_lengths,
+        f"configs/cite{fname_postfix}.yaml", cite, input_lengths,
         use_chat_template=True, max_test_samples=100, shots=2, stop_new_line=False
     )
     
@@ -312,230 +314,8 @@ def ruler_all_configs():
         yaml.dump(config, f, sort_keys=False)
 
 
-def ruler_configs():
-    input_lengths = [4096, 8192, 16384, 32768]
-    input_lengths = [65536, 131072]
-
-    dataset=["ruler_niah_mk_2", "ruler_niah_mq", "ruler_niah_mv", "ruler_cwe", "ruler_fwe", "ruler_vt"]
-    gen_lengths = [50, 100, 50, 100, 50, 50]
-    
-    configs = []
-    for i, d in enumerate(dataset):
-        for l in input_lengths:
-            configs.append({
-                "input_max_length": l,
-                "datasets": d,
-                "generation_max_length": gen_lengths[i],
-                "test_files": f'data/ruler/{d.replace("ruler_", "").replace("_s_", "_single_").replace("mq", "multiquery").replace("mk", "multikey").replace("mv", "multivalue")}/validation_{l}.jsonl',
-                "demo_files": "",
-            })
-
-    with open(f"configs/ruler{'' if max(input_lengths) <= 2**15 else '_long'}.yaml", "w") as f:
-        config = {
-            k: ",".join([str(c[k]) for c in configs]) for k in configs[0]
-        }
-        config.update({
-            "use_chat_template": False,
-            "max_test_samples": 100,
-            "shots": 0,
-            "stop_new_line": False,
-            "model_name_or_path": "/scratch/gpfs/hyen/models/Meta-Llama-3.1-8B",
-            "output_dir": "output/Meta-Llama-3.1-8B",
-        })
-        
-        print(config)
-        yaml.dump(config, f, sort_keys=False)
-
-
-def alce_configs():
-    input_lengths = [65536, 131072, 65536, 131072]
-    dataset=["alce_asqa_345", "alce_asqa_700", "alce_qampari_345", "alce_qampari_700"]
-    # dataset=["alce_asqa_nocite_345", "alce_asqa_nocite_700", "alce_qampari_nocite_345", "alce_qampari_nocite_700"]
-
-    input_lengths = [4096, 8192, 16384, 32768, 4096, 8192, 16384, 32768]
-    dataset=["alce_asqa_8", "alce_asqa_30", "alce_asqa_75", "alce_asqa_165", "alce_qampari_ce_qampari_30", "alce_qampari_75", "alce_qampari_165"]
-    # dataset=["alce_asqa_nocite_8", "alce_asqa_nocite_30", "alce_asqa_nocite_75", "alce_asqa_nocite_165", "alce_qampari_nocite_8", "alce_qampari_nocite_30", "alce_qampari_nocite_75", "alce_qampari_nocite_165"]
-    
-    configs = []
-    for d, l in zip(dataset, input_lengths):
-        configs.append({
-            "input_max_length": l,
-            "datasets": d,
-            "test_files": f'data/alce/{"asqa" if "asqa" in d else "qampari"}_eval_gtr_top2000.json',
-            "demo_files": f'prompts/{"asqa" if "asqa" in d else "qampari"}_{"revised" if "nocite" not in d else "nocite"}.json',
-        })
-
-    with open(f"configs/alce{'' if 'nocite' not in dataset[0] else '_nocite'}{'' if max(input_lengths) <= 2**15 else '_long'}.yaml", "w") as f:
-        config = {
-            k: ",".join([str(c[k]) for c in configs]) for k in configs[0]
-        }
-        config.update({
-            "use_chat_template": True,
-            "generation_max_length": 300,
-            "max_test_samples": 100,
-            "shots": 2,
-            "stop_new_line": False,
-            "model_name_or_path": "/scratch/gpfs/hyen/models/Meta-Llama-3.1-8B-Instruct",
-            "output_dir": "output/Meta-Llama-3.1-8B-Instruct",
-            # "do_sample": True,
-            # "temperature": 0.9,
-            # "top_p": 0.9,
-        })
-        
-        print(config)
-        yaml.dump(config, f, sort_keys=False)
-
-
-def summ_configs():
-    input_lengths = [4096, 8192, 16384, 32768]
-    input_lengths = [65536, 131072]
-    configs = []
-    for l in input_lengths:
-        configs.append({
-            "input_max_length": l,
-            "datasets": "multi_lexsum_" + str(l - 400 - 300), # 400 for generation, 300 for prompt and buffer
-            "test_files": '',
-            "demo_files": '',
-        })
-
-    with open(f"configs/summ{'' if max(input_lengths) <= 2**15 else '_long'}.yaml", "w") as f:
-        config = {
-            k: ",".join([str(c[k]) for c in configs]) for k in configs[0]
-        }
-        config.update({
-            "use_chat_template": True,
-            "generation_max_length": 400,
-            "max_test_samples": 100,
-            "shots": 2,
-            "stop_new_line": False,
-            "model_name_or_path": "/scratch/gpfs/hyen/models/Meta-Llama-3.1-8B-Instruct",
-            "output_dir": "output/Meta-Llama-3.1-8B-Instruct",
-        })
-        
-        print(config)
-        yaml.dump(config, f, sort_keys=False)
-
-
-def kilt_configs():
-    input_lengths = [4096, 8192, 16384, 32768]
-    psgs = [20, 50, 105, 220]
-    input_lengths = [65536, 131072]
-    psgs = [440, 1000]
-
-    input_lengths = [131072]
-    psgs = [1000]
-
-    datasets = {"nq": "nq-dev-multikilt_1000", "popqa": "popqa_test_1000", "triviaqa": "triviaqa-dev-multikilt_1000", "hotpotqa": "hotpotqa-dev-multikilt_1000"}
-    configs = []
-    
-    for k, v in datasets.items():
-        for i, l in enumerate(input_lengths):
-            configs.append({
-                "input_max_length": l,
-                "datasets": "kilt_" + k + ("_3" if k == "popqa" else ""),
-                "test_files": f'data/kilt/{v}_k{psgs[i]}_dep{3 if k == "hotpotqa" else 6}.jsonl',
-                "demo_files": f'data/kilt/{v.replace("dev", "train")}_k3_dep{3 if k == "hotpotqa" else 6}.jsonl',
-            })
-
-    with open(f"configs/kilt{'' if max(input_lengths) <= 2**15 else '_long'}.yaml", "w") as f:
-        config = {
-            k: ",".join([str(c[k]) for c in configs]) for k in configs[0]
-        }
-        config.update({
-            "use_chat_template": False,
-            "generation_max_length": 20,
-            "max_test_samples": 100,
-            "shots": 2,
-            "stop_new_line": True,
-            "model_name_or_path": "/scratch/gpfs/hyen/models/Meta-Llama-3-8B-Theta8M",
-            "output_dir": "output/Meta-Llama-3-8B-Theta8M",
-        })
-        
-        print(config)
-        yaml.dump(config, f, sort_keys=False)
-
-
-def infbench_configs():
-    input_lengths = [4096, 8192, 16384, 32768]
-    # input_lengths = [65536, 131072]
-
-    dataset=["infbench_qa_eng", "infbench_choice_eng", "infbench_sum_eng"]
-    gen_lengths = [10, 10, 1200]
-    
-    configs = []
-    for i, d in enumerate(dataset):
-        for l in input_lengths:
-            if d == "infbench_sum_eng" and l == "4096":
-                # skip this because it's simply too short to have meaningful numbers
-                continue
-            configs.append({
-                "input_max_length": l,
-                "datasets": d + f"_{l - gen_lengths[i] - 200}", # control the length of the context, substract for buffer
-                "generation_max_length": gen_lengths[i],
-                "test_files": "",
-                "demo_files": "",
-            })
-
-    with open(f"configs/infbench{'' if max(input_lengths) <= 2**15 else '_long'}.yaml", "w") as f:
-        config = {
-            k: ",".join([str(c[k]) for c in configs]) for k in configs[0]
-        }
-        config.update({
-            "use_chat_template": True,
-            "max_test_samples": 100,
-            "shots": 2,
-            "stop_new_line": False,
-            "model_name_or_path": "/scratch/gpfs/hyen/models/Meta-Llama-3.1-8B-Instruct",
-            "output_dir": "output/Meta-Llama-3.1-8B-Instruct",
-        })
-        
-        print(config)
-        yaml.dump(config, f, sort_keys=False)
-
-
-def ablate_shots():
-    shots = [0, 2] 
-    datasets = ["json_kv", "kilt_nq", "msmarco_rerank_psg", "infbench_qa_eng_130862","infbench_choice_eng_130862", "infbench_sum_eng_129672", "multi_lexsum_130372"]
-    test_files = ["data/json_kv/test_k1800_dep6.jsonl", "data/kilt/nq-dev-multikilt_1000_k1000_dep6.jsonl", "data/msmarco/trec2019psg_preprocessed/test_reranking_data_k1000_dep3.jsonl", "", "", "", ""]
-    demo_files = ["", "data/kilt/nq-train-multikilt_1000_k3_dep6.jsonl", "data/msmarco/trec2019psg_preprocessed/test_reranking_data_k10_dep3.jsonl", "", "", "", ""]
-    gen_max_length = [100, 20, 200, 10, 10, 1200, 400]
-   
-    for shot in shots:
-        config = {
-            "input_max_length": 131072,
-            "datasets": ",".join(datasets[:3]),
-            "test_files": ",".join(test_files[:3]),
-            "demo_files": ",".join(demo_files[:3]),
-            "generation_max_length": ",".join([str(g) for g in gen_max_length[:3]]),
-            "shots": shot,
-            "max_test_samples": 100,
-            "use_chat_template": False,
-            "stop_newline": True,
-        }
-        with open(f"configs/ablate_shots_base_{shot}_long.yaml", "w") as f:
-            yaml.dump(config, f, sort_keys=False)
-
-        config = {
-            "input_max_length": 131072,
-            "datasets": ",".join(datasets[3:]),
-            "test_files": ",".join(test_files[3:]),
-            "demo_files": ",".join(demo_files[3:]),
-            "generation_max_length": ",".join([str(g) for g in gen_max_length[3:]]),
-            "shots": shot,
-            "max_test_samples": 100,
-            "use_chat_template": True,
-            "stop_newline": False,
-        }
-        with open(f"configs/ablate_shots_chat_{shot}_long.yaml", "w") as f:
-            yaml.dump(config, f, sort_keys=False)
-
-
 if __name__ == "__main__":
-    # ruler_all_configs()
-    # ruler_configs()
-    # alce_configs()
-    # summ_configs()
-    # kilt_configs()
-    # infbench_configs()
-    # ablate_shots()
     helmet_configs()
+    helmet_configs(input_lengths=["8k", "16k", "32k", "64k"], fname_postfix="_short")
+    niah_configs()
+    ruler_all_configs()
