@@ -1,0 +1,11 @@
+input_max_length: 8192,16384,32768,65536,8192,16384,32768,65536,8192,16384,32768,65536,8192,16384,32768,65536,8192,16384,32768,65536
+datasets: icl_trec_coarse_400shot_balance,icl_trec_coarse_800shot_balance,icl_trec_coarse_1600shot_balance,icl_trec_coarse_3300shot_balance,icl_trec_fine_400shot_balance,icl_trec_fine_800shot_balance,icl_trec_fine_1600shot_balance,icl_trec_fine_3200shot_balance,icl_banking77_360shot_balance,icl_banking77_720shot_balance,icl_banking77_1450shot_balance,icl_banking77_2900shot_balance,icl_clinic150_440shot_balance,icl_clinic150_880shot_balance,icl_clinic150_1750shot_balance,icl_clinic150_3525shot_balance,icl_nlu_510shot_balance,icl_nlu_1020shot_balance,icl_nlu_2040shot_balance,icl_nlu_4080shot_balance
+generation_max_length: 20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20
+test_files: ',,,,,,,,,,,,,,,,,,,'
+demo_files: ',,,,,,,,,,,,,,,,,,,'
+use_chat_template: false
+max_test_samples: 100
+shots: 0
+stop_new_line: true
+model_name_or_path: meta-llama/Llama-3.2-1B-Instruct
+output_dir: output/Llama-3.2-1B-Instruct

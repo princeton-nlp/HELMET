@@ -1,0 +1,11 @@
+input_max_length: 8192,16384,32768,65536,8192,16384,32768,65536
+datasets: infbench_sum_eng_6792,infbench_sum_eng_14984,infbench_sum_eng_31368,infbench_sum_eng_64136,multi_lexsum_7492,multi_lexsum_15684,multi_lexsum_32068,multi_lexsum_64836
+generation_max_length: 1200,1200,1200,1200,400,400,400,400
+test_files: ',,,,,,,'
+demo_files: ',,,,,,,'
+use_chat_template: true
+max_test_samples: 100
+shots: 2
+stop_new_line: false
+model_name_or_path: meta-llama/Llama-3.2-1B-Instruct
+output_dir: output/Llama-3.2-1B-Instruct

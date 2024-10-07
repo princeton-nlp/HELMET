@@ -1,0 +1,5 @@
+input_max_length: 131072
+datasets: ruler_niah_s_2
+generation_max_length: 50
+test_files: data/ruler/niah_single_2/validation_131072.jsonl
+demo_files: ''
