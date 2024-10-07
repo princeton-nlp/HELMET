@@ -24,7 +24,6 @@ def parse_arguments():
 
     # dataset specific settings
     parser.add_argument("--popularity_threshold", type=int, default=3)
-    parser.add_argument("--flenqa_ctx_size", type=int, default=1000)
 
     # evaluation settings
     parser.add_argument("--shots", type=int, default=5, help="total number of demos (encoder + decoder)")
@@ -45,14 +44,6 @@ def parse_arguments():
     parser.add_argument("--no_torch_compile", action="store_true", help="disable cuda")
     parser.add_argument("--use_chat_template", type=ast.literal_eval, choices=[True, False], default=False, help="whether to use chat template")
     parser.add_argument("--rope_theta", type=int, default=None, help="override rope theta")
-
-    # retriever settings
-    parser.add_argument("--save_retrieval", action="store_true", help="save the retrieval results on disk")
-    parser.add_argument("--retriever_model_name_or_path", type=str, default=None, help="which retriever to use")
-    parser.add_argument("--retriever_topk", type=int, default=8, help="retrieve top k documents")
-    parser.add_argument("--retriever_chunk_mode", type=str, default="naive", choices=["naive", "natural"], help="retriever chunk mode")
-    parser.add_argument("--retriever_ctx_size", type=int, default=512, help="retriever ctx size (also the max length)")
-    parser.add_argument("--retriever_overlap", type=int, default=0, help="retriever chunk overlap for naive mode")
 
     # misc
     parser.add_argument("--debug", action="store_true", help="for debugging")
