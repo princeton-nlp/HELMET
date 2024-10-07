@@ -21,7 +21,7 @@ Please check out the paper for more details, and this repo will detail how to ru
 ## Release Progress
 
 - [x] HELMET Code
-- [ ] HELMET data
+- [x] HELMET data
 - [ ] Correlation analysis notebook
 - [ ] Retrieval setup
 - [ ] VLLM Support
@@ -47,16 +47,33 @@ You should also set the environmental variables accordingly so the API calls can
 
 <img width="1354" alt="image" src="https://github.com/user-attachments/assets/db748c54-57c5-41f2-8d02-576555a44a1f">
 
-Data will be uploaded soon :)
-In the meantime, please contact me to get access
+You can download the data with the script:
+```bash
+bash scripts/download_data.sh
+```
+This will first download the .tar.gz file and the decompress it to the `data` directory.
+
+The data is hosted on this Huggingface [repo](https://huggingface.co/datasets/princeton-nlp/HELMET), which stores our preprocessed data in jsonl files and is about 34GB in storage.
+For Recall, RAG, Passage Re-ranking, and ALCE, we either generate the data ourselves or do retrieval, so these are stored in jsonl files, whereas our script will load the data from Huggingface for the other tasks, LongQA, Summ, and ICL.
+The data also contains the key points extracted for evaluating summarization with model-based evaluation.
+
+In the future, we will add support for simply loading from Huggingface with all the input-outputs formatted, so you can plug in your own evaluation pipeline easily, stay tuned!
+
 
 ## Running evaluation
 
-To run the evaluation, simply use one of the config files in the `configs` directory, you may also overwrite any arguments in the config file or add new arguments simply through command line:
+To run the evaluation, simply use one of the config files in the `configs` directory, you may also overwrite any arguments in the config file or add new arguments simply through command line (see `arguments.py`):
 ```bash
 python eval.py --config configs/cite.yaml --model_name_or_path {local model path or huggingface model name} --output_dir {output directory}
 ```
 This will output the results file under the output directory. 
+We recommend simply using the model name as the output directory: `--output_dir output/Llama-3.2-1B` for example.
+
+You may also run the whole suite with a simple bash statement:
+```bash
+bash scripts/run_eval.sh
+```
+Check out the script file for more details!
 
 The full results from our evaluation is [here](https://shorturl.at/u7fgY).
 
