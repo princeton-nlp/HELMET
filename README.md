@@ -53,7 +53,7 @@ You can download the data with the script:
 ```bash
 bash scripts/download_data.sh
 ```
-This will first download the .tar.gz file and the decompress it to the `data` directory.
+This will first download the .tar.gz file and then decompress it to the `data` directory.
 
 The data is hosted on this Huggingface [repo](https://huggingface.co/datasets/princeton-nlp/HELMET), which stores our preprocessed data in jsonl files and is about 34GB in storage.
 For Recall, RAG, Passage Re-ranking, and ALCE, we either generate the data ourselves or do retrieval, so these are stored in jsonl files, whereas our script will load the data from Huggingface for the other tasks, LongQA, Summ, and ICL.
@@ -64,7 +64,7 @@ In the future, we will add support for simply loading from Huggingface with all 
 
 ## Running evaluation
 
-To run the evaluation, simply use one of the config files in the `configs` directory, you may also overwrite any arguments in the config file or add new arguments simply through command line (see `arguments.py`):
+To run the evaluation, simply use one of the config files in the `configs` directory, you may also overwrite any arguments in the config file or add new arguments simply through the command line (see `arguments.py`):
 ```bash
 python eval.py --config configs/cite.yaml --model_name_or_path {local model path or huggingface model name} --output_dir {output directory}
 ```
@@ -77,7 +77,7 @@ bash scripts/run_eval.sh
 ```
 Check out the script file for more details!
 
-The full results from our evaluation is [here](https://shorturl.at/u7fgY).
+The full results from our evaluation are [here](https://shorturl.at/u7fgY).
 
 ### Model-based evaluation
 
@@ -122,7 +122,6 @@ You can refer to the existing tasks for examples (e.g., `load_json_kv`, `load_na
 We also analyze the correlation between performance on different datasets.
 The code will be released soon.
 
-<<<<<<< HEAD
 ## Others
 
 <details>
@@ -146,8 +145,6 @@ For example:
 
 </details>
 
-=======
->>>>>>> 39c00e4499809965cbc85ec473fbe308cd8c608c
 
 ## Contacts
 
