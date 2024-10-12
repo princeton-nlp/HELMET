@@ -94,6 +94,13 @@ bash scripts/eval_gpt4_summ.sh
 To specify which model/paths you want to run model-based evaluation for, check out the python scripts and modify the `model_to_check` field.
 You may also use Claude, Gemini, or other models for model-based evaluation by modifying the class but we have tested for `gpt-4o-2024-05-13`.
 
+## Adding new models
+
+The existing code supports using HuggingFace-supported models and API models (OpenAI, Anthropic, Google, and Together). To add a new model or use a different framework (e.g., VLLM), you can modify the `model_utils.py` file.
+Specifically, you need to create a new class that implements `prepare_inputs` (how the inputs are processed) and `generate` functions. Then, you can add a new case to `load_LLM`.
+Please refer to the existing classes for examples.
+
+
 ## Adding new tasks
 
 To add a new task/dataset, you just need to modify the `data.py` file:
@@ -107,11 +114,6 @@ Create a function that specifies how to load the data:
 Finally, simply add a new case to the `load_data` function that calls the function that you just wrote to load your data.
 You can refer to the existing tasks for examples (e.g., `load_json_kv`, `load_narrativeqa`, and `load_msmarco_rerank`).
 
-## Adding new models
-
-The existing code supports using HuggingFace-supported models and API models (OpenAI, Anthropic, Google, and Together). To add a new model or use a different framework (e.g., VLLM), you can modify the `model_utils.py` file.
-Specifically, you need to create a new class that implements `prepare_inputs` (how the inputs are processed) and `generate` functions. Then, you can add a new case to `load_LLM`.
-Please refer to the existing classes for examples.
 
 ## Dataset correlation analysis 
 
@@ -120,6 +122,7 @@ Please refer to the existing classes for examples.
 We also analyze the correlation between performance on different datasets.
 The code will be released soon.
 
+<<<<<<< HEAD
 ## Others
 
 <details>
@@ -143,6 +146,8 @@ For example:
 
 </details>
 
+=======
+>>>>>>> 39c00e4499809965cbc85ec473fbe308cd8c608c
 
 ## Contacts
 
@@ -155,7 +160,7 @@ If you find our work useful, please cite us:
 ```
 @misc{yen2024helmetevaluatelongcontextlanguage,
       title={HELMET: How to Evaluate Long-Context Language Models Effectively and Thoroughly}, 
-      author={Howard Yen and Tianyu Gao and Minmin Hou and Ke Ding and Daniel Fleischer and Peter Izasak and Moshe Wasserblat and Danqi Chen},
+      author={Howard Yen and Tianyu Gao and Minmin Hou and Ke Ding and Daniel Fleischer and Peter Izsak and Moshe Wasserblat and Danqi Chen},
       year={2024},
       eprint={2410.02694},
       archivePrefix={arXiv},
