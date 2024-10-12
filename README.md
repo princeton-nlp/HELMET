@@ -15,6 +15,8 @@ Please check out the paper for more details, and this repo will detail how to ru
 - [Running evaluation](#running-evaluation)
 - [Adding new tasks](#adding-new-tasks)
 - [Adding new models](#adding-new-models)
+- [Dataset correlation analysis](#dataset-correlation-analysis)
+- [Others](#others)
 - [Contacts](#contacts)
 - [Citation](#citation)
 
@@ -117,6 +119,30 @@ Please refer to the existing classes for examples.
 
 We also analyze the correlation between performance on different datasets.
 The code will be released soon.
+
+## Others
+
+<details>
+
+<summary>Slurm scripts</summary>
+
+I have also included the slurm scripts for running all the experiments from the paper.
+You can run the scripts with:
+```bash
+sbatch scripts/run_eval_slurm.sh
+sbatch scripts/run_short_slurm.sh
+sbatch scripts/run_api.sh
+```
+Note that you may need to modify the script to fit your cluster setup.
+For example:
+ - `--array 0-1` specifies the number of jobs to run, this index corresponds to the model index in the array.
+ - You may also specify which set of models to run with `MNAME="${S_MODELS[$M_IDX]}"` or `MNAME="${L_MODELS[$M_IDX]}"` for the short and long models respectively.
+ - `--gres=gpu:1` specifies the number of GPUs you want to use, for the larger models, you may need more GPUs (we use up to 8x80GB GPUs).
+ - `--mail-user` specifies the email address to send the job status to.
+ - `source env/bin/activate` specifies the virtual environment to use.
+
+</details>
+
 
 ## Contacts
 
