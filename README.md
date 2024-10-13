@@ -122,7 +122,6 @@ You can refer to the existing tasks for examples (e.g., `load_json_kv`, `load_na
 We also analyze the correlation between performance on different datasets.
 The code will be released soon.
 
-<<<<<<< HEAD
 ## Others
 
 <details>
@@ -146,8 +145,6 @@ For example:
 
 </details>
 
-=======
->>>>>>> 39c00e4499809965cbc85ec473fbe308cd8c608c
 
 ## Contacts
 
