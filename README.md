@@ -77,7 +77,7 @@ bash scripts/run_eval.sh
 ```
 Check out the script file for more details!
 
-The full results from our evaluation are [here](https://shorturl.at/u7fgY).
+The full results from our evaluation are [here](https://docs.google.com/spreadsheets/d/1LBt6dP4UwZwU_CjoYhyAd_rjKhQLvo0Gq4cYUnpi_CA/edit?usp=sharing).
 
 ### Model-based evaluation
 
