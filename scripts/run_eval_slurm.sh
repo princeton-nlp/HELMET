@@ -116,7 +116,7 @@ S_MODELS=(
 MNAME="${S_MODELS[$M_IDX]}"
 
 OUTPUT_DIR="output/$MNAME"
-MODEL_NAME="/path/to/your/model/$MANE" # CHANGE PATH HERE or you can change the array to load from HF
+MODEL_NAME="/path/to/your/model/$MNAME" # CHANGE PATH HERE or you can change the array to load from HF
 
 shopt -s nocasematch
 chat_models=".*(chat|instruct|it$|nous|command|Jamba-1.5|MegaBeam).*"
