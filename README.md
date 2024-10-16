@@ -142,6 +142,7 @@ For example:
  - `--gres=gpu:1` specifies the number of GPUs you want to use, for the larger models, you may need more GPUs (we use up to 8x80GB GPUs).
  - `--mail-user` specifies the email address to send the job status to.
  - `source env/bin/activate` specifies the virtual environment to use.
+ - `MODEL_NAME="/path/to/your/model/$MNAME"` you should specify the path to your model here.
 
 </details>
 
