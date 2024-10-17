@@ -137,6 +137,8 @@ For example, you can change the models, task configs, output directories, tags, 
 
 </details>
 
+<details>
+
 <summary>Slurm scripts</summary>
 
 I have also included the slurm scripts for running all the experiments from the paper.
