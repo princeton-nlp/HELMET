@@ -24,9 +24,9 @@ Please check out the paper for more details, and this repo will detail how to ru
 
 - [x] HELMET Code
 - [x] HELMET data
+- [x] VLLM Support
 - [ ] Correlation analysis notebook
 - [ ] Retrieval setup
-- [ ] VLLM Support
 
 
 ## Setup
@@ -76,6 +76,7 @@ You may also run the whole suite with a simple bash statement:
 bash scripts/run_eval.sh
 ```
 Check out the script file for more details!
+See [Others](#others) for the slurm scripts, easily collecting all the results, and using VLLM.
 
 The full results from our evaluation are [here](https://docs.google.com/spreadsheets/d/1LBt6dP4UwZwU_CjoYhyAd_rjKhQLvo0Gq4cYUnpi_CA/edit?usp=sharing).
 
@@ -96,7 +97,7 @@ You may also use Claude, Gemini, or other models for model-based evaluation by m
 
 ## Adding new models
 
-The existing code supports using HuggingFace-supported models and API models (OpenAI, Anthropic, Google, and Together). To add a new model or use a different framework (e.g., VLLM), you can modify the `model_utils.py` file.
+The existing code supports using HuggingFace-supported models and API models (OpenAI, Anthropic, Google, and Together). To add a new model or use a different framework (other than HuggingFace), you can modify the `model_utils.py` file.
 Specifically, you need to create a new class that implements `prepare_inputs` (how the inputs are processed) and `generate` functions. Then, you can add a new case to `load_LLM`.
 Please refer to the existing classes for examples.
 
@@ -126,6 +127,16 @@ The code will be released soon.
 
 <details>
 
+<summary>Collecting results</summary>
+To quickly collect all the results, you can use the script:
+```bash
+python scripts/collect_results.py
+```
+Please check out the script and modify the specific fields to fit your needs.
+For example, you can change the models, task configs, output directories, tags, and more.
+
+</details>
+
 <summary>Slurm scripts</summary>
 
 I have also included the slurm scripts for running all the experiments from the paper.
@@ -145,6 +156,22 @@ For example:
  - `MODEL_NAME="/path/to/your/model/$MNAME"` you should specify the path to your model here.
 
 </details>
+
+<details>
+
+<summary>Using VLLM</summary>
+
+To use VLLM to run the evaluation, you can simply add the `--use_vllm` flag to the command line like so:
+```bash
+python eval.py --config configs/cite.yaml --use_vllm
+```
+Disclaimer: 
+VLLM can be much faster than using the native HuggingFace generation; however, we found that the results can be slightly different, so we recommend using the native HuggingFace generation for the final evaluation.
+All reported results in the paper are from the native HuggingFace generation.
+The speedup is much more noticable for tasks that generates more tokens (e.g., summarization may see up to 2x speedup), whereas the speedup is less noticable for tasks that generate fewer tokens (e.g., JSON KV may see less than 5% speedup).
+
+</details>
+
 
 
 ## Contacts

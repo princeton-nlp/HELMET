@@ -585,7 +585,7 @@ class HFModel(LLM):
     @torch.no_grad()
     def generate(self, inputs=None, prompt=None, **kwargs):
         if inputs is None:
-            inputs = self.tokenizer([prompt], return_tensors="pt", max_length=self.max_length-self.generation_max_length, truncation=True, padding=True).to(self.model.device)
+            inputs = self.tokenizer([prompt], return_tensors="pt", max_length=self.max_length-self.generation_max_length, truncation=True, padding=True)
         
         inputs = inputs.to(self.model.device)
         input_len = inputs.input_ids.size(1)
@@ -648,34 +648,55 @@ class VLLMModel(LLM):
             generation_min_length=generation_min_length,
             do_sample=do_sample,
             stop_newline=stop_newline,
+            use_chat_template=use_chat_template,
         )
-        from vllm import LLM, SamplingParams
+        
+        from vllm import LLM
+        # at the time of testing: note that the max model length is derived from the config file, and if max_length is larger than that length, there will be an error. it appears that vllm does not support positional extrapolation
+        # there are some work arounds to this, but it may give unexpected results. 
         self.model = LLM(
             model_name,
             tensor_parallel_size=torch.cuda.device_count(),
             dtype="bfloat16",
             trust_remote_code=True,
-        )
-        self.sampling_params = SamplingParams(
-            temperature = temperature,
-            top_p = top_p,
-            max_tokens = 2048
+            # enforce_eager=True,
         )
         self.tokenizer = self.model.get_tokenizer()
 
-    def generate(self, message, **kwargs):
-        raise NotImplementedError("VLLM is still buggy rn :(")
-        inputs = self.tokenizer([message])
+
+    def prepare_inputs(self, test_item, data):
+        return tokenize(
+            test_item, 
+            data, 
+            tokenizer=self.tokenizer, 
+            max_length=self.max_length,
+            generation_max_length=self.generation_max_length,
+            use_chat_template=self.use_chat_template,
+        )
+    
+
+    def generate(self, inputs=None, prompt=None, **kwargs):
+        from vllm import SamplingParams, TokensPrompt
+        if inputs is None:
+            inputs = self.tokenizer([prompt], return_tensors="pt", max_length=self.max_length-self.generation_max_length, truncation=True, padding=True)
+        
+        self.sampling_params = SamplingParams(
+            temperature = self.temperature if self.do_sample else 0.0,
+            top_p = self.top_p,
+            max_tokens = self.generation_max_length,
+        )
+
         outputs = self.model.generate(
-            prompt_token_ids=inputs["input_ids"],
+            prompts=TokensPrompt(prompt_token_ids=inputs["input_ids"][0].tolist()),
             sampling_params=self.sampling_params,
             **kwargs
-        )
+        )[0]
+        save_prompt = self.tokenizer.decode(inputs["input_ids"][0][:500]) + " <skip> " + self.tokenizer.decode(inputs["input_ids"][0][-500:])
         return {
-            "output": outputs[0].outputs[0].text,
-            "input_len": len(inputs["input_ids"][0]),
-            "output_len": len(outputs[0].outputs[0].token_ids),
-            "input_text": outputs[0].prompt,
+            "output": outputs.outputs[0].text,
+            "input_len": len(outputs.prompt_token_ids),
+            "output_len": len(outputs.outputs[0].token_ids),
+            "input_text": save_prompt,
         }
 
 

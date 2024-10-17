@@ -392,12 +392,14 @@ def load_icl(dataset, max_test_sample=None, seed=42):
     if "trec_fine" in dataset.lower():
         train_data = load_dataset("CogComp/trec", trust_remote_code=True)["train"]
         test_data = load_dataset("CogComp/trec", trust_remote_code=True)["test"]
+        id2label = train_data.features['fine_label'].names
         text_field = "text"
         label_field = "fine_label"
         num_labels = 50
     elif "trec_coarse" in dataset.lower():
         train_data = load_dataset("CogComp/trec", trust_remote_code=True)["train"]
         test_data = load_dataset("CogComp/trec", trust_remote_code=True)["test"]
+        id2label = train_data.features['coarse_label'].names
         text_field = "text"
         label_field = "coarse_label"
         num_labels = 6
@@ -418,12 +420,14 @@ def load_icl(dataset, max_test_sample=None, seed=42):
     elif "clinic150" in dataset.lower():
         train_data = load_dataset("clinc_oos", "plus")["train"]
         test_data = load_dataset("clinc_oos", "plus")["validation"]
+        id2label = train_data.features["intent"].names
         text_field = "text"
         label_field = "intent"
         num_labels = 151
     elif "nlu" in dataset.lower():
         data = load_dataset("xingkunliuxtracta/nlu_evaluation_data", trust_remote_code=True)["train"]
         data = data.train_test_split(test_size=0.1, seed=seed)
+        id2label = data.features["label"].names
         train_data = data["train"]
         test_data = data["test"]
         text_field = "text"
