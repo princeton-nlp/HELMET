@@ -47,7 +47,7 @@ You should also set the environmental variables accordingly so the API calls can
 
 ## Data
 
-<img width="1354" alt="image" src="https://github.com/user-attachments/assets/db748c54-57c5-41f2-8d02-576555a44a1f">
+<img width="1354" alt="benchmark_overview" src="assets/benchmark_overview.png">
 
 You can download the data with the script:
 ```bash
@@ -118,7 +118,7 @@ You can refer to the existing tasks for examples (e.g., `load_json_kv`, `load_na
 
 ## Dataset correlation analysis 
 
-<img width="838" alt="image" src="https://github.com/user-attachments/assets/7b2dcb8e-ee1b-4e87-acf6-978db99df0b1">
+<img width="838" alt="task_correlation" src="assets/task_correlation.png">
 
 We also analyze the correlation between performance on different datasets.
 The code will be released soon.
