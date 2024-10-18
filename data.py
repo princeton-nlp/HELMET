@@ -410,8 +410,8 @@ def load_icl(dataset, max_test_sample=None, seed=42):
         label_field = "label"
         num_labels = 2
     elif "banking77" in dataset.lower():
-        train_data = load_dataset("PolyAI/banking77")["train"]
-        test_data = load_dataset("PolyAI/banking77")["test"]
+        train_data = load_dataset("PolyAI/banking77", trust_remote_code=True)["train"]
+        test_data = load_dataset("PolyAI/banking77", trust_remote_code=True)["test"]
         id2label = train_data.features["label"].names
         id2label = {i: id2label[i] for i in range(len(id2label))}
         text_field = "text"
