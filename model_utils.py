@@ -113,10 +113,8 @@ class OpenAIModel(LLM):
     
     def prepare_inputs(self, test_item, data):
         buffer = 100
-        prompt = format_chat(
-            data["user_template"].format(**test_item), 
-            system_message=data.get("system_message", "You are a helpful assistant.")
-        )
+        # we don't include system message to stay consistent with other models
+        prompt = format_chat(data["user_template"].format(**test_item), include_system=False,)
         inputs = "\n".join([f"Role: {x['role']}\nContent: {x['content']}" for x in prompt])
         tokens = self.tokenizer.encode(inputs)
         input_len = len(tokens)
@@ -130,10 +128,7 @@ class OpenAIModel(LLM):
             truncate_length = input_len - (max_length - self.generation_max_length - buffer)
             new_context = self.tokenizer.decode(self.tokenizer.encode(test_item["context"])[:-truncate_length])
             test_item["context"] = new_context
-            prompt = format_chat(
-                data["user_template"].format(**test_item), 
-                system_message=data.get("system_message", "You are a helpful assistant.")
-            )
+            prompt = format_chat(data["user_template"].format(**test_item), include_system=False)
         return prompt 
 
     """
@@ -249,6 +244,10 @@ class AnthropicModel(LLM):
             inputs = format_chat(prompt, include_system=False)
         
         # kwargs can be used to pass additional parameters to the model: max_tokens, stop, etc.
+        # Note: in the original paper, we used this system message:
+        # system="You are a helpful assistant. Make sure your output does not contain new lines."
+        # To be consistent with the other models, and for future compability, we remove the system message
+        # We don't expect this to make a significant difference in the results
         func = functools.partial(
             self.model.messages.create,
             model=self.model_name, 
@@ -257,7 +256,6 @@ class AnthropicModel(LLM):
             temperature=self.temperature if self.do_sample else 0.0,
             top_p=self.top_p,
             stop_sequences=self.stops,
-            system="You are a helpful assistant. Make sure your output does not contain new lines.",
             **kwargs,
         )
         output = call_api(func, pause=20)

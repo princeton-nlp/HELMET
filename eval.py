@@ -93,8 +93,9 @@ def run_test(args, model, dataset, test_file, demo_file):
                 logger.info(f"Decoder inputs:\n{input_text}\n")
 
                 logger.info(f"Input length: {output['input_len']}")
-                logger.info(f"Question: {test_item['question']}\n")
-                logger.info(f"Answer: {test_item['answer']}")
+                # currently we hardcode somethings to print out, but you may change these to print out other things
+                logger.info(f"Question: {test_item['question'] if 'question' in test_item else ''}")
+                logger.info(f"Answer: {test_item['answer'] if 'answer' in test_item else ''}")
                 logger.info(f"Output: {output['output']}")
                 logger.info(f"Parsed output: {output['parsed_output']}")
             
@@ -117,14 +118,6 @@ def run_test(args, model, dataset, test_file, demo_file):
         return output_path
 
     averaged_metrics = {k: np.mean(v)*(100 if "_len" not in k else 1) for k, v in metrics.items()}
-    
-    if "dialogre" in dataset:
-        prec = np.average(metrics["precision"], weights=metrics["num_preds"]) if sum(metrics["num_preds"]) > 0 else 0
-        rec = np.average(metrics["recall"], weights=metrics["num_labels"])
-        f1 = 2 * prec * rec / (prec + rec)
-        averaged_metrics["dialogre_precision"] = prec * 100
-        averaged_metrics["dialogre_recall"] = rec * 100
-        averaged_metrics["dialogre_f1"] = f1 * 100
 
     logger.info("Averaged metrics:")
     for k, v in averaged_metrics.items():
@@ -142,7 +135,7 @@ def run_test(args, model, dataset, test_file, demo_file):
     if args.output_dir is not None:
         with open(output_path, "w") as f:
             json.dump(output, f, indent=4)
-        # this makes it easier to parse results
+        # this makes it easier to parse results, but alce uses a different evaluation script
         if not "alce" in dataset:
             with open(output_path + ".score", "w") as f:
                 json.dump(output["averaged_metrics"], f, indent=4)
@@ -156,10 +149,6 @@ def main():
 
     logger.info(f"Arguments: {args}")
     assert args.model_name_or_path is not None
-
-    if args.output_dir is None:
-        logger.warning("no output directory specified, setting it to args.model_name_or_path but may cause error")
-        args.output_dir = args.model_name_or_path
     os.makedirs(args.output_dir, exist_ok=True)
 
     if not args.do_sample:
@@ -201,8 +190,10 @@ def main():
 
         except Exception as e:
             # in case we run into some kind of error 
-            logger.error(f"Error in {dataset}: {e}, continuing...")
-            # raise e
+            logger.exception(e)
+            logger.error(f"Error in {dataset}, continuing...")
+            if args.debug:
+                raise e
 
 if __name__ == "__main__":
     main()

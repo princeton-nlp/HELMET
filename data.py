@@ -98,20 +98,9 @@ def load_qa(dataset, path, demo_path, max_test_samples=None, popularity_threshol
                 # popqa only has one split
                 demos = demo_data.filter(lambda x: x[key] != sample[key])
 
-            # unanswerable is the only one case (for now) where we care about balancing the labels
-            if "nq_bad" in dataset:
-                # this is in the format of {"normal": [], "unanswerable": []}, and we just sample from them accordingly
-                count = (shots + 1) // 2
-                idx1, idx2 = random.sample(range(len(demos["normal"])), count), random.sample(range(len(demos["unanswerable"])), count)
-                dlist = [[demos["normal"][i1], demos["unanswerable"][i2]] for i1, i2 in zip(idx1, idx2)] 
-                for d in dlist:
-                    random.shuffle(d)
-                demos = [d for sublist in dlist for d in sublist]
-                
-            else:
-                # seed ensures that we get the same demos for the same question
-                demos = demos.shuffle(seed=hash(sample[key]) % ((sys.maxsize + 1) * 2))
-                demos = drop_duplicates(demos, key).select(range(shots))
+            # seed ensures that we get the same demos for the same question
+            demos = demos.shuffle(seed=abs(hash(sample[key])) % (2**31))
+            demos = drop_duplicates(demos, key).select(range(shots))
             demo_text = "\n\n".join([demo_template.format(**d, documents="\n\n".join([passage_template.format(**c) for c in d["ctxs"]]), answer=d["answers"][0]) for d in demos]) + "\n\n"
         passage_text = ""
         if len(sample['ctxs']) > 0:
@@ -350,7 +339,7 @@ def load_msmarco_rerank(path, demo_path=None, max_test_samples=None, shots=0):
             # need to make sure we don't pick the same question as the demos
             if not demo_filtered:
                 demos = demos.filter(lambda x: x["qid"] != sample["qid"])
-            demo = demos.shuffle(seed=hash(sample["qid"]) % ((sys.maxsize + 1) * 2))
+            demo = demos.shuffle(seed=abs(hash(sample["qid"])) % (2**31))
             demo = drop_duplicates(demo, 'qid').select(range(shots))
             
             demo_ids = set()
@@ -403,12 +392,6 @@ def load_icl(dataset, max_test_sample=None, seed=42):
         text_field = "text"
         label_field = "coarse_label"
         num_labels = 6
-    elif "sst2" in dataset.lower():
-        train_data = load_dataset("nyu-mll/glue", "sst2")["train"]
-        test_data = load_dataset("nyu-mll/glue", "sst2")["validation"]
-        text_field = "sentence"
-        label_field = "label"
-        num_labels = 2
     elif "banking77" in dataset.lower():
         train_data = load_dataset("PolyAI/banking77", trust_remote_code=True)["train"]
         test_data = load_dataset("PolyAI/banking77", trust_remote_code=True)["test"]
@@ -426,34 +409,21 @@ def load_icl(dataset, max_test_sample=None, seed=42):
         num_labels = 151
     elif "nlu" in dataset.lower():
         data = load_dataset("xingkunliuxtracta/nlu_evaluation_data", trust_remote_code=True)["train"]
-        data = data.train_test_split(test_size=0.1, seed=seed)
         id2label = data.features["label"].names
+        data = data.train_test_split(test_size=0.1, seed=seed)
         train_data = data["train"]
         test_data = data["test"]
         text_field = "text"
         label_field = "label"
         num_labels = 68
-    elif "dialogre" in dataset.lower():
-        label2id = {'per:alternate_names': 0, 'per:alumni': 1, 'per:positive_impression': 2, 'unanswerable': 3, 'per:place_of_residence': 4, 'per:employee_or_member_of': 5, 'per:girl/boyfriend': 6, 'per:title': 7, 'gpe:residents_of_place': 8, 'org:employees_or_members': 9, 'per:children': 10, 'per:parents': 11, 'per:siblings': 12, 'per:spouse': 13, 'per:friends': 14, 'per:negative_impression': 15, 'per:client': 16, 'per:pet': 17, 'per:place_of_work': 18, 'per:boss': 19, 'per:subordinate': 20, 'per:acquaintance': 21, 'per:roommate': 22, 'per:dates': 23, 'per:other_family': 24, 'per:age': 25, 'per:visited_place': 26, 'gpe:visitors_of_place': 27, 'per:origin': 28, 'per:neighbor': 29, 'per:works': 30, 'per:schools_attended': 31, 'org:students': 32, 'per:major': 33, 'per:date_of_birth': 34, 'per:place_of_birth': 35, 'gpe:births_in_place': 36}
-        num_labels = len(label2id)
-        train_data = load_dataset("dataset-org/dialog_re", trust_remote_code=True)['train']
-        test_data = load_dataset("dataset-org/dialog_re", trust_remote_code=True)['validation']
-
-        def dialogre_convert(dataset):
-            new_dataset = []
-            for conv in dataset:
-                conv_history = "dialog:\n" + "\n".join(conv["dialog"]) + "\n"
-                for i in range(len(conv["relation_data"]['r'])):
-                    text = conv_history + f"entity pair: [{conv['relation_data']['x'][i]}], [{conv['relation_data']['y'][i]}]"
-                    new_dataset.append({"text": text, "label": [label2id[x] for x in conv["relation_data"]["r"][i]]})
-            return new_dataset
-        
-        train_data = dialogre_convert(train_data)
-        test_data = dialogre_convert(test_data)
-        text_field = "text"
-        label_field = "label"
-    
+    else:
+        raise NotImplementedError(f"Unknown ICL dataset")
+   
     def balance_labels(data, shots):
+        # for each data point, we are going to sample a random set of demos with balanced labels
+        # there are two places where randomness is involved: the selection of the demos and the final shuffle
+        rand = random.Random(seed)
+
         label_mapping = {x[label_field]: [] for x in data}
         for x in data:
             label_mapping[x[label_field]].append(x)
@@ -463,16 +433,16 @@ def load_icl(dataset, max_test_sample=None, seed=42):
         num_rounds = math.ceil(shots / len(label_mapping))
         new_data = [[] for _ in range(num_rounds)]
         for _, samples in label_mapping.items():
-            indices = random.sample(range(len(samples)), num_rounds % len(samples))
+            indices = rand.sample(range(len(samples)), num_rounds % len(samples))
             while len(indices) < num_rounds:
                 # sample with replacement if necessary, shouldn't happen unless we have very many shots 
-                indices += random.sample(range(len(samples)), min(num_rounds - len(indices), len(samples)))
+                indices += rand.sample(range(len(samples)), min(num_rounds - len(indices), len(samples)))
             
             for i, idx in enumerate(indices):
                 new_data[i].append(samples[idx])
 
         for i in range(len(new_data)):
-            random.shuffle(new_data[i])
+            rand.shuffle(new_data[i])
         new_data = [item for sublist in new_data for item in sublist][:shots]
         return new_data
         
@@ -485,30 +455,29 @@ def load_icl(dataset, max_test_sample=None, seed=42):
     prompt_template = user_template + "\n" + system_template
 
     def preprocess(sample):
+        # use a different seed for every sample, but is also deterministic and affected by the set seed
+        local_seed = abs((hash(sample[text_field]) + seed) % (2**31))
+        np.random.seed(local_seed)
         if "balance" in dataset:
             demos = balance_labels(train_data, shot)
         else:
             demos = []
             while len(demos) < shot:
                 demos += list(np.random.choice(train_data, min(len(train_data), shot - len(demos)), replace=False))
+
         if "natural_label" in dataset:
             label_mapping = [id2label[i] for i in range(num_labels)]
         else:
+            # we map the labels to a random integer
             label_mapping = list(range(num_labels))
+            random.seed(local_seed)
             random.shuffle(label_mapping)
 
-        if "dialogre" in dataset.lower():
-            context = "\n\n".join([
-                item_template.format(text=selected_item[text_field], label=",".join([str(label_mapping[int(x)]) for x in selected_item[label_field]]))
-                for selected_item in demos]
-            )
-            return {"context": context, "question": sample[text_field], "answer": [str(label_mapping[int(x)]) for x in sample[label_field]]}
-        else:
-            context = "\n\n".join([
-                item_template.format(text=selected_item[text_field], label=str(label_mapping[int(selected_item[label_field])]))
-                for selected_item in demos]
-            )
-            return {"context": context, "question": sample[text_field], "answer": str(label_mapping[int(sample[label_field])])}
+        context = "\n\n".join([
+            item_template.format(text=selected_item[text_field], label=str(label_mapping[int(selected_item[label_field])]))
+            for selected_item in demos]
+        )
+        return {"context": context, "question": sample[text_field], "answer": str(label_mapping[int(sample[label_field])])}
     
     final_data = test_data.map(preprocess, num_proc=40)
 
@@ -519,30 +488,12 @@ def load_icl(dataset, max_test_sample=None, seed=42):
         mets = calculate_metrics(prediction, answer)
         return mets, {"parsed_output": prediction}
 
-    def post_process_dialogre(output, example):
-        prediction = output["output"]
-        answers = example["answer"] # a list
-        prediction = parse_output(prediction, system_template) # a string, multiple answers separated by ,
-        preds = list(set([p.strip() for p in prediction.split(",")]))
-
-        # TODO: technically unanswerable needs to be processed separately....
-        correct = sum([p in answers for p in preds]) # longicl eval allows label to be substring of p
-        precision = correct / len(preds) if len(preds) > 0 else 0
-        recall = correct / len(answers) if len(answers) > 0 else 0 # although labels should not be empty
-        f1 = 2 * precision * recall / (precision + recall) if precision + recall > 0 else 0
-        print("answers", answers)
-        print("preds", preds)
-        print("p, r, f1", precision, recall, f1)
-        print("-----")
-
-        return {"dialogre_precision": precision, "dialogre_recall": recall, "dialogre_f1": f1}, {"parsed_output": preds, "labels": answers}
-
     return {
         "data": final_data,
         "prompt_template": prompt_template,
         "user_template": user_template,
         "system_template": system_template,
-        "post_process": post_process_dialogre if "dialogre" in dataset.lower() else post_process,
+        "post_process": post_process,
     }
 
 
@@ -753,7 +704,6 @@ def shuffle_labels(data, method="shuffle"):
         context_mapping = {data["system_template"].format(sample) + " " + k: data["system_template"].format(sample) + " " + v for k, v in mapping.items()}
         context_pattern = re.compile("|".join(context_mapping.keys()))
         return {
-            # "context": context_pattern.sub(lambda x: context_mapping[re.escape(x.group(0))], sample["context"]),
             "context": pattern.sub(lambda x: mapping[re.escape(x.group(0))], sample["context"]),
             "answer": mapping[sample["answer"]],
             "original_answer": sample["answer"],

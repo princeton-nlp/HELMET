@@ -17,7 +17,7 @@ def parse_arguments():
     parser.add_argument("--demo_files", type=str, default=None)
     parser.add_argument("--test_files", type=str, default=None)
     parser.add_argument("--output_dir", type=str, default=None, help="path to save the predictions")
-    parser.add_argument("--overwrite", action="store_true", help="whether to include the title in the prompt")
+    parser.add_argument("--overwrite", action="store_true", help="whether to the saved file")
     parser.add_argument("--max_test_samples", type=int, default=None)
     parser.add_argument("--num_workers", type=int, default=4)
     parser.add_argument("--num_depths", type=int, default=10)
@@ -27,10 +27,10 @@ def parse_arguments():
 
     # evaluation settings
     parser.add_argument("--shots", type=int, default=5, help="total number of demos (encoder + decoder)")
-    parser.add_argument("--input_max_length", type=str, default='4096', help="the maximum number of tokens of the input, we truncate from the left, can separate by comma to match the specified datasets")
+    parser.add_argument("--input_max_length", type=str, default='8192', help="the maximum number of tokens of the input, we truncate the end of the context; can be separated by comma to match the specified datasets")
 
     # generation settings
-    parser.add_argument("--do_sample", type=ast.literal_eval, choices=[True, False], default=False, help="whether to use sampling (false is greedy)")
+    parser.add_argument("--do_sample", type=ast.literal_eval, choices=[True, False], default=False, help="whether to use sampling (false is greedy), overwrites temperature")
     parser.add_argument("--generation_max_length", type=str, default='10', help="max number of tokens to generate, can be separated by comma to match the specified datasets")
     parser.add_argument("--generation_min_length", type=int, default=0, help="min number of tokens to generate")
     parser.add_argument("--temperature", type=float, default=1.0, help="generation temperature")

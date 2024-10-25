@@ -22,6 +22,8 @@ Please check out the paper for more details, and this repo will detail how to ru
 
 ## Release Progress
 
+See `CHANGELOG.md` for updates and more details.
+
 - [x] HELMET Code
 - [x] HELMET data
 - [x] VLLM Support
@@ -66,19 +68,24 @@ In the future, we will add support for simply loading from Huggingface with all 
 
 To run the evaluation, simply use one of the config files in the `configs` directory, you may also overwrite any arguments in the config file or add new arguments simply through the command line (see `arguments.py`):
 ```bash
-python eval.py --config configs/cite.yaml --model_name_or_path {local model path or huggingface model name} --output_dir {output directory}
+python eval.py --config configs/cite.yaml --model_name_or_path {local model path or huggingface model name} --output_dir {output directory, defaults to output/{model_name}}
 ```
-This will output the results file under the output directory. 
-We recommend simply using the model name as the output directory: `--output_dir output/Llama-3.2-1B` for example.
+This will output the results file under the output directory in two files: `.json` contains all the data point details while `.json.score` only contain the aggregated metrics.
+
 
 You may also run the whole suite with a simple bash statement:
 ```bash
 bash scripts/run_eval.sh
+bash scripts/run_api.sh # for the API models, note that API models results may vary due to the randomness in the API calls
 ```
 Check out the script file for more details!
 See [Others](#others) for the slurm scripts, easily collecting all the results, and using VLLM.
 
 The full results from our evaluation are [here](https://docs.google.com/spreadsheets/d/1LBt6dP4UwZwU_CjoYhyAd_rjKhQLvo0Gq4cYUnpi_CA/edit?usp=sharing).
+
+Tested model that we didn't?
+Please email me the result files and I will add them to the spreadsheet!
+See [Contacts](#contacts) for my email.
 
 ### Model-based evaluation
 
@@ -195,3 +202,325 @@ If you find our work useful, please cite us:
       url={https://arxiv.org/abs/2410.02694}, 
 }
 ```
+
+Please also cite the original dataset creators, listed below:
+<details>
+
+<summary>Citations</summary>
+
+```
+@article{Liu2023LostIT,
+  title={Lost in the Middle: How Language Models Use Long Contexts},
+  author={Nelson F. Liu and Kevin Lin and John Hewitt and Ashwin Paranjape and Michele Bevilacqua and Fabio Petroni and Percy Liang},
+  journal={Transactions of the Association for Computational Linguistics},
+  year={2023},
+  volume={12},
+  pages={157-173},
+  url={https://api.semanticscholar.org/CorpusID:259360665}
+}
+
+@inproceedings{
+  hsieh2024ruler,
+  title={{RULER}: What{\textquoteright}s the Real Context Size of Your Long-Context Language Models?},
+  author={Cheng-Ping Hsieh and Simeng Sun and Samuel Kriman and Shantanu Acharya and Dima Rekesh and Fei Jia and Boris Ginsburg},
+  booktitle={First Conference on Language Modeling},
+  year={2024},
+  url={https://openreview.net/forum?id=kIoBbc76Sy}
+}
+
+@inproceedings{mallen-etal-2023-trust,
+    title = "When Not to Trust Language Models: Investigating Effectiveness of Parametric and Non-Parametric Memories",
+    author = "Mallen, Alex  and
+      Asai, Akari  and
+      Zhong, Victor  and
+      Das, Rajarshi  and
+      Khashabi, Daniel  and
+      Hajishirzi, Hannaneh",
+    editor = "Rogers, Anna  and
+      Boyd-Graber, Jordan  and
+      Okazaki, Naoaki",
+    booktitle = acl,
+    month = jul,
+    year = "2023",
+    address = "Toronto, Canada",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2023.acl-long.546",
+    doi = "10.18653/v1/2023.acl-long.546",
+    pages = "9802--9822",
+}
+
+@inproceedings{yang-etal-2018-hotpotqa,
+    title = "{H}otpot{QA}: A Dataset for Diverse, Explainable Multi-hop Question Answering",
+    author = "Yang, Zhilin  and
+      Qi, Peng  and
+      Zhang, Saizheng  and
+      Bengio, Yoshua  and
+      Cohen, William  and
+      Salakhutdinov, Ruslan  and
+      Manning, Christopher D.",
+    editor = "Riloff, Ellen  and
+      Chiang, David  and
+      Hockenmaier, Julia  and
+      Tsujii, Jun{'}ichi",
+    booktitle = "Proceedings of the 2018 Conference on Empirical Methods in Natural Language Processing",
+    month = oct # "-" # nov,
+    year = "2018",
+    address = "Brussels, Belgium",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/D18-1259",
+    doi = "10.18653/v1/D18-1259",
+    pages = "2369--2380",
+}
+
+@inproceedings{joshi2017triviaqa,
+    title = "{T}rivia{QA}: A Large Scale Distantly Supervised Challenge Dataset for Reading Comprehension",
+    author = "Joshi, Mandar  and
+      Choi, Eunsol  and
+      Weld, Daniel  and
+      Zettlemoyer, Luke",
+    editor = "Barzilay, Regina  and
+      Kan, Min-Yen",
+    booktitle = "Proceedings of the 55th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)",
+    month = jul,
+    year = "2017",
+    address = "Vancouver, Canada",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/P17-1147",
+    doi = "10.18653/v1/P17-1147",
+    pages = "1601--1611",
+}
+
+@inproceedings{petroni-etal-2021-kilt,
+    title = "{KILT}: a Benchmark for Knowledge Intensive Language Tasks",
+    author = {Petroni, Fabio  and Piktus, Aleksandra  and
+      Fan, Angela  and Lewis, Patrick  and
+      Yazdani, Majid  and De Cao, Nicola  and
+      Thorne, James  and Jernite, Yacine  and
+      Karpukhin, Vladimir  and Maillard, Jean  and
+      Plachouras, Vassilis  and Rockt{\"a}schel, Tim  and
+      Riedel, Sebastian},
+    booktitle = "Proceedings of the 2021 Conference of the North American Chapter of the Association 
+                 for Computational Linguistics: Human Language Technologies",
+    month = jun,
+    year = "2021",
+    address = "Online",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2021.naacl-main.200",
+    doi = "10.18653/v1/2021.naacl-main.200",
+    pages = "2523--2544",
+}
+
+@article{kwiatkowski2019natural,
+    title = "Natural Questions: A Benchmark for Question Answering Research",
+    author = "Kwiatkowski, Tom  and
+      Palomaki, Jennimaria  and
+      Redfield, Olivia  and
+      Collins, Michael  and
+      Parikh, Ankur  and
+      Alberti, Chris  and
+      Epstein, Danielle  and
+      Polosukhin, Illia  and
+      Devlin, Jacob  and
+      Lee, Kenton  and
+      Toutanova, Kristina  and
+      Jones, Llion  and
+      Kelcey, Matthew  and
+      Chang, Ming-Wei  and
+      Dai, Andrew M.  and
+      Uszkoreit, Jakob  and
+      Le, Quoc  and
+      Petrov, Slav",
+    editor = "Lee, Lillian  and
+      Johnson, Mark  and
+      Roark, Brian  and
+      Nenkova, Ani",
+    journal = "Transactions of the Association for Computational Linguistics",
+    volume = "7",
+    year = "2019",
+    address = "Cambridge, MA",
+    publisher = "MIT Press",
+    url = "https://aclanthology.org/Q19-1026",
+    doi = "10.1162/tacl_a_00276",
+    pages = "452--466",
+}
+
+@inproceedings{gao2023alce,
+    title = "Enabling Large Language Models to Generate Text with Citations",
+    author = "Gao, Tianyu  and
+      Yen, Howard  and
+      Yu, Jiatong  and
+      Chen, Danqi",
+    editor = "Bouamor, Houda  and
+      Pino, Juan  and
+      Bali, Kalika",
+    booktitle = "Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing",
+    month = dec,
+    year = "2023",
+    address = "Singapore",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2023.emnlp-main.398",
+    doi = "10.18653/v1/2023.emnlp-main.398",
+    pages = "6465--6488",
+}
+
+@inproceedings{stelmakh2022asqa,
+    title = "{ASQA}: Factoid Questions Meet Long-Form Answers",
+    author = "Stelmakh, Ivan  and
+      Luan, Yi  and
+      Dhingra, Bhuwan  and
+      Chang, Ming-Wei",
+    booktitle = "Proceedings of the 2022 Conference on Empirical Methods in Natural Language Processing",
+    month = dec,
+    year = "2022",
+    address = "Abu Dhabi, United Arab Emirates",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2022.emnlp-main.566",
+    doi = "10.18653/v1/2022.emnlp-main.566",
+    pages = "8273--8288",
+}
+
+@inproceedings{fan-etal-2019-eli5,
+    title = "{ELI}5: Long Form Question Answering",
+    author = "Fan, Angela  and
+      Jernite, Yacine  and
+      Perez, Ethan  and
+      Grangier, David  and
+      Weston, Jason  and
+      Auli, Michael",
+    booktitle = acl,
+    year = "2019",
+    url = "https://aclanthology.org/P19-1346",
+    doi = "10.18653/v1/P19-1346",
+    pages = "3558--3567",
+}
+
+@article{rubin2022qampari,
+  title={{QAMPARI: An Open-domain Question Answering Benchmark for Questions with Many Answers from Multiple Paragraphs}},
+  author={Rubin, Samuel Joseph Amouyal Ohad and Yoran, Ori and Wolfson, Tomer and Herzig, Jonathan and Berant, Jonathan},
+  journal={arXiv preprint arXiv:2205.12665},
+  year={2022},
+  url="https://arxiv.org/abs/2205.12665"
+}
+
+@misc{bajaj2018ms,
+      title={MS MARCO: A Human Generated MAchine Reading COmprehension Dataset}, 
+      author={Payal Bajaj and Daniel Campos and Nick Craswell and Li Deng and Jianfeng Gao and Xiaodong Liu and Rangan Majumder and Andrew McNamara and Bhaskar Mitra and Tri Nguyen and Mir Rosenberg and Xia Song and Alina Stoica and Saurabh Tiwary and Tong Wang},
+      year={2018},
+      eprint={1611.09268},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url="https://arxiv.org/abs/1611.09268"
+}
+
+@article{kocisky2018narrativeqa,
+    title = "The {N}arrative{QA} Reading Comprehension Challenge",
+    author = "Ko{\v{c}}isk{\'y}, Tom{\'a}{\v{s}}  and
+      Schwarz, Jonathan  and
+      Blunsom, Phil  and
+      Dyer, Chris  and
+      Hermann, Karl Moritz  and
+      Melis, G{\'a}bor  and
+      Grefenstette, Edward",
+    journal = "Transactions of the Association for Computational Linguistics",
+    volume = "6",
+    year = "2018",
+    address = "Cambridge, MA",
+    publisher = "MIT Press",
+    url = "https://aclanthology.org/Q18-1023",
+    doi = "10.1162/tacl_a_00023",
+    pages = "317--328"
+}
+
+@inproceedings{
+  shen2022multilexsum,
+  title={Multi-LexSum: Real-world Summaries of Civil Rights Lawsuits at Multiple Granularities},
+  author={Zejiang Shen and Kyle Lo and Lauren Yu and Nathan Dahlberg and Margo Schlanger and Doug Downey},
+  booktitle={Thirty-sixth Conference on Neural Information Processing Systems Datasets and Benchmarks Track},
+  year={2022},
+  url={https://openreview.net/forum?id=z1d8fUiS8Cr}
+}
+
+@misc{zhang2024inftybenchextendinglongcontext,
+  title={$\infty$Bench: Extending Long Context Evaluation Beyond 100K Tokens}, 
+  author={Xinrong Zhang and Yingfa Chen and Shengding Hu and Zihang Xu and Junhao Chen and Moo Khai Hao and Xu Han and Zhen Leng Thai and Shuo Wang and Zhiyuan Liu and Maosong Sun},
+  year={2024},
+  eprint={2402.13718},
+  archivePrefix={arXiv},
+  primaryClass={cs.CL},
+  url={https://arxiv.org/abs/2402.13718}, 
+}
+
+@inproceedings{li-roth-2002-learning,
+    title = "Learning Question Classifiers",
+    author = "Li, Xin  and
+      Roth, Dan",
+    booktitle = "{COLING} 2002: The 19th International Conference on Computational Linguistics",
+    year = "2002",
+    url = "https://aclanthology.org/C02-1150",
+}
+
+@article{Liu2019BenchmarkingNL,
+  title={Benchmarking Natural Language Understanding Services for building Conversational Agents},
+  author={Xingkun Liu and Arash Eshghi and Pawel Swietojanski and Verena Rieser},
+  journal={ArXiv},
+  year={2019},
+  volume={abs/1903.05566},
+  url={https://api.semanticscholar.org/CorpusID:76660838}
+}
+
+@inproceedings{casanueva-etal-2020-efficient,
+    title = "Efficient Intent Detection with Dual Sentence Encoders",
+    author = "Casanueva, I{\~n}igo  and
+      Tem{\v{c}}inas, Tadas  and
+      Gerz, Daniela  and
+      Henderson, Matthew  and
+      Vuli{\'c}, Ivan",
+    editor = "Wen, Tsung-Hsien  and
+      Celikyilmaz, Asli  and
+      Yu, Zhou  and
+      Papangelis, Alexandros  and
+      Eric, Mihail  and
+      Kumar, Anuj  and
+      Casanueva, I{\~n}igo  and
+      Shah, Rushin",
+    booktitle = "Proceedings of the 2nd Workshop on Natural Language Processing for Conversational AI",
+    month = jul,
+    year = "2020",
+    address = "Online",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2020.nlp4convai-1.5",
+    doi = "10.18653/v1/2020.nlp4convai-1.5",
+    pages = "38--45",
+}
+
+@inproceedings{larson-etal-2019-evaluation,
+    title = "An Evaluation Dataset for Intent Classification and Out-of-Scope Prediction",
+    author = "Larson, Stefan  and
+      Mahendran, Anish  and
+      Peper, Joseph J.  and
+      Clarke, Christopher  and
+      Lee, Andrew  and
+      Hill, Parker  and
+      Kummerfeld, Jonathan K.  and
+      Leach, Kevin  and
+      Laurenzano, Michael A.  and
+      Tang, Lingjia  and
+      Mars, Jason",
+    editor = "Inui, Kentaro  and
+      Jiang, Jing  and
+      Ng, Vincent  and
+      Wan, Xiaojun",
+    booktitle = "Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing (EMNLP-IJCNLP)",
+    month = nov,
+    year = "2019",
+    address = "Hong Kong, China",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/D19-1131",
+    doi = "10.18653/v1/D19-1131",
+    pages = "1311--1316",
+}
+```
+
+</details>
+
+<details>
