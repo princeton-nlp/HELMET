@@ -289,7 +289,8 @@ def load_multi_lexsum(dataset, path=None, shots=0, max_samples=None, seed=42):
     }
 
 
-def load_msmarco_rerank(path, demo_path=None, max_test_samples=None, shots=0):
+def load_msmarco_rerank(path, demo_path=None, max_test_samples=None, shots=0, seed=42):
+    random.seed(seed)
     user_template = "You are provided with a list of documents, each indicated by their ID. Rank each document based on their relevance to the question in descending order from most relelvant to least relevant texts. Include all documents in the rankings. Write your answer using the unique IDs, with the following format:\nRanking: ID3 > ID1 > ID2\n\n{demos}{context}\n\nQuery: {question}"
     system_template = "Ranking:"
     prompt_template = user_template + "\n" + system_template
@@ -739,7 +740,7 @@ def load_data(args, dataset, path=None, demo_path=None):
     elif "qasper" in dataset:
         data = load_qasper(dataset, path, args.shots, args.max_test_samples, args.seed)
     elif "msmarco" in dataset:
-        data = load_msmarco_rerank(path, demo_path, args.max_test_samples, args.shots)
+        data = load_msmarco_rerank(path, demo_path, args.max_test_samples, args.shots, args.seed)
     elif "alce" in dataset:
         data = load_alce(dataset, path, demo_path, args.shots)
         if args.max_test_samples is not None:
