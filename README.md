@@ -43,6 +43,7 @@ Additionally, if you wish to use the API models, you will need to install the pa
 pip install openai # OpenAI API
 pip install anthropic # Anthropic API
 pip install google-generativeai # Google GenerativeAI API
+pip install vertexai==1.64.0 # Google VertexAI 
 pip install together # Together API
 ```
 You should also set the environmental variables accordingly so the API calls can be made correctly. To see the variable that you should set up, check out `model_utils.py` and the corresponding class (e.g., `GeminiModel`).
