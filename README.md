@@ -27,6 +27,7 @@ See `CHANGELOG.md` for updates and more details.
 - [x] HELMET Code
 - [x] HELMET data
 - [x] VLLM Support
+- [ ] Support >128k input length
 - [ ] Correlation analysis notebook
 - [ ] Retrieval setup
 
@@ -137,9 +138,11 @@ The code will be released soon.
 
 <summary>Collecting results</summary>
 To quickly collect all the results, you can use the script:
+
 ```bash
 python scripts/collect_results.py
 ```
+
 Please check out the script and modify the specific fields to fit your needs.
 For example, you can change the models, task configs, output directories, tags, and more.
 
@@ -524,4 +527,3 @@ Please also cite the original dataset creators, listed below:
 
 </details>
 
-<details>
