@@ -21,6 +21,7 @@ def format_chat(message, include_system=False, system_message="You are a helpful
         chat = [{"role": "user", "content": message}]
     return chat
 
+
 def call_api(func, limit=5, pause=10):
     count = 0
     while True:
@@ -40,6 +41,7 @@ def call_api(func, limit=5, pause=10):
                 output = None
                 break
     return output
+
 
 class LLM:
     def __init__(
@@ -699,6 +701,7 @@ class VLLMModel(LLM):
 
 
 def load_LLM(args):
+    kwargs = {}
     if "gpt" in args.model_name_or_path:
         model_cls = OpenAIModel
     elif "claude" in args.model_name_or_path:
@@ -711,15 +714,13 @@ def load_LLM(args):
         model_cls = VLLMModel
     else:
         model_cls = HFModel
-
-    kwargs = {}
-    if args.no_torch_compile:
-        kwargs["torch_compile"] = False
-    if args.no_bf16:
-        kwargs["torch_dtype"] = torch.float32
-    if args.rope_theta is not None:
-        kwargs["rope_theta"] = args.rope_theta
-        
+        if args.no_torch_compile:
+            kwargs["torch_compile"] = False
+        if args.no_bf16:
+            kwargs["torch_dtype"] = torch.float32
+        if args.rope_theta is not None:
+            kwargs["rope_theta"] = args.rope_theta
+     
     model = model_cls(
         args.model_name_or_path, 
         temperature=args.temperature, 
