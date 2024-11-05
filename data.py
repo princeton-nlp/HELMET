@@ -303,13 +303,6 @@ def load_msmarco_rerank(path, demo_path=None, max_test_samples=None, shots=0, se
     
     demos = load_dataset("json", data_files=demo_path)["train"]
 
-    def get_qrels(data):
-        # for evaluation, to be passed into trec_eval
-        qrels = {}
-        for d in data:
-            qrels[d["qid"]] = {c["id"]: c["label"] for c in d["ctxs"]}
-        return qrels
-
     if max_test_samples is not None:
         key = "qid" if "qid" in data.column_names else "query"
         keys = set(data[key])
@@ -319,7 +312,6 @@ def load_msmarco_rerank(path, demo_path=None, max_test_samples=None, shots=0, se
     # the k values are used to calculate metrics later
     k_values = [1, 5, 10, 20, 50, 100, 200, 500, 1000]
     k_values = [k for k in k_values if k <= len(data[0]["ctxs"])]
-    qrels = get_qrels(data)
 
     # could also do this question by question, but not necessary if we are sampling
     demo_filtered = False
@@ -353,15 +345,16 @@ def load_msmarco_rerank(path, demo_path=None, max_test_samples=None, shots=0, se
                 ranking = " > ".join([x['id'] for x in ids])
                 demo_text += "\n\n".join([passage_template.format(**c) for c in d['ctxs']]) + f"\n\nQuery: {d['query']}\nRanking: {ranking}" + "\n\n"
 
-        return {"context": passage_text, "question": sample["query"], "demos": demo_text, "answer": gold_ranking}
+        qrel = [[c['id'], str(c['label'])] for c in sample["ctxs"]]  
+        return {"context": passage_text, "question": sample["query"], "demos": demo_text, "answer": gold_ranking, "qrel": qrel}
 
     data = data.map(lambda x: update(x, demos), remove_columns=["query", "ctxs"])
 
     def post_process(output, example):
         parsed_pred = parse_rankings(output["output"])
         o = {"parsed_output": parsed_pred}
-        # qrels = {k: v for k, v in example["qrel"].items() if v is not None}
-        mets = calculate_retrieval_metrics({example['qid']: parsed_pred}, qrels, k_values)
+        qrels = {example["qid"]: {c[0]: int(c[1]) for c in example["qrel"]}}
+        mets = calculate_retrieval_metrics(results={example['qid']: parsed_pred}, qrels=qrels, k_values=k_values)
         mets = {**mets, "num_preds": len(parsed_pred)}
         return mets, o
 
@@ -370,7 +363,6 @@ def load_msmarco_rerank(path, demo_path=None, max_test_samples=None, shots=0, se
         "prompt_template": prompt_template,
         "user_template": user_template,
         "system_template": system_template,
-        "qrels": qrels,
         "k_values": k_values,
         "post_process": post_process,
     }
@@ -565,7 +557,7 @@ def load_alce(dataset, path, demo_path, shots=0):
     doc_prompt = demos["doc_prompt"]
     # there are 5 docs for each demo, and we use all of them
     
-    user_template = "{demo_text}\n\n\n{instruction}\n\nQuestion: {question}\n\n{context}"
+    user_template = "{demo_text}{instruction}\n\nQuestion: {question}\n\n{context}"
     system_template = "Answer:"
     prompt_template = user_template + "\n\n" + system_template
 
@@ -579,6 +571,8 @@ def load_alce(dataset, path, demo_path, shots=0):
             demo_prompt.format(**demo, instruction=instruction, context = "\n\n".join([doc_prompt.format(**d, ID=idx+1) for idx, d in enumerate(demo["docs"])]))
             for demo in random.sample(demos["demos"], shots)
         ])
+        if shots > 0:
+            demo_text += "\n\n\n"
         return {"context": context, "demo_text": demo_text, "instruction": instruction}
     data = data.map(preprocess_example)
     
