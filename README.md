@@ -27,6 +27,7 @@ See `CHANGELOG.md` for updates and more details.
 - [x] HELMET Code
 - [x] HELMET data
 - [x] VLLM Support
+- [ ] Support >128k input length
 - [ ] Correlation analysis notebook
 - [ ] Retrieval setup
 
@@ -43,6 +44,7 @@ Additionally, if you wish to use the API models, you will need to install the pa
 pip install openai # OpenAI API
 pip install anthropic # Anthropic API
 pip install google-generativeai # Google GenerativeAI API
+pip install vertexai==1.64.0 # Google VertexAI 
 pip install together # Together API
 ```
 You should also set the environmental variables accordingly so the API calls can be made correctly. To see the variable that you should set up, check out `model_utils.py` and the corresponding class (e.g., `GeminiModel`).
@@ -136,9 +138,11 @@ The code will be released soon.
 
 <summary>Collecting results</summary>
 To quickly collect all the results, you can use the script:
+
 ```bash
 python scripts/collect_results.py
 ```
+
 Please check out the script and modify the specific fields to fit your needs.
 For example, you can change the models, task configs, output directories, tags, and more.
 
@@ -523,4 +527,3 @@ Please also cite the original dataset creators, listed below:
 
 </details>
 
-<details>
