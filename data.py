@@ -5,6 +5,7 @@ import copy
 import math
 import random
 import numpy as np
+import hashlib
 
 from collections import defaultdict
 from datasets import load_dataset, load_from_disk
@@ -99,7 +100,9 @@ def load_qa(dataset, path, demo_path, max_test_samples=None, popularity_threshol
                 demos = demo_data.filter(lambda x: x[key] != sample[key])
 
             # seed ensures that we get the same demos for the same question
-            demos = demos.shuffle(seed=abs(hash(sample[key])) % (2**31))
+            # hashlib is deterministic while hash() is not in Python>=3.3, the seed has to be a positive integer
+            h = int(hashlib.sha256(sample[key].encode("utf-8")).hexdigest(), 16) % 2**31
+            demos = demos.shuffle(seed=h)
             demos = drop_duplicates(demos, key).select(range(shots))
             demo_text = "\n\n".join([demo_template.format(**d, documents="\n\n".join([passage_template.format(**c) for c in d["ctxs"]]), answer=d["answers"][0]) for d in demos]) + "\n\n"
         passage_text = ""
@@ -332,7 +335,9 @@ def load_msmarco_rerank(path, demo_path=None, max_test_samples=None, shots=0, se
             # need to make sure we don't pick the same question as the demos
             if not demo_filtered:
                 demos = demos.filter(lambda x: x["qid"] != sample["qid"])
-            demo = demos.shuffle(seed=abs(hash(sample["qid"])) % (2**31))
+            # hashlib is deterministic while hash() is not in Python>=3.3, the seed has to be a positive integer
+            h = abs(int(hashlib.sha256(sample["qid"].encode("utf-8")).hexdigest(), 16) % 2**31)
+            demo = demos.shuffle(seed=h)
             demo = drop_duplicates(demo, 'qid').select(range(shots))
             
             demo_ids = set()
@@ -449,7 +454,7 @@ def load_icl(dataset, max_test_sample=None, seed=42):
 
     def preprocess(sample):
         # use a different seed for every sample, but is also deterministic and affected by the set seed
-        local_seed = abs((hash(sample[text_field]) + seed) % (2**31))
+        local_seed = (int(hashlib.sha256(sample[text_field].encode("utf-8")).hexdigest(), 16) + seed) % 2**31
         np.random.seed(local_seed)
         if "balance" in dataset:
             demos = balance_labels(train_data, shot)

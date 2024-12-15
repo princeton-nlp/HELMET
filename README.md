@@ -186,6 +186,19 @@ The speedup is much more noticable for tasks that generates more tokens (e.g., s
 </details>
 
 
+<details>
+
+<summary>Error loading InfiniteBench</summary>
+
+If you encounter errors loading the InfiniteBench dataset in different modes (online vs. offline inference), it appears to stem from a bug in the hashing function.
+To fix this, you can do the following:
+```bash
+cd {cache_dir}/huggingface/datasets/xinrongzhang2022___infinitebench
+ln -s default-819c8cda45921923 default-7662505cb3478cd4
+```
+
+</details>
+
 
 ## Contacts
 
