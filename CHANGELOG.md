@@ -1,6 +1,20 @@
 # Changelog
 All notable changes will be documented in this file.
 
+## 2025-01-xx
+
+In this version, we make some significant improvements to reduce the cost of running the experiments.
+
+- Add support for batch evaluation
+    - For OpenAI and Anthropic, we use their batch API to reduce the cost of API calls by 50% ([OpenAI documentation](https://cookbook.openai.com/examples/batch_processing), [Anthropic documentation](https://docs.anthropic.com/en/docs/build-with-claude/message-batches)). The model-based evaluation script have also been updated to reduce cost.
+    - For other API providers, we use a simple multi-threading approach to parallelize the API calls
+    - For open-source models, we use batching from the VLLM library for more speed-up.
+- Changes to the datasets pre-processing — the paper will be updated in a future version.
+    - ICL datasets now evaluate 500 samples instead of 100, use a different set of demonstrations for each test instance, and we balance the number of test labels
+    - RAG, Re-ranking, and Citation use `hashlib` for consistent hashing
+- Visualization jupyter notebook for plotting results.
+- Other minor changes, such as adding documentation.
+
 ## 2024-10-04
 
 Thanks to @8188zq and @chtmp223 for pointing out some issues in the current repo: some results are not fully reproducible due to random seeding problems.
