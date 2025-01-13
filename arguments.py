@@ -70,7 +70,4 @@ def parse_arguments():
         args.temperature = 0.0
         logger.info("overwriting temperature to 0.0 since do_sample is False")
 
-    if dataset == "popqa":
-        tag += f"_pop{args.popularity_threshold}"
-
     return args
