@@ -26,7 +26,7 @@ CsvToHtmlTableAgg = {
                 var csvHeaderRow = csvData[0];
 
                 var $tableHeadRow1 = $("<tr></tr>");
-                $tableHeadRow1.append($("<th colspan='1' data-dt-order='disable' class='has-text-centered'></th>").text("Model"));
+                $tableHeadRow1.append($("<th colspan='1' data-dt-order='disable' class='has-text-centered'></th>").text(""));
                 $tableHeadRow1.append($("<th colspan='8' data-dt-order='disable' class='has-text-centered'></th>").text("Average Performance Across Seven Tasks"));
                 $tableHeadRow1.css("background-color", "#f5f5f5");
                 $tableHead.append($tableHeadRow1);
