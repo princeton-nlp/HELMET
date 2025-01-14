@@ -26,8 +26,8 @@ CsvToHtmlTableAgg = {
                 var csvHeaderRow = csvData[0];
 
                 var $tableHeadRow1 = $("<tr></tr>");
-                $tableHeadRow1.append($("<th colspan='2' data-dt-order='disable' class='has-text-centered'></th>").text("Model"));
-                $tableHeadRow1.append($("<th colspan='3' data-dt-order='disable' class='has-text-centered'></th>").text("Average Performance Across Six Tasks"));
+                $tableHeadRow1.append($("<th colspan='1' data-dt-order='disable' class='has-text-centered'></th>").text("Model"));
+                $tableHeadRow1.append($("<th colspan='8' data-dt-order='disable' class='has-text-centered'></th>").text("Average Performance Across Seven Tasks"));
                 $tableHeadRow1.css("background-color", "#f5f5f5");
                 $tableHead.append($tableHeadRow1);
 
@@ -53,7 +53,7 @@ CsvToHtmlTableAgg = {
                         } else {
                             $tableBodyRowTd.text(csvData[rowIdx][colIdx]);
                         }
-                        if (colIdx == 1 || colIdx == 4 || colIdx == 7 || colIdx == 10 || colIdx == 13 || colIdx == 16 ) {
+                        if (colIdx == 0 ||  colIdx == 7 || colIdx == 10 || colIdx == 13 || colIdx == 16 ) {
                             $tableBodyRowTd.css("border-right", "1px solid #dbdbdb");
                         }
                         // // if the second column equals to "Proprietary", then set the background color of the row to light red

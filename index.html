@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="description"
-        content="LONGPROC: Benchmarking Long-Context Language Models on Long Procedural Generation">
-  <meta name="keywords" content="LongProc, Large Language Models, Long-Context">
+        content="HELMET: How to Evaluate Long-Context Language Models Effectively and Thoroughly">
+  <meta name="keywords" content="HELMET, Large Language Models, Long-Context">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LongProc</title>
+  <title>HELMET</title>
   
   <script src="https://kit.fontawesome.com/854f31a6c4.js" crossorigin="anonymous"></script>
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
@@ -30,42 +30,19 @@
       <div class="columns is-centered">
         <div class="column has-text-centered is-four-fifths">
           <!-- <h1 class="title is-1 publication-title">
-            <span>LongProc: Benchmarking Long-Context Language Models on Long Procedural Generation</span>
+            <span></span>
           </h1> -->
           <h2 class="subtitle is-3 publication-subtitle">
-            <span>LongProc: Benchmarking Long-Context Language Models on Long Procedural Generation</span>
+            <span>HELMET: How to Evaluate Long-Context Language Models Effectively and Thoroughly</span>
           </h2>
           <div class="is-size-5 publication-authors">
-            <span class="author-block">
-              <a href="https://xiye17.github.io/">
-                <span class="fancy_text_color">Xi Ye</span>
-              </a><sup>&spades;</sup>,
-            </span>
-
-            <span class="author-block">
-              <a href="https://fangcong-yin-2.github.io/">
-                <span class="fancy_text_color">Fangcong Yin</span>
-              </a><sup>&diams;*</sup>,
-            </span>
-
-            <span class="author-block">
-              <a href="https://ying-hui-he.github.io/">
-                <span class="fancy_text_color">Yinghui He</span>
-              </a><sup>&spades;*</sup>,
-            </span>
-
-            <span class="author-block">
-              <a href="https://github.com/joie-zhang">
-                <span class="fancy_text_color">Joie Zhang</span>
-              </a><sup>&spades;*</sup>,
-            </span>
 
             <span class="author-block">
               <a href="https://howard-yen.github.io/">
                 <span class="fancy_text_color">Howard Yen</span>
               </a><sup>&spades;*</sup>,
             </span>
-            <br>
+
             <span class="author-block">
               <a href="https://gaotianyu.xyz/about/">
                 <span class="fancy_text_color">Tianyu Gao</span>
@@ -73,8 +50,35 @@
             </span>
 
             <span class="author-block">
-              <a href="https://www.cs.utexas.edu/~gdurrett/">
-                <span class="fancy_text_color">Greg Durrett</span>
+              <a href="">
+                <span class="fancy_text_color">Minmin Hou</span>
+              </a><sup>&diams;</sup>,
+            </span>
+
+            <span class="author-block">
+              <a href="">
+                <span class="fancy_text_color">Ke Ding</span>
+              </a><sup>&diams;*</sup>,
+            </span>
+
+
+            <br>
+
+            <span class="author-block">
+              <a href="">
+                <span class="fancy_text_color">Daniel Fleischer</span>
+              </a><sup>&diams;*</sup>,
+            </span>
+
+            <span class="author-block">
+              <a href="">
+                <span class="fancy_text_color">Peter Izsak</span>
+              </a><sup>&diams;*</sup>,
+            </span>
+
+            <span class="author-block">
+              <a href="">
+                <span class="fancy_text_color">Moshe Wasserblat</span>
               </a><sup>&diams;</sup>,
             </span>
 
@@ -87,14 +91,14 @@
 
           <div class="is-size-5 publication-authors">
             <span class="author-block"><sup>&spades;</sup>Princeton Language and Intelligence (PLI), Princeton University</span><br>
-            <span class="author-block"><sup>&diams;</sup>The University of Texas at Austin</span>
+            <span class="author-block"><sup>&diams;</sup>Intel</span>
           </div>
 
           <div class="column has-text-centered">
             <div class="publication-links">
               <!-- arxiv link -->
               <span class="link-block">
-                <a href="https://arxiv.org/pdf/2501.05414"
+                <a href="https://arxiv.org/abs/2410.02694"
                    class="external-link button is-normal is-rounded is-dark">
                   <span class="icon">
                       <i class="ai ai-arxiv"></i>
@@ -104,7 +108,7 @@
               </span>
               <!-- Code Link. -->
               <span class="link-block">
-                <a href="https://github.com/princeton-pli/LongProc"
+                <a href="https://github.com/princeton-nlp/HELMET"
                    class="external-link button is-normal is-rounded is-dark">
                   <span class="icon">
                       <i class="fab fa-github"></i>
@@ -114,7 +118,7 @@
               </span>
               <!-- Data Link. -->
               <span class="link-block">
-                <a href="https://github.com/princeton-pli/LongProc"
+                <a href="https://github.com/princeton-nlp/HELMET"
                    class="external-link button is-normal is-rounded is-dark">
                   <span class="icon">
                     <i class="fa fa-database"></i>
@@ -140,10 +144,10 @@
       <section class="hero teaser has-text-centered">
         <div class="container is-max-desktop">
           <div class="hero-body">
-            <img src="./static/images/data_example.png" width="60%"/>
+            <img src="./static/images/data_summary.png" width="60%"/>
   
             <p style="width: 70%; margin-left: auto; margin-right: auto">
-              Three (out of six) representative tasks in <b>LongProc</b>: HTML to TSV, Theory-of- Mind Tracking, Travel Planning. Tasks in <b>LongProc</b> require LLMs to follow a given procedure detailed by instructions and generate long-form outputs  (up to 8K tokens) in a specified format. Click <a class="fancy_text_color" href="#full_examples">here</a> to view full examples.
+              Overview of the HELMET datasets, which consists of seven categories derived from realistic applications. 
           </div>
         </div>
       </section>
@@ -157,19 +161,21 @@
       <div class="column is-9">
         <h2 class="title is-3">Introduction</h2>
         <div class="content has-text-justified">
-          <p> Existing benchmarks for evaluating long-context language models (LCLMs) primarily focus on long-context recall, requiring models to produce short responses based on a few critical snippets while processing thousands of irrelevant tokens.
+          <p> There have been many benchmarks for evaluating long-context language
+            models (LCLMs), but developers often rely on synthetic tasks like needle-in-a-haystack (NIAH) or arbitrary subsets of tasks. 
           </p>
           <p>
-            We introduce <b>LongProc</b> (<b>Long Proc</b>edural Generation), a new benchmark that requires both the <b>integration of highly dispersed information</b> and <b>long-form generation</b>. LongProc consists of <b>six diverse</b> procedural generation tasks, such as extracting structured information from HTML pages into a TSV format and executing complex search procedures to create travel plans. These tasks challenge LCLMs by testing their ability to follow detailed procedural instructions, synthesize and reason over dispersed information, and generate structured, long-form outputs (up to 8K tokens). Furthermore, as these tasks adhere to deterministic procedures and yield structured outputs, they enable reliable rule-based evaluation.
+            We present HELMET (How to Evaluate Long-context Models Effectively and Thoroughly), a comprehensive benchmark encompassing seven diverse, application-centric categories. We also address many issues in previous benchmarks by adding controllable lengths up to 128k tokens, model-based evaluation for reliable metrics, and few-shot prompting for robustly evaluating base models.
           </p>
           <p>
-            We evaluate 17 LCLMs on LongProc across three difficulty levels, with maximum numbers of output tokens set at 500, 2K, and 8K. Notably, while all tested models claim a context window size above 32K tokens, open-weight models typically falter on 2K-token tasks, and closed-source models like GPT-4o show significant degradation on 8K-token tasks. Further analysis reveals that LCLMs struggle to maintain long-range coherence in long-form generations. These findings highlight critical limitations in current LCLMs and suggest substantial room for improvement.
+            Through a comprehensive study of 51 LCLMs, we find that (1) synthetic tasks like NIAH are not good predictors of downstream performance; (2) the diverse categories in HELMET exhibit distinct trends and low correlation with each other; and (3) while most LCLMs achieve perfect NIAH scores, open-source models significantly lag behind closed ones when the task requires full-context reasoning or following complex instructions—the gap widens with increased lengths.
           </p>
         </div>
         <br>
         <h2 class="title is-3" id="leaderboard"> Leaderboard: Overall Performance</h2>
         <div class="content has-text-justified">
-          <p> <b>Table: Average performance across six tasks</b> on LongProc under <b>three difficulty levels</b> with maximum numbers of output tokens set at 500, 2K, and 8K. Even frontier models struggle with 8K-token procedural generation tasks. All models show performance degradation with increased output length. </p>
+          <p> <b>Table: Average performance across seven categories</b> on HELMET at <b>128K input length</b>. Frontier models struggle significantly more at more complex tasks, such as generation-with-citations and passage re-ranking. For details on the models and the full results, please refer to the paper.
+          </p>
         </div>
         <div class="content is-9">
           <div class="content has-text-justified">
@@ -190,9 +196,8 @@
 </div>
 </section>
 
-<section class="section">
+<!-- <section class="section">
   <div class="container" style="margin-bottom: 2vh;">
-    <!-- Abstract. -->
     <div class="columns is-centered has-text-centered">
       <div class="column is-11">
         <h2 class="title is-3" id="leaderboard"> Detail Results across Tasks</h2>
@@ -206,14 +211,13 @@
       </div>
     </div>
 </div>
-</section>
+</section> -->
 
-<section id="full_examples" class="section">
+<!-- <section id="full_examples" class="section">
   <div class="container" style="margin-bottom: 2vh;">
     <div class="columns is-centered has-text-centered">
       <div class="column is-four-fifths">
         <h2 id="full_examples" class="title is-3">Data Examples</h2>
-        <!-- document.getElementById('pdfViewer').src='path/to/pdf1.pdf'; document.getElementById('pdfTitle').textContent='PDF 1' -->
           <button class="button is-rounded is-dark" onclick="document.getElementById('example_viewer').style.display='block'; document.getElementById('example_pdf').src='./static/pdfs/exs_htmltotsv.pdf'; document.getElementById('example_caption').textContent='HTML to TSV: Extract specified information from HTML pages and structure it into a table format (TSV).'">HTML to TSV</button>
           <button class="button is-rounded is-dark" onclick="document.getElementById('example_viewer').style.display='block'; document.getElementById('example_pdf').src='./static/pdfs/exs_pseudocode.pdf'; document.getElementById('example_caption').textContent='Pseudocode to Code. Translate pseudocode that is structured line-by-line into corresponding C++ code.'">Code to Pseudocode</button>
           <button class="button is-rounded is-dark" onclick="document.getElementById('example_viewer').style.display='block'; document.getElementById('example_pdf').src='./static/pdfs/exs_path.pdf'; document.getElementById('example_caption').textContent='Path Traversal: Traverse a route that connects two cities in a graph where each city has only one outgoing connection.'">Path Traversal</button>
@@ -235,7 +239,7 @@
       </div>
     </div>
   </div> 
-</section>
+</section> -->
 
 <section class="section">
   <div class="container is-max-desktop content">
@@ -249,11 +253,14 @@
     <div class="columns is-centered">
       <div class="column is-four-fifths">
         <pre style="border-radius: 25px;">
-<code>@article{ye25longproc,
-    title={LongProc: Benchmarking Long-Context Language Models on Long Procedural Generation},
-    author={Ye, Xi and Yin, Fangcong and He, Yinghui and Zhang, Joie and Howard, Yen and Gao, Tianyu and Durrett, Greg and Chen, Danqi},
-    journal={arXiv preprint},
-    year={2025}
+<code>@misc{yen2024helmetevaluatelongcontextlanguage,
+  title={HELMET: How to Evaluate Long-Context Language Models Effectively and Thoroughly}, 
+  author={Howard Yen and Tianyu Gao and Minmin Hou and Ke Ding and Daniel Fleischer and Peter Izsak and Moshe Wasserblat and Danqi Chen},
+  year={2024},
+  eprint={2410.02694},
+  archivePrefix={arXiv},
+  primaryClass={cs.CL},
+  url={https://arxiv.org/abs/2410.02694}, 
 }</code>
         </pre>
       </div>
@@ -291,7 +298,7 @@
         "paging": false, 
         "searching": false,
         "info": false,
-        "order": [[4, 'desc']],
+        "order": [[8, 'desc']],
         "columnDefs": [
         {targets: [0], className: 'dt-left', className: 'dt-head-left', className: 'fw-bold'},
         ],
