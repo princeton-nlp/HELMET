@@ -7,5 +7,4 @@ use_chat_template: true
 max_test_samples: 100
 shots: 2
 stop_new_line: false
-model_name_or_path: meta-llama/Llama-3.2-1B-Instruct
-output_dir: output/Llama-3.2-1B-Instruct
+model_name_or_path: meta-llama/Llama-3.1-8B-Instruct

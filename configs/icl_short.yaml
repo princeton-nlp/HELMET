@@ -4,8 +4,7 @@ generation_max_length: 20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,
 test_files: ',,,,,,,,,,,,,,,,,,,'
 demo_files: ',,,,,,,,,,,,,,,,,,,'
 use_chat_template: false
-max_test_samples: 100
+max_test_samples: 500
 shots: 0
 stop_new_line: true
-model_name_or_path: meta-llama/Llama-3.2-1B-Instruct
-output_dir: output/Llama-3.2-1B-Instruct
+model_name_or_path: meta-llama/Llama-3.1-8B-Instruct

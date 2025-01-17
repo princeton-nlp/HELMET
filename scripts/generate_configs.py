@@ -60,12 +60,12 @@ master_mapping = {
             "input_length": v, "generation_max_length": 50, "test_files": f"data/ruler/vt/validation_{v}.jsonl"
         } for k, v in lengths_mapping.items()
     },
-    "ruler_niah_qa_1": { # SQuAD
+    "ruler_qa_1": { # SQuAD
         k: {
             "input_length": v, "generation_max_length": 50, "test_files": f"data/ruler/qa_1/validation_{v}.jsonl"
         } for k, v in lengths_mapping.items()
     },
-    "ruler_niah_qa_2": { # HotpotQA
+    "ruler_qa_2": { # HotpotQA
         k: {
             "input_length": v, "generation_max_length": 50, "test_files": f"data/ruler/qa_2/validation_{v}.jsonl"
         } for k, v in lengths_mapping.items()
@@ -86,6 +86,17 @@ master_mapping = {
     "alce_qampari": { # QAMPARI
         k: {
             "input_length": v, "generation_max_length": 300, "test_files": f"data/alce/qampari_eval_gtr_top2000.json", "demo_files": f"prompts/qampari_revised.json", "name_postfix": ["_8", "_30", "_75", "_165", "_345", "_700"][i]
+        } for i, (k, v) in enumerate(lengths_mapping.items())
+    },
+
+    "alce_asqa_nocite": { # ASQA
+        k: {
+            "input_length": v, "generation_max_length": 300, "test_files": f"data/alce/asqa_eval_gtr_top2000.json", "demo_files": f"prompts/asqa_nocite.json", "name_postfix": ["_8", "_30", "_75", "_165", "_345", "_700"][i]
+        } for i, (k, v) in enumerate(lengths_mapping.items())
+    },
+    "alce_qampari_nocite": { # QAMPARI
+        k: {
+            "input_length": v, "generation_max_length": 300, "test_files": f"data/alce/qampari_eval_gtr_top2000.json", "demo_files": f"prompts/qampari_nocite.json", "name_postfix": ["_8", "_30", "_75", "_165", "_345", "_700"][i]
         } for i, (k, v) in enumerate(lengths_mapping.items())
     },
 
@@ -208,9 +219,6 @@ def process_configs(config_name, datasets, input_lengths, **kwargs):
         out_config.update({
             **kwargs,
             "model_name_or_path": "meta-llama/Llama-3.1-8B-Instruct",
-            "output_dir": "output/Llama-3.1-8B-Instruct",
-            "model_name_or_path": "meta-llama/Llama-3.2-1B-Instruct",
-            "output_dir": "output/Llama-3.2-1B-Instruct",
         })
     with open(config_name, "w") as f:
         yaml.dump(out_config, f, sort_keys=False)
@@ -244,7 +252,7 @@ def helmet_configs(input_lengths = ["128k"], fname_postfix = ""):
     icl = ['icl_trec_coarse', 'icl_trec_fine', 'icl_banking77', 'icl_clinic150', 'icl_nlu']
     process_configs(
         f"configs/icl{fname_postfix}.yaml", icl, input_lengths,
-        use_chat_template=False, max_test_samples=100, shots=0, stop_new_line=True
+        use_chat_template=False, max_test_samples=500, shots=0, stop_new_line=True
     )
 
     rerank = ["msmarco_rerank_psg"]
@@ -259,6 +267,18 @@ def helmet_configs(input_lengths = ["128k"], fname_postfix = ""):
         use_chat_template=True, max_test_samples=100, shots=2, stop_new_line=False
     )
     
+    nocite = ["alce_asqa_nocite"]
+    process_configs(
+        f"configs/alce_nocite{fname_postfix}.yaml", nocite, input_lengths,
+        use_chat_template=True, max_test_samples=100, shots=0, stop_new_line=False, generation_max_length=600,
+    )
+
+    ruler = ["ruler_niah_s_1", "ruler_niah_s_2", "ruler_niah_s_3", "ruler_niah_mk_1", "ruler_niah_mk_2", "ruler_niah_mk_3", "ruler_niah_mq", "ruler_niah_mv", "ruler_cwe", "ruler_fwe", "ruler_vt", "ruler_qa_1", "ruler_qa_2"]
+    process_configs(
+        f"configs/ruler{fname_postfix}.yaml", ruler, input_lengths,
+        use_chat_template=False, max_test_samples=100, shots=0, stop_new_line=False
+    )
+
 
 def niah_configs():
     input_lengths = [8192, 16384, 32768, 65536, 131072]
@@ -276,46 +296,7 @@ def niah_configs():
         yaml.dump(config, f, sort_keys=False)
     
 
-def ruler_all_configs():
-    input_lengths = [4096, 8192, 16384, 32768]
-    input_lengths = [65536, 131072]
-
-    dataset=["ruler_niah_s_1", "ruler_niah_s_2", "ruler_niah_s_3", "ruler_niah_mk_1", "ruler_niah_mk_2", "ruler_niah_mk_3", "ruler_niah_mq", "ruler_niah_mv", "ruler_cwe", "ruler_fwe", "ruler_vt", "ruler_qa_1", "ruler_qa_2"]
-    gen_lengths = [50, 50, 50, 50, 50, 100, 100, 50, 100, 50, 50, 50, 50]
-
-    assert len(dataset) == len(gen_lengths)
-    
-    configs = []
-    for i, d in enumerate(dataset):
-        for l in input_lengths:
-            configs.append({
-                "input_max_length": l,
-                "datasets": d,
-                "generation_max_length": gen_lengths[i],
-                "test_files": f'data/ruler/{d.replace("ruler_", "").replace("_s_", "_single_").replace("mq", "multiquery").replace("mk", "multikey").replace("mv", "multivalue")}/validation_{l}.jsonl',
-                "demo_files": "",
-            })
-
-    # with open(f"configs/ruler_all{'' if max(input_lengths) <= 2**15 else '_long'}.yaml", "w") as f:
-    with open(f"configs/niah{'' if max(input_lengths) <= 2**15 else '_long'}.yaml", "w") as f:
-        config = {
-            k: ",".join([str(c[k]) for c in configs]) for k in configs[0]
-        }
-        config.update({
-            "use_chat_template": False,
-            "max_test_samples": 100,
-            "shots": 0,
-            "stop_new_line": False,
-            "model_name_or_path": "/scratch/gpfs/hyen/models/Meta-Llama-3.1-8B",
-            "output_dir": "output/Meta-Llama-3.1-8B",
-        })
-        
-        print(config)
-        yaml.dump(config, f, sort_keys=False)
-
-
 if __name__ == "__main__":
     helmet_configs()
     helmet_configs(input_lengths=["8k", "16k", "32k", "64k"], fname_postfix="_short")
     niah_configs()
-    ruler_all_configs()

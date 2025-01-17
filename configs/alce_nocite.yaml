@@ -1,0 +1,10 @@
+input_max_length: '131072'
+datasets: alce_asqa_nocite_700
+generation_max_length: 600
+test_files: data/alce/asqa_eval_gtr_top2000.json
+demo_files: prompts/asqa_nocite.json
+use_chat_template: true
+max_test_samples: 100
+shots: 0
+stop_new_line: false
+model_name_or_path: meta-llama/Llama-3.1-8B-Instruct
