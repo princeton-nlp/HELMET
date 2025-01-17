@@ -69,6 +69,7 @@ def run_test(args, model, dataset, test_file, demo_file):
     # generate all outputs
     if isinstance(model, OpenAIModel) or isinstance(model, AnthropicModel):
         # using the batch API makes it cheaper and faster
+        logger.info(f"Using the OpenAI/Anthropic batch API by default, if you want to use the iterative API, please change the code")
         all_outputs = model.generate_batch(all_inputs, batch_file=output_path+".batch")
     else:
         all_outputs = model.generate_batch(all_inputs)
@@ -80,15 +81,6 @@ def run_test(args, model, dataset, test_file, demo_file):
         test_item = data["data"][idx]
         input_text = all_input_texts[idx]
 
-    # with torch.inference_mode():
-    #     for idx, inputs in enumerate(tqdm(dataloader)):
-    #         test_item = data["data"][idx]
-    #         inputs, input_text = inputs[0] # batch size is just 1
-    #         if args.count_tokens:
-    #             metrics["input_len"].append(inputs.input_ids.shape[1])
-    #             continue
-            
-    #         output = model.generate(inputs=inputs)
         if output is None:
             logger.info(f"skipping example {idx+1} because the model returned None")
             continue
@@ -129,8 +121,6 @@ def run_test(args, model, dataset, test_file, demo_file):
         
         if args.debug:
             import pdb; pdb.set_trace()
-
-        # output = None
 
     mem_usage = sum([torch.cuda.max_memory_allocated(i) for i in range(torch.cuda.device_count())])
     logger.info(f"Memory usage: {mem_usage/1000**3:.02f} GB")
