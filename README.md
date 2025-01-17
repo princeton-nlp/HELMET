@@ -8,6 +8,7 @@ HELMET <img src="assets/logo.jpeg" alt="HELMET" width="30"> (How to Evaluate Lon
 The datasets are application-centric and are designed to evaluate models at different lengths and levels of complexity.
 Please check out the paper for more details, and this repo will detail how to run the evaluation.
 
+
 ## Quick Links
 
 - [Setup](#setup)
@@ -34,17 +35,19 @@ See `CHANGELOG.md` for updates and more details.
 
 ## Setup
 
-Please install the necessary packages with
+Please install the necessary packages with (using a virtual environment is recommended, tested with python 3.11):
 ```bash
+python -m venv env
+source env/bin/activate
 pip install -r requirements.txt
 ```
 
 Additionally, if you wish to use the API models, you will need to install the package corresponding to the API you wish to use
 ```bash
-pip install openai # OpenAI API
-pip install anthropic # Anthropic API
-pip install google-generativeai # Google GenerativeAI API
-pip install vertexai==1.64.0 # Google VertexAI 
+pip install openai # OpenAI API (GPT)
+pip install anthropic==0.42.0 # Anthropic API (Claude)
+pip install google-generativeai # Google API (Gemini)
+pip install vertexai==1.71.0 # Google API (Gemini)
 pip install together # Together API
 ```
 You should also set the environmental variables accordingly so the API calls can be made correctly. To see the variable that you should set up, check out `model_utils.py` and the corresponding class (e.g., `GeminiModel`).
