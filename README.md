@@ -76,12 +76,19 @@ To run the evaluation, simply use one of the config files in the `configs` direc
 python eval.py --config configs/cite.yaml --model_name_or_path {local model path or huggingface model name} --output_dir {output directory, defaults to output/{model_name}}
 ```
 This will output the results file under the output directory in two files: `.json` contains all the data point details while `.json.score` only contain the aggregated metrics.
-
+Note: for non-instruction-tuned models (e.g., `Llama-3-8B`), you should ALWAYS set `--use_chat_template False`, the defaults are set for instruction-tuned models.
 
 You may also run the whole suite with a simple bash statement:
 ```bash
 bash scripts/run_eval.sh
-bash scripts/run_api.sh # for the API models, note that API models results may vary due to the randomness in the API calls
+
+# I recommend using these slurm scripts as they contain more details (including all the model names) and can be easily modified to fit your setup
+# you can also run them interactive by replacing sbatch with bash, check out the file for more details
+sbatch scripts/run_eval_slurm.sh
+sbatch scripts/run_short_slurm.sh
+
+# for the API models, note that API models results may vary due to the randomness in the API calls
+bash scripts/run_api.sh 
 ```
 Check out the script file for more details!
 See [Others](#others) for the slurm scripts, easily collecting all the results, and using VLLM.
@@ -146,7 +153,7 @@ To quickly collect all the results, you can use the script:
 python scripts/collect_results.py
 ```
 
-Please check out the script and modify the specific fields to fit your needs.
+You should check the script for more details and modify the specific fields to fit your needs.
 For example, you can change the models, task configs, output directories, tags, and more.
 
 </details>

@@ -1069,6 +1069,7 @@ def load_LLM(args):
         if args.rope_theta is not None:
             kwargs["rope_theta"] = args.rope_theta
 
+    logger.info(f"Loading model {args.model_name_or_path} with {model_cls.__name__}")
     model = model_cls(
         args.model_name_or_path,
         temperature=args.temperature,

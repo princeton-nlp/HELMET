@@ -7,14 +7,10 @@ import string
 import re
 import unicodedata
 from collections import Counter
-import sys
 
-import time
 from rouge_score import rouge_scorer
 
 import torch
-import transformers
-from transformers import AutoModelForCausalLM, AutoTokenizer, GenerationConfig, AutoModel
 import pytrec_eval
 
 # import tensor_parallel as tp
@@ -165,8 +161,8 @@ def parse_rankings(output):
     return results
 
 
-r_scorer = rouge_scorer.RougeScorer(['rougeL', 'rougeLsum'], use_stemmer=True)
 def calculate_metrics(prediction, answers):
+    r_scorer = rouge_scorer.RougeScorer(['rougeL', 'rougeLsum'], use_stemmer=True)
     em = drqa_metric_max_over_ground_truths(drqa_exact_match_score, prediction, answers)
     f1 = drqa_metric_max_over_ground_truths(lambda x, y: f1_score(x, y)[0], prediction, answers)
     sub_em = drqa_metric_max_over_ground_truths(substring_exact_match_score, prediction, answers)

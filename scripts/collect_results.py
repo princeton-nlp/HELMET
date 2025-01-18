@@ -13,7 +13,7 @@ dataset_to_metrics = {
     "triviaqa": "substring_exact_match",
     "hotpotqa": "substring_exact_match",
     
-    "narrativeqa": ["gpt-4-score",],
+    "narrativeqa": ["gpt-4-score"],
     "msmarco_rerank_psg": "NDCG@10",
     
     "trec_coarse": "exact_match",
@@ -23,7 +23,7 @@ dataset_to_metrics = {
     "nlu": "exact_match",
     
     "qmsum": "rougeL_recall",
-    "multi_lexsum": ["gpt4-f1"],
+    "multi_lexsum": ["gpt-4-f1"],
     
     "ruler_niah_s_1": "ruler_recall",
     "ruler_niah_s_2": "ruler_recall",
@@ -39,13 +39,14 @@ dataset_to_metrics = {
     "ruler_qa_1": "substring_exact_match",
     "ruler_qa_2": "substring_exact_match",
     
-    "infbench_qa": [ "rougeL_f1"],
+    "infbench_qa": ["rougeL_f1"],
     "infbench_choice": ["exact_match"],
-    "infbench_sum": ["gpt4-f1"],
+    "infbench_sum": ["gpt-4-f1"],
     
     "alce_asqa": ["str_em", "citation_rec", "citation_prec"],
     "alce_qampari": ["qampari_rec_top5", "citation_rec", "citation_prec"],
 }
+
 dataset_to_metrics = {k: [v] if isinstance(v, str) else v for k, v in dataset_to_metrics.items()}
 custom_avgs = {
     "Recall": ["json_kv substring_exact_match", "ruler_niah_mk_2 ruler_recall", "ruler_niah_mk_3 ruler_recall", "ruler_niah_mv ruler_recall"],
@@ -54,7 +55,7 @@ custom_avgs = {
     "Cite": ['alce_asqa str_em', 'alce_asqa citation_rec', 'alce_asqa citation_prec', 'alce_qampari qampari_rec_top5', 'alce_qampari citation_rec', 'alce_qampari citation_prec', ],
     "Re-rank": ['msmarco_rerank_psg NDCG@10', ],
     "LongQA": ['narrativeqa gpt-4-score', 'infbench_qa rougeL_f1', 'infbench_choice exact_match', ],
-    "Summ": ['infbench_sum gpt4-f1', 'multi_lexsum gpt4-f1', ],
+    "Summ": ['infbench_sum gpt-4-f1', 'multi_lexsum gpt-4-f1', ],
     "RULER": ['ruler_niah_s_1 ruler_recall', 'ruler_niah_s_2 ruler_recall', 'ruler_niah_s_3 ruler_recall', 'ruler_niah_mk_1 ruler_recall', 'ruler_niah_mk_2 ruler_recall', 'ruler_niah_mk_3 ruler_recall', 'ruler_niah_mq ruler_recall', 'ruler_niah_mv ruler_recall', 'ruler_cwe ruler_recall', 'ruler_fwe ruler_recall', 'ruler_vt ruler_recall', 'ruler_qa_1 substring_exact_match', 'ruler_qa_2 substring_exact_match'],
     "Ours-Real": ['RAG', 'ICL', 'Cite', 'Re-rank', 'LongQA', 'Summ'],
     "Ours": ['Recall', 'RAG', 'ICL', 'Cite', 'Re-rank', 'LongQA', 'Summ'],
@@ -69,11 +70,10 @@ class arguments:
     max_test_samples: int = 100
     shots: int = 2
     do_sample: bool = False
-    temperature: float = 1.0
+    temperature: float = 0.0
     top_p: float = 1.0
     use_chat_template: bool = False
     seed: int = 42
-    num_depths: int = 11
     test_name: str = ""
     dataset: str = "nq"
     output_dir: str = "output"
@@ -129,7 +129,7 @@ class arguments:
                 return None
             s = {m: results['averaged_metrics'][m] for m in metric}
         
-        s = {m : v * (100 if m == "gpt4-f1" else 1) * (100/3 if m == "gpt-4-score" else 1) for m, v in s.items()}
+        s = {m : v * (100 if m == "gpt-4-f1" else 1) * (100/3 if m == "gpt-4-score" else 1) for m, v in s.items()}
         print("found scores:", s)
         return s
         
@@ -164,9 +164,8 @@ class arguments:
         return dfs.to_dict("records")
 
 if __name__ == "__main__":
-    # comment out the models you don't want to include
+    # comment out the models you don't want to include, or add the new ones 
     models_configs = [
-        # closed models
         {"model": "gpt-4-0125-preview", "use_chat_template": True, "training_length": 128000},
         {"model": "gpt-4o-mini-2024-07-18", "use_chat_template": True, "training_length": 128000},
         {"model": "gpt-4o-2024-05-13", "use_chat_template": True, "training_length": 128000},
@@ -176,24 +175,25 @@ if __name__ == "__main__":
         {"model": "gemini-1.5-pro-001", "use_chat_template": True, "training_length": 2097152},
 
         # llama 2 based models
-        {"model": "LLaMA-2-7B-32K", "use_chat_template": False, "training_length": 32768},
+        {"model": "Llama-2-7B-32K", "use_chat_template": False, "training_length": 32768},
         {"model": "Llama-2-7B-32K-Instruct", "training_length": 32768},
-        {"model": "llama-2-7b-80k-basefixed", "use_chat_template": False, "training_length": 80000},
+        {"model": "llama-2-7b-80k", "use_chat_template": False, "training_length": 80000},
         {"model": "Yarn-Llama-2-7b-64k", "use_chat_template": False, "training_length": 65536},
         {"model": "Yarn-Llama-2-7b-128k", "use_chat_template": False, "training_length": 131072},
         
         # llama 3 models
         {"model": "Meta-Llama-3-8B", "use_chat_template": False, "training_length": 8192},
         {"model": "Meta-Llama-3-8B-Instruct", "training_length": 8192},
-        {"model": "Meta-Llama-3-8B-Theta8M", "use_chat_template": False, "training_length": 8192},
-        {"model": "Meta-Llama-3-8B-Instruct-Theta8M", "training_length": 8192},
-        {"model": "Meta-Llama-3-70B-Theta8M", "use_chat_template": False, "training_length": 8192},
-        {"model": "Meta-Llama-3-70B-Instruct-Theta8M", "training_length": 8192},
+        {"model": "Meta-Llama-3-8B-Theta16M", "use_chat_template": False, "training_length": 8192},
+        {"model": "Meta-Llama-3-8B-Instruct-Theta16M", "training_length": 8192},
+        {"model": "Meta-Llama-3-70B-Theta16M", "use_chat_template": False, "training_length": 8192},
+        {"model": "Meta-Llama-3-70B-Instruct-Theta16M", "training_length": 8192},
         
-        {"model": "Meta-Llama-3.1-8B", "use_chat_template": False, "training_length": 131072},
-        {"model": "Meta-Llama-3.1-8B-Instruct", "training_length": 131072},
-        {"model": "Meta-Llama-3.1-70B", "use_chat_template": False, "training_length": 131072},
-        {"model": "Meta-Llama-3.1-70B-Instruct", "training_length": 131072},
+        {"model": "Llama-3.1-8B", "use_chat_template": False, "training_length": 131072},
+        {"model": "Llama-3.1-8B-Instruct", "training_length": 131072},
+        {"model": "Llama-3.1-70B", "use_chat_template": False, "training_length": 131072},
+        {"model": "Llama-3.1-70B-Instruct", "training_length": 131072},
+        {"model": "Llama-3.3-70B-Instruct", "training_length": 131072},
         
         {"model": "Llama-3.2-1B", "use_chat_template": False, "training_length": 131072},
         {"model": "Llama-3.2-1B-Instruct", "training_length": 131072},
@@ -206,6 +206,7 @@ if __name__ == "__main__":
         {"model": "Mistral-7B-Instruct-v0.2", "training_length": 32768},
         {"model": "Mistral-7B-v0.3", "use_chat_template": False, "training_length": 32768},
         {"model": "Mistral-7B-Instruct-v0.3", "training_length": 32768},
+        {"model": "Ministral-8B-Instruct-2410", "training_length": 131072},
         
         {"model": "Mistral-Nemo-Base-2407", "use_chat_template": False, "training_length": 128000},
         {"model": "Mistral-Nemo-Instruct-2407", "training_length": 128000},
@@ -228,37 +229,62 @@ if __name__ == "__main__":
         {"model": "Qwen2-7B-Instruct", "training_length": 32768},
         {"model": "Qwen2-57B-A14B", "use_chat_template": False, "training_length": 32768},
         {"model": "Qwen2-57B-A14B-Instruct", "training_length": 32768},
+        {"model": "Qwen2.5-1.5B", "use_chat_template": False, "training_length": 32768},
+        {"model": "Qwen2.5-1.5B-Instruct", "training_length": 32768},
+        {"model": "Qwen2.5-3B", "use_chat_template": False, "training_length": 32768},
+        {"model": "Qwen2.5-3B-Instruct", "training_length": 32768},
+        {"model": "Qwen2.5-7B", "use_chat_template": False, "training_length": 131072},
+        {"model": "Qwen2.5-7B-Instruct", "training_length": 131072},
+        {"model": "Qwen2.5-72B-Instruct", "training_length": 131072},
+        
+        # prolong
+        {"model": "Llama-3-8B-ProLong-512k-Instruct", "training_length": 524288},
+        
+        # gemma 2 models
+        {"model": "gemma-2-9b", "use_chat_template": False, "training_length": 8192},
+        {"model": "gemma-2-9b-it", "training_length": 8192},
+        {"model": "gemma-2-9b-it-Theta320K", "training_length": 8192},
+
+        {"model": "gemma-2-27b", "use_chat_template": False, "training_length": 8192},
+        {"model": "gemma-2-27b-it", "training_length": 8192},
+        {"model": "gemma-2-27b-it-Theta320K", "training_length": 8192},
         
         # others
         {"model": "c4ai-command-r-v01", "training_length": 131072},
         {"model": "Jamba-v0.1", "use_chat_template": False, "training_length": 262144},
         {"model": "AI21-Jamba-1.5-Mini", "training_length": 262144},
-        
-        # prolong
-        {"model": "prolong-64k-instruct", "training_length": 65536},
-        {"model": "prolong-512k-instruct-20b-theta128m", "training_length": 524288},
     ]
 
-    # set your configs here
-    configs = ["configs/recall.yaml", "configs/rag.yaml", "configs/rerank.yaml", "configs/cite.yaml", "configs/longqa.yaml", "configs/summ.yaml", "configs/icl.yaml"]
-    datasets_configs = []
-    for config in configs:
-        c = yaml.safe_load(open(config))
-        print(c)
+    # set your configs here, only include the ones that you ran
+    config_files = [
+        "configs/recall.yaml", "configs/recall_short.yaml", 
+        "configs/rag.yaml", "configs/rag_short.yaml", 
+        "configs/longqa.yaml", "configs/longqa_short.yaml", 
+        "configs/summ.yaml", "configs/summ_short.yaml", 
+        "configs/rerank.yaml", "configs/rerank_short.yaml", 
+        "configs/icl.yaml", "configs/icl_short.yaml", 
+        "configs/cite.yaml", "configs/cite_short.yaml", 
+        "configs/ruler.yaml", "configs/ruler_short.yaml", 
+    ]
+
+    dataset_configs = []
+    for file in config_files:
+        c = yaml.safe_load(open(file))
+        
         if isinstance(c["generation_max_length"], int):
             c["generation_max_length"] = ",".join([str(c["generation_max_length"])] * len(c["datasets"].split(",")))
-        if isinstance(c["input_max_length"], int):
-            c["input_max_length"] = ",".join([str(c["input_max_length"])] * len(c["datasets"].split(",")))
         for d, t, l, g in zip(c['datasets'].split(','), c['test_files'].split(','), c['input_max_length'].split(','), c['generation_max_length'].split(',')):
-            datasets_configs.append({"dataset": d, "test_name": os.path.basename(os.path.splitext(t)[0]), "input_max_length": int(l), "generation_max_length": int(g), "use_chat_template": c["use_chat_template"], "max_test_samples": c["max_test_samples"], 'shots': c['shots']})
-    
+            dataset_configs.append({"dataset": d, "test_name": os.path.basename(os.path.splitext(t)[0]), "input_max_length": int(l), "generation_max_length": int(g), "max_test_samples": c['max_test_samples'], 'use_chat_template': c['use_chat_template'], 'shots': c['shots']})
+    print(dataset_configs)    
+
+    failed_paths = []
     df = []
     for model in tqdm(models_configs):
         args = arguments()
         args.tag = "v1" # SET YOUR TAG HERE
         args.output_dir = f"output/{model['model']}"
     
-        for dataset in datasets_configs:
+        for dataset in dataset_configs:
             args.update(dataset)
             args.update(model)
 
@@ -266,6 +292,7 @@ if __name__ == "__main__":
             dsimple, mnames = args.get_metric_name()
 
             if metric is None:
+                failed_paths.append(args.get_path())
                 continue
                 
             for k, m in metric.items():
@@ -279,4 +306,6 @@ if __name__ == "__main__":
     lf_df = lf_df.reset_index()
 
     print(lf_df.to_csv(index=False))
+
+    print("Warning, failed to get the following paths, make sure that these are correct or the printed results will not be accurate:", failed_paths)
     # import pdb; pdb.set_trace()
