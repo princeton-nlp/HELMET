@@ -1,0 +1,3 @@
+[submodule "longproc_addon/longproc"]
+	path = longproc_addon/longproc
+	url = https://github.com/princeton-pli/LongProc.git
