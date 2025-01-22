@@ -1,0 +1,11 @@
+input_max_length: 128000,128000,128000
+generation_max_length: 1024,3072,10240
+datasets: html_to_tsv_0.5k,html_to_tsv_2k,html_to_tsv_8k
+test_files: longproc_addon/longproc/data,longproc_addon/longproc/data,longproc_addon/longproc/data
+demo_files: ",,"
+use_chat_template: true
+max_test_samples: 100
+temperature: 0.0
+shots: 0
+stop_new_line: false
+model_name_or_path: gpt-4o-mini-2024-07-18
