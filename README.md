@@ -232,7 +232,7 @@ If you encounter any problems, you can also open an issue here. Please try to sp
 
 If you find our work useful, please cite us:
 ```
-@misc{yen2024helmetevaluatelongcontextlanguage,
+@misc{yen2024helmet,
       title={HELMET: How to Evaluate Long-Context Language Models Effectively and Thoroughly}, 
       author={Howard Yen and Tianyu Gao and Minmin Hou and Ke Ding and Daniel Fleischer and Peter Izsak and Moshe Wasserblat and Danqi Chen},
       year={2024},
