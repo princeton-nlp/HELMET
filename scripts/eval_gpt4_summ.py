@@ -448,6 +448,7 @@ if __name__ == "__main__":
 
     all_paths = [item for sublist in all_paths for item in sublist if item.endswith(".json")]
     all_paths = [p for p in all_paths if not os.path.exists(p.replace(".json", "-gpt4eval_o.json"))]
+    all_paths = [p for p in all_paths if not p.endswith("-gpt4eval_o.json")]
     all_paths = all_paths[shard_idx::num_shards]
     print(f"Found {len(all_paths)} path")
 
