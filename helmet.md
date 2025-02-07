@@ -41,6 +41,7 @@ We evaluate over 50 recent LCLMs and find that simple synthetic tasks, such as n
   <figcaption>Figure 1: existing benchmarks show counterintuitive trends such as smaller models outperforming larger ones.</figcaption>
 </figure>
 
+\
 Since the initial release, model developers have adopted HELMET for evaluating their models, such as [Microsoft's Phi-4](https://arxiv.org/abs/2412.08905), and we hope that HELMET will be useful for future development of LCLMs.
 In the following sections, we will describe the construction of HELMET, our findings, and how researchers and users may use HELMET to differentiate between different LCLMs.
 
@@ -64,6 +65,7 @@ However, current models are *often evaluated on different benchmarks* (Table 1).
   <figcaption>Table 1: Model developers often evaluate on different sets of datasets.</figcaption>
 </figure>
 
+\
 A common practice for evaluating long-context language models is to use perplexity or synthetic tasks, such as needle-in-a-haystack (NIAH).
 However, recent works have shown that perplexity does not correlate well with downstream performance ([Fang et al., 2024](https://arxiv.org/abs/2410.23771)).
 In our work, we show that synthetic tasks like NIAH do not correlate with real-world performance (Figure 2).
@@ -73,6 +75,7 @@ In our work, we show that synthetic tasks like NIAH do not correlate with real-w
   <figcaption>Figure 2: Simple synthetic tasks, such as NIAH, do not correlate well with downstream tasks, such as summarization or generation with citations.</figcaption>
 </figure>
 
+\
 Among the existing benchmarks with realistic applications, such as ZeroScrolls ([Shaman et al., 2023](https://arxiv.org/abs/2308.14508)), LongBench ([Bai et al., 2024](https://arxiv.org/abs/2308.14508)), and InfiniteBench ([Zhang et al., 2024](https://arxiv.org/abs/2402.13718)), there are still limitations:
 
 - Insufficient coverage of downstream tasks: often focused on specific domains
@@ -152,6 +155,7 @@ We examine model performance over a wide range of real tasks, and find that diff
    <figcaption>Figure 4: Different categories do not correlate well with each other.</figcaption>
 </figure>
 
+\
 While some tasks moderately correlate with each other (e.g., RAG and MS-MARCO) due to their retrieval-based nature, others show little correlation (e.g., Summ and Cite).
 Notably, ICL has the lowest correlation with other tasks, which suggests that it is a unique task that requires different capabilities from the model.
 Therefore, model developers should evaluate across these distinct axes to draw a more holistic picture of the model's capabilities.
@@ -167,6 +171,7 @@ Additional results can be found in the paper and the website.
    <figcaption>Figure 5: HELMET results on selected instruction-tuned models.</figcaption>
 </figure>
 
+\
 First, we observe that **open-source models lag behind closed-source models on complext tasks**.
 Although the gap appears to small on more simple tasks, such as Recall, the gap widens on more complex ones, such as Cite.
 
