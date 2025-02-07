@@ -1,116 +1,113 @@
-# HELMET: How to Evaluate Long-Context Language Models Effectively and Thoroughly
+<!-- # HELMET: How to Evaluate Long-Context Language Models Effectively and Thoroughly -->
+<h1 class="subtitle is-3 publication-subtitle">
+  <span>HELMET: How to Evaluate Long-Context Language Models Effectively and Thoroughly</span>
+  <img src="./static/images/logo.jpeg" alt="logo" width="30"/>
+</h1>
 
-By [Howard Yen](howard-yen.github.io)
+By [Howard Yen](howard-yen.github.io)\
+2025-02-07
 
 Paper: https://arxiv.org/abs/2410.02694 \
 Code & Data: https://github.com/princeton-nlp/HELMET \
 Website: https://princeton-nlp.github.io/HELMET
 
 
-- [HELMET: How to Evaluate Long-Context Language Models Effectively and Thoroughly](#helmet-how-to-evaluate-long-context-language-models-effectively-and-thoroughly)
-  - [Background](#background)
-  - [Building HELMET](#building-helmet)
-    - [Task construction](#task-construction)
-    - [Reliable evaluation](#reliable-evaluation)
-    - [Better prompting and controllability](#better-prompting-and-controllability)
-  - [Analysis](#analysis)
-    - [Simple synthetic tasks are poor predictors of real-world performance](#simple-synthetic-tasks-are-poor-predictors-of-real-world-performance)
-    - [Diverse LCLM applications call for diverse evaluation](#diverse-lclm-applications-call-for-diverse-evaluation)
-    - [Model performance across tasks and lengths](#model-performance-across-tasks-and-lengths)
-  - [Conclusion](#conclusion)
-  - [Future work](#future-work)
 
-<img src="./static/images/logo.jpeg" alt="logo" width="100"/>
+- [How to compare long-context language models?](#how-to-compare-long-context-language-models)
+- [Constructing HELMET](#constructing-helmet)
+  - [Key improvements over existing benchmarks](#key-improvements-over-existing-benchmarks)
+- [Analysis](#analysis)
+  - [Diverse long-context applications call for diverse evaluation](#diverse-long-context-applications-call-for-diverse-evaluation)
+  - [Model performance across tasks and lengths](#model-performance-across-tasks-and-lengths)
+- [Using HELMET for future developments](#using-helmet-for-future-developments)
+  - [Diverse domains](#diverse-domains)
+  - [Avoid running expensive baselines](#avoid-running-expensive-baselines)
+  - [Future works](#future-works)
+- [Acknowledgements](#acknowledgements)
+- [Citation](#citation)
+
 
 From summarizing numerous legal documents to learning new tasks on the fly, long-context language models (LCLMs) have immense potential to change the way we use and interact with language models.
-With the recent excitement around LCLMs, many model developers have released new models with longer and longer context windows.
-However, existing benchmarks for long-context language modeling primarily rely on either perplexity and synthetic tasks, such as needle-in-a-haystack, even though it is unclear how well the performance on these tasks would transfer to real-world applications. 
+Traditionally, language models have been limited by their context window, which is typically around 2k tokens (e.g., [GPT-3](https://arxiv.org/abs/2005.14165)).
+Recently, model developers are constantly increasing the context window of their models, with recent models like [GPT-4o](https://openai.com/index/hello-gpt-4o/), [Claude](https://www.anthropic.com/news/claude-3-family), and [Gemini](https://blog.google/technology/ai/google-gemini-next-generation-model-february-2024/#ethics-safety) supporting context windows of up to millions of tokens.
 
-In this work, we propose HELMET (How to Evaluate Long-Context Models Effectively and Thoroughly), a comprehensive benchmark for evaluating LCLMs.
+For downstream users, it may be difficult to choose the right model for their applications, as the evaluation settings between different models are *inconsistent* and often *not reflective of real-world applications*.
+Furthermore, existing benchmarks for LCLMs may show confusing and counterintuitive results, making it difficult to understand the strengths and weaknesses of different models (Figure 1).
+In this work, we propose HELMET (How to Evaluate Long-Context Models Effectively and Thoroughly), a comprehensive benchmark for evaluating LCLMs that improves upon existing benchmarks in several ways—*diversity, controllability, and reliability*.
+We evaluate over 50 recent LCLMs and find that simple synthetic tasks, such as needle-in-a-haystack, do not reflect real-world performance, and it is crucial to evaluate model across diverse applications to understand their capabilities.
+
+<figure>
+  <img src="./static/images/teaser.png" alt="logo" width="800"/>
+  <figcaption>Figure 1: existing benchmarks show counterintuitive trends such as smaller models outperforming larger ones.</figcaption>
+</figure>
+
+Since the initial release, model developers have adopted HELMET for evaluating their models, such as [Microsoft's Phi-4](https://arxiv.org/abs/2412.08905), and we hope that HELMET will be useful for future development of LCLMs.
+In the following sections, we will describe the construction of HELMET, our findings, and how researchers and users may use HELMET to differentiate between different LCLMs.
+
+<!-- We evaluate over 50 recent models on diverse, application-centric tasks, which enables researchers and practitioners to compare models across different axes. -->
+
+<!-- However, existing benchmarks for long-context language modeling primarily rely on either perplexity and synthetic tasks, such as needle-in-a-haystack, even though it is unclear how well the performance on these tasks would transfer to real-world applications.  -->
+
+<!-- In this work, we propose HELMET (How to Evaluate Long-Context Models Effectively and Thoroughly), a comprehensive benchmark for evaluating LCLMs.
 In contrast to previous benchmarks, HELMET is designed to include diverse, application-centric tasks, complemented with reliable evaluation settings. 
 We evaluate over 50 recent models, enabling detail comparisons and understanding of existing models and architectures across diverse axes.
 Our experiments reveal key findings: (1) synthetic tasks like needle-in-a-haystack (NIAH) do not reflect real-world performance, (2) diverse types of tasks exhibit distinct trends, and (3) open-source models still lag behind proprietary models on more complex tasks.
-Ultimately, we advocate for a holistic evaluation across diverse tasks.
+Ultimately, we advocate for a holistic evaluation across diverse tasks. -->
 
+## How to compare long-context language models?
 
-## Background
+With the development of LCLMs across both industry and the open-source community, it is crucial to have a reliable method for evaluating and comparing these models.
+However, current models are *often evaluated on different benchmarks* (Table 1).
 
-There has been a surge of interest in LCLMs in the recent years—companies are building frontier models (e.g., GPT-4, Claude, and Gemini) with longer and longer context lengths (up to millions of tokens) and researchers are exploring new models architectures and techniques to improve these models.
-Consequently, there is a need for benchmarks that can effectively evaluate these models.
-A popular approach to evaluate these models is through perplexity [can cite some works here like Fu et al.], but recent works showed that perplexity does not correlate well with downstream performance [cite].
-Another approach is to use synthetic tasks, such as NIAH, which are easy to generate and evaluate. However, as we will show in this work, these tasks do not capture the complexity of real-world applications, and thus do not reflect models' true capabilities in realistic settings. 
+<figure>
+  <img src="./static/images/model_eval_comparison.png" alt="logo" width="400"/>
+  <figcaption>Table 1: Model developers often evaluate on different sets of datasets.</figcaption>
+</figure>
 
-Despite the development of new long-context benchmarks, frontier LCLMs mostly rely on synthetic tasks or arbitrary subsets of other benchmarks for evaluation [add table 1 here?].
-This complicates the comparison between different models and makes it difficult to understand the strengths and weaknesses of each model.
-Existing benchmarks still suffer from the following design flaws:
-- Insufficient coverage of downstream tasks: most benchmarks focuses on synthetic tasks or specific applications (e.g., question answering, summarization). 
-- Inadequate lengths: most natural language datasets are too short for testing frontier LCLMs, which usually have context lengths >= 128k tokens.
-- Unreliable metrics: existing benchmarks rely on n-gram based metrics, such as ROUGE, which can be noisy and unreliable.
-- Incompatibility with base models: LCLM development often focuses on base models, but most benchmarks require the model to be instruction-tuned.
+A common practice for evaluating long-context language models is to use perplexity or synthetic tasks, such as needle-in-a-haystack (NIAH).
+However, recent works have shown that perplexity does not correlate well with downstream performance ([Fang et al., 2024](https://arxiv.org/abs/2410.23771)).
+In our work, we show that synthetic tasks like NIAH do not correlate with real-world performance (Figure 2).
 
+<figure>
+  <img src="./static/images/correlation_syn.png" alt="syn" width="500"/>
+  <figcaption>Figure 2: Simple synthetic tasks, such as NIAH, do not correlate well with downstream tasks, such as summarization or generation with citations.</figcaption>
+</figure>
 
-<img src="./static/images/teaser.png" alt="logo" width="800"/>
+Among the existing benchmarks with realistic applications, such as ZeroScrolls ([Shaman et al., 2023](https://arxiv.org/abs/2308.14508)), LongBench ([Bai et al., 2024](https://arxiv.org/abs/2308.14508)), and InfiniteBench ([Zhang et al., 2024](https://arxiv.org/abs/2402.13718)), there are still limitations:
 
-As a result, model developers do not agree on these evaluation settings.
-We evaluate leading LCLMs on benchmarks that support 128k context lengths—NIAH, RULER, and InfiniteBench—and found that they show counterintuitive results.
-Specifically, smaller models (Llama-8B) outperform larger models (Llama-70B) on these benchmarks, which contradicts previous findings [cite gemini here] as well as common beliefs in the community.
+- Insufficient coverage of downstream tasks: often focused on specific domains
+- Inadequate lengths for testing frontier LCLMs: context lengths < 128k tokens
+- Unreliable metrics: N-gram matching metrics like ROUGE are noisy
+- Incompatibility with base models: require instruction-tuning
 
+Thus, we propose HELMET to address these limitations and provide a comprehensive evaluation of LCLMs.
 
+## Constructing HELMET
 
-## Building HELMET
-
-To address the aforementioned limitations of existing benchmarks, we design HELMET with the following desiderata:
-<!-- Desiderata: -->
+We design HELMET with the following desiderata:
 1. Diverse coverage of downstream tasks
 2. Controllable length and complexity
 3. Reliable evaluation for base and instruction-tuned models
 
-In the following section, we will first describe the construction of HELMET, followed by the improved evaluation settings. 
+We show an overview of the benchmark in Table 2.
 
-### Task construction
+<figure>
+  <img src="./static/images/data_summary.png" alt="logo" width="800"/>
+  <figcaption>Table 2: Overview of HELMET datasets.</figcaption>
+</figure>
 
-<img src="./static/images/data_summary.png" alt="logo" width="800"/>
+### Key improvements over existing benchmarks
 
-- Retrieval-augmented generation (RAG): RAG is one of the most popular application of language models, and long-context models have the potential to process large amounts of retrieved information. To this end, we leverage open-domain question answering datasets to test model in RAG settings. The input consists of a question and k retrieved passages, one of which contains the answer while the rest are distractors. The model is tasked with generating the answer to the question.
-- Passage re-ranking (Re-rank): Re-ranking retrieved passage based on their relevance to the query is a critical part of the RAG pipeline and, thus, an important application of LCLMs. Given a query and a set of retrieved passages, the model outputs a ranking of the passages.
-- Generation with citations (Cite): In addition to question answering with retrieved information, we may want the model to follow other instructions at the same time, such as citing its sources. We use subsets of ALCE (Gao et al., 2023) to test models' ability to answer complex questions and attribute their answers to the context. The context includes a multi-faceted question and k retrieved passage. This task requires the model to reason over a large number of passages *and* follow follow the citation formatting.
-- Long-document question answering (LongQA):  The input consists of a question and a long document (e.g., a novel), and the model needs to generate the answer. For the datasets with longer answers, we employ a model-based evaluation metric that are more reliable than the traditional n-gram based metrics.
-- Summarization (Summ): As a popular task for testing LCLMs, summarization requires the model to aggregate information across the input text and generate a concise summary. In our chosen datasets, the input consists of either multiple formal legal documents (Multi-LexSum; Shen et al., 2022) or a long book (InfiniteBench Summ; Zhang et al., 2024). We also design robust model-based evaluation for the model outputs. 
-- Many-shot in-context learning (ICL): Language models adapts to new tasks through in-context learning. Long-context inputs enables models to learn from more examples, and we test existing LCLMs with datasets with large label spaces. Notably, we map the labels to random integers to prevent models from memorizing the labels.
-- Synthetic recall (Recall): Synthetic tasks are effective for stress testing models on precise information retrieval from long contexts. Due to their ease of controllability and evaluation, we include synthetic tasks that are correlates well with realistic applications (see the results for more information.).
+**Reliable evaluation**: Many existing benchmarks still use n-gram based metrics, such as ROUGE, despite their poor correlation with human judgments ([Goyal et al., 2023](https://arxiv.org/abs/2209.12356)). We employ model-based evaluations that show better distinguishability between models and different input lengths (Figure 3). Furthermore, our human studies show that our metrics have high agreement with human judgments.
 
-A summary of the benchmark is shown in table above and more details can be found in the paper.
-
-### Reliable evaluation
-
-A key flaw of many existing benchmarks is the reliance on n-gram based metrics, such as ROUGE, for open-ended tasks like summarization, despite their known poor correlation with human judgments (Goyal et al., 2023).
-In HELMET, we address these issues with model-based metrics for tasks with open-ended answers, such as LongQA and Summ.
-
-For LongQA, we prompt GPT-4o to evaluate model responses on fluency and correctness.
-Inspired by previous works on model judges, we give the judge detailed rubrics and few-shot examples to ensure consistent evaluation.
-The final score is the product of the fluency and correctness scores, normalized between [0, 100].
-
-For Summ, we similarly check if the model output is fluent (0 or 1).
-Then, we decompose the reference summary into atomic claims and prompt GPT-4o to check if each claim is supported by the model summary (recall). 
-Then, we check if each sentence in the model response is supported by the gold summary (precision). 
-After computing the F1 score, we take its product with the fluency score as the final score.
-
-<img src="./static/images/model_eval.png" alt="logo" width="800"/>
+<figure>
+  <img src="./static/images/model_eval.png" alt="logo" width="800"/>
+  <figcaption>Figure 3: ROUGE cannot differentiate between models and lengths while model-based evaluations are better at separating models of different capacities.</figcaption>
+</figure>
 
 
-Compared to n-gram based metrics, our model-based metrics reflects more consistent trends:
-- Llama-3.1-8B-Inst achieves similar ROUGE scores to GPT-4o on both summarization datasets, while our model-based metrics show that GPT-4o outperforms Llama by a large margin.
-- Model-based metrics are better at identifying incoherent generations and shows lower performance for models with smaller context windows (e.g., Mistral-v0.3).
-- GPT-4o exhibits a positive trends with increasing input lengths, while ROUGE remains within a difference of 2 absolute points.
-
-Furthermore, we conducted humans studies and found that our new metrics achieve high agreement with human judgments—our metric has a Cohen's Kappa = 0.91 and Kappa=0.76 on summary precision and recall.
-
-
-### Better prompting and controllability 
-
-**Robust prompting**: Existing long-context benchmarks often require models to follow instructions, which means they only apply to instruction-tuned models (Shaham et al., 2023). However, many model developments revolve around base models, which has to rely on synthetic tasks or perplexity for evaluation.
-Thus, we support base models for a subset of our tasks.
-Existing benchmarks mostly use zero-shot prompting (Shaham et al., 2023; Zhang et al., 2024), which often leads to noisy output formats; by adding two-shot demonstrations to the prompt, we observe that base models substantially improve their performance on our tasks, which is also a better reflection of how the models are used in real-world applications.
+**Robust prompting**: Existing long-context benchmarks often require models to follow instructions, but many model developments revolve around base models, which has to rely on synthetic tasks or perplexity for evaluation.
+Thus, we support base models for a subset of our tasks via in-context learning examples. This substantially improves the performance of base models, which is more reflective of real-world applications.
 
 
 **Controllable length and difficulty**:
@@ -121,7 +118,7 @@ Although LongQA and Summ can not be easily extended to longer contexts, we inten
 
 ## Analysis
 
-With the release of numerous long-context language models, it may be difficult discerning their differences given the stark difference in the evaluation settings.
+<!-- With the release of numerous long-context language models, it may be difficult discerning their differences given the stark difference in the evaluation settings.
 Furthermore, it's often unclear how these models will perform on specific applications, as most benchmarks often focus on synthetic tasks or specific applications.
 In this work, we evaluate a comprehensive set of 51 models on HELMET.
 To our best knowledge, this is the most thorough and controlled comparison of long-context models on diverse applications.
@@ -135,24 +132,25 @@ One of the most popular task for evaluating LCLMs is the needle-in-a-haystack (N
 However, there has been no systematic evaluation of how well these synthetic tasks correlate with real-world performance.
 In the following figure, we plot their Pearson rank correlation with real-world tasks in HELMET.
 
-
-<!-- ![synthetic correlation](./static/images/correlation_syn.png) -->
-<img src="./static/images/correlation_syn.png" alt="syn" width="500"/>
-
 The most simple synthetic task—NIAH—has the lowest correlation with real-world tasks, while the more complex variants (e.g., RULER MK) have higher correlation.
 The tasks with noisier, more distracting contexts are better at differentiating models, as the performance are less likely to be concentrated at 100% accuracy.
 In contrast, a more realistic task, such as RAG, has much higher correlation with the real-world tasks.
-Thus, **RAG is a better proxy for real-world tasks**. 
+Thus, **RAG is a better proxy for real-world tasks**.  -->
 
-<!-- ### RAG is a better proxy for real-world tasks -->
+Our experiments and analysis include a comprehensive set of 59 LCLMs. To our knowledge this is the most thorough and controlled comparison of long-context models on diverse applications.
+These models cover both leading proprietary and open-source models, and we also consider models with different architectures (e.g., full-attention transformers, hybrid architectures) and positional extrapolation techniques.
+In this section, we will highlight a few key findings from our experiments.
 
 
-### Diverse LCLM applications call for diverse evaluation
+### Diverse long-context applications call for diverse evaluation
 
 Long-context benchmarks are often constructed with specific applications in mind, such as summarization or question answering, which limits the understanding of LCLMs in a broader context.
-We examine model performance over a wide range of real tasks, and find that different categories do not always correlate with each other, as shown in the following figure.
+We examine model performance over a wide range of real tasks, and find that different categories do not always correlate with each other (Figure 4).
 
-<img src="./static/images/correlation_category_inst.png" alt="syn" width="500"/>
+<figure>
+   <img src="./static/images/correlation_category_inst.png" alt="syn" width="500"/>
+   <figcaption>Figure 4: Different categories do not correlate well with each other.</figcaption>
+</figure>
 
 While some tasks moderately correlate with each other (e.g., RAG and MS-MARCO) due to their retrieval-based nature, others show little correlation (e.g., Summ and Cite).
 Notably, ICL has the lowest correlation with other tasks, which suggests that it is a unique task that requires different capabilities from the model.
@@ -164,7 +162,10 @@ Therefore, model developers should evaluate across these distinct axes to draw a
 We present the results of the frontier proprietary models as well as a few open-source models on HELMET.
 Additional results can be found in the paper and the website.
 
-<img src="./static/images/results_length_main.png" alt="syn" width="800"/>
+<figure>
+   <img src="./static/images/results_length_main.png" alt="syn" width="800"/>
+   <figcaption>Figure 5: HELMET results on selected instruction-tuned models.</figcaption>
+</figure>
 
 First, we observe that **open-source models lag behind closed-source models on complext tasks**.
 Although the gap appears to small on more simple tasks, such as Recall, the gap widens on more complex ones, such as Cite.
@@ -176,17 +177,39 @@ Finally, **there is no clear winner across all categories**, thereby calling for
 Additional analysis, such as performance of different positional extrapolation methods and the lost-in-the-middle phenomenon, can be found in the paper.
 
 
-## Conclusion
+## Using HELMET for future developments
 
-In this work, we propose HELMET for evaluating long-context language models.
-We test over 50 models on diverse tasks and lengths, and reveal key findings for the current state of LCLMs—it is crucial to test models on diverse applications to understand their capabilities.
-We hope that our benchmark will be useful for future development.
+### Diverse domains
+With HELMET, practitioners can easily choose the right model for their applications by comparing models across diverse tasks. Given the increasing interest in LCLMs for both applications and other research fields (), we hope that HELMET will be useful tool for the community.
+
+### Avoid running expensive baselines
+It is often expensive to run all the baselines for evaluating LCLMs, especially at long contexts given its computational and memory costs. 
+For example, running the HELMET at all lengths on a 70B model requires a node with 8 * 80GB GPUs for hundreds of GPU hours, which can be costly.
+By evaluating on HELMET, researchers can directly compare their models to existing ones simply by referencing our results, which covers 59 models of different sizes and architectures.
 
 
-## Future work
+### Future works 
 
-HELMET is a step towards a more comprehensive evaluation of long-context language models, but there are still many exciting applications of LCLMs that we have not yet considered.
-We recently released [LongProc](https://arxiv.org/abs/2501.05414), a benchmark for evaluating LCLMs on *long-form generation* and *following procedures*.
-Although summarization tasks in HELMET have long outputs (up to 1k tokens), LongProc focuses on even longer outputs, up to 8k tokens.
+HELMET is a step towards a more comprehensive evaluation of long-context language models, but there are still many more exciting applications of LCLMs.
+For example, we recently released [LongProc](https://arxiv.org/abs/2501.05414), a benchmark for evaluating LCLMs on *long-form generation* and *following procedures*.
+Although summarization tasks have long outputs (up to 1k tokens), LongProc focuses on even longer outputs, up to 8k tokens.
 Similar to HELMET, LongProc is also designed with reliable evaluation settings and diverse tasks.
 We are working on integrating LongProc into HELMET's evaluation suite, and we hope that this will provide a more comprehensive evaluation of LCLMs on long-form tasks.
+
+## Acknowledgements
+
+We thank Mengzhou Xia, Howard Chen, Xi Ye, Yinghui He, Lucy He, Alexander Wettig, Sadhika Malladi, Adithya Bhaskar, and Joie Zhang for their helpful feedback.
+We also thank the Microsoft Accelerate Foundation Models Research (AFMR) for Azure OpenAI credits.
+
+## Citation
+
+If you find HELMET useful, please consider citing our paper:
+
+```
+@inproceedings{yen2024helmetevaluatelongcontextlanguage,
+      title={HELMET: How to Evaluate Long-Context Language Models Effectively and Thoroughly}, 
+      author={Howard Yen and Tianyu Gao and Minmin Hou and Ke Ding and Daniel Fleischer and Peter Izsak and Moshe Wasserblat and Danqi Chen},
+      year={2025},
+      booktitle={International Conference on Learning Representations (ICLR)},
+}
+```
