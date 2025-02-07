@@ -180,7 +180,7 @@ Additional analysis, such as performance of different positional extrapolation m
 ## Using HELMET for future developments
 
 ### Diverse domains
-With HELMET, practitioners can easily choose the right model for their applications by comparing models across diverse tasks. Given the increasing interest in LCLMs for both applications and other research fields (), we hope that HELMET will be useful tool for the community.
+With HELMET, practitioners can easily choose the right model for their applications by comparing models across diverse tasks. Given the increasing interest in LCLMs for both applications and other research fields, we hope that HELMET will be useful tool for the community.
 
 ### Avoid running expensive baselines
 It is often expensive to run all the baselines for evaluating LCLMs, especially at long contexts given its computational and memory costs. 
