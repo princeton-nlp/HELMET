@@ -101,19 +101,19 @@ We show an overview of the benchmark in Table 2.
 
 ### Key improvements over existing benchmarks
 
-**Reliable evaluation**: Many existing benchmarks still use n-gram based metrics, such as ROUGE, despite their poor correlation with human judgments ([Goyal et al., 2023](https://arxiv.org/abs/2209.12356)). We employ model-based evaluations that show better distinguishability between models and different input lengths (Figure 3). Furthermore, our human studies show that our metrics have high agreement with human judgments.
+***Reliable evaluation***: Many existing benchmarks still use n-gram based metrics, such as ROUGE, despite their poor correlation with human judgments ([Goyal et al., 2023](https://arxiv.org/abs/2209.12356)). We employ model-based evaluations that show better distinguishability between models and different input lengths (Figure 3). Furthermore, our human studies show that our metrics have high agreement with human judgments.
 
 <figure>
   <img src="./static/images/model_eval.png" alt="logo" width="800"/>
   <figcaption>Figure 3: ROUGE cannot differentiate between models and lengths while model-based evaluations are better at separating models of different capacities.</figcaption>
 </figure>
 
-
-**Robust prompting**: Existing long-context benchmarks often require models to follow instructions, but many model developments revolve around base models, which has to rely on synthetic tasks or perplexity for evaluation.
+\
+***Robust prompting***: Existing long-context benchmarks often require models to follow instructions, but many model developments revolve around base models, which has to rely on synthetic tasks or perplexity for evaluation.
 Thus, we support base models for a subset of our tasks via in-context learning examples. This substantially improves the performance of base models, which is more reflective of real-world applications.
 
 
-**Controllable length and difficulty**:
+***Controllable length and difficulty***:
 An important dimension to consider when evaluating LCLMs is the input length, as longer inputs can provide more information while challenging the model's ability to process noisy contexts.
 In our tasks, we can control the input length by changing the number of retrieved passages (RAG, Cite, Re-rank), the number of demonstrations (ICL), or the length of the input document (LongQA, Summ).
 Although LongQA and Summ can not be easily extended to longer contexts, we intentionally chose datasets with natural documents of length far greater than 100k tokens, such that they can still be used to evaluate frontier LCLMs.
