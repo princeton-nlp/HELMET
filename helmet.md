@@ -33,6 +33,7 @@ Recently, model developers are constantly increasing the context window of their
 
 For downstream users, it may be difficult to choose the right model for their applications, as the evaluation settings between different models are *inconsistent* and often *not reflective of real-world applications*.
 Furthermore, existing benchmarks for LCLMs may show confusing and counterintuitive results, making it difficult to understand the strengths and weaknesses of different models (Figure 1).
+
 In this work, we propose HELMET (How to Evaluate Long-Context Models Effectively and Thoroughly), a comprehensive benchmark for evaluating LCLMs that improves upon existing benchmarks in several ways—*diversity, controllability, and reliability*.
 We evaluate over 50 recent LCLMs and find that simple synthetic tasks, such as needle-in-a-haystack, do not reflect real-world performance, and it is crucial to evaluate model across diverse applications to understand their capabilities.
 
