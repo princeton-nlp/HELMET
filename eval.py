@@ -14,7 +14,7 @@ from arguments import parse_arguments
 from model_utils import load_LLM, OpenAIModel, AnthropicModel
 
 from data import (
-    load_data, 
+    load_data,
     TestItemDataset,
 )
 
@@ -43,9 +43,9 @@ def run_test(args, model, dataset, test_file, demo_file):
     logger.info(f"loaded {len(data['data'])} samples from {dataset}")
 
     dataloader = DataLoader(
-        TestItemDataset(data, model, model.tokenizer), 
-        batch_size=1, 
-        shuffle=False, 
+        TestItemDataset(data, model, model.tokenizer),
+        batch_size=1,
+        shuffle=False,
         collate_fn=lambda x: x,
         num_workers=args.num_workers if not args.debug else 0,
     )
@@ -63,7 +63,7 @@ def run_test(args, model, dataset, test_file, demo_file):
             continue
         all_inputs.append(inputs)
         all_input_texts.append(input_text)
-    
+
     logger.info("Running generation...")
     start_time = time.time()
     # generate all outputs
@@ -85,13 +85,13 @@ def run_test(args, model, dataset, test_file, demo_file):
             logger.info(f"skipping example {idx+1} because the model returned None")
             continue
 
-        # If we do not use the chat template, then we are doing completion, and for the sake of parsing, we want to prepend the system prompt to the input. 
+        # If we do not use the chat template, then we are doing completion, and for the sake of parsing, we want to prepend the system prompt to the input.
         # For example, since we are autocompleting "Answer:"" in the input, then we should prepend the system prompt to the output as well.
         # This requires some coordination from the dataset preprocessing
         if not args.use_chat_template:
             prepend_text = data["system_template"].format(**test_item)
             output["output"] = prepend_text + output["output"]
-        
+
         mets, others = data['post_process'](output, test_item)
         output.update({**others, **mets})
         for k, v in mets.items():
@@ -118,7 +118,7 @@ def run_test(args, model, dataset, test_file, demo_file):
             logger.info(f"Output: {output['output']}")
             logger.info(f"Parsed output: {output['parsed_output']}")
             logger.info(f"Metrics: {mets}")
-        
+
         if args.debug:
             import pdb; pdb.set_trace()
 
@@ -188,7 +188,7 @@ def main():
         model.max_length = max_length
         model.generation_max_length = gen_length
 
-        try: 
+        try:
             output_path = run_test(args, model, dataset, test_file, demo_file)
 
             if "alce" in dataset and not args.count_tokens and (not os.path.exists(output_path+".score") or args.overwrite):
@@ -206,7 +206,7 @@ def main():
                 eval_alce.main(cli_args)
 
         except Exception as e:
-            # in case we run into some kind of error 
+            # in case we run into some kind of error
             logger.exception(e)
             logger.error(f"Error in {dataset}, continuing...")
             if args.debug:

@@ -215,58 +215,8 @@ def load_narrativeqa(dataset, shots=0, max_samples=None, seed=42):
     }
 
 
-<<<<<<< HEAD
 def load_multi_lexsum(dataset, shots=0, max_samples=None, seed=42):
     all_data = load_dataset("allenai/multi_lexsum", name="v20230518", trust_remote_code=True)
-=======
-def drop_duplicates_in_input(untokenized_dataset):
-    # https://github.com/tau-nlp/scrolls/blob/bfc0da0747976418cd0c4b8837db023ea567ba84/evaluator/dataset_evaluator.py#L107
-    indices_to_keep = []
-    id_to_idx = {}
-    outputs = []
-    for i, (id_, output) in enumerate(zip(untokenized_dataset["id"], untokenized_dataset["output"])):
-        if id_ in id_to_idx:
-            outputs[id_to_idx[id_]].append(output)
-            continue
-        indices_to_keep.append(i)
-        id_to_idx[id_] = len(outputs)
-        outputs.append([output])
-    untokenized_dataset = untokenized_dataset.select(indices_to_keep).flatten_indices()
-    untokenized_dataset = untokenized_dataset.remove_columns("output")
-    untokenized_dataset = untokenized_dataset.add_column("outputs", outputs)
-    return untokenized_dataset
-
-
-def load_qasper(dataset, path=None, shots=0, max_samples=None, seed=42):
-    user_template = 'You are given a scientific article and a question. Answer the question as concisely as you can, using a single phrase or sentence if possible. If the question cannot be answered based on the information in the article, write "unanswerable". If the question is a yes/no question, answer "yes", "no", or "unanswerable".\n\n{demo}{context}\n\nQuestion: {question}'
-    system_template = "Answer:"
-    prompt_template = user_template + "\n" + system_template
-    if path is not None and path != "":
-        data = load_from_disk(path)
-    else:
-        # instead of using allenai/qasper, we use tau/scrolls, because it's nicely preprocessed
-        # but the instructions are from zeroscrolls
-        all_data = load_dataset("tau/scrolls", "qasper")
-        data = drop_duplicates_in_input(all_data["validation"]).shuffle(seed=seed)
-        train_data = drop_duplicates_in_input(all_data["train"])
-        if max_samples is not None:
-            data = data.select(range(min(max_samples, len(data))))
-
-        data = data.map(lambda example: {
-            "context": example["input"][example["input"].index("\n\n")+2:].strip(),
-            "question": example["input"][:example["input"].index("\n\n")].strip(),
-            "answer": example["outputs"],
-            # "demo": "" if shots == 0 else "\n\n".join(["[Text omitted]\n\nQuestion: {}\nAnswer: {}".format(ex['input'][:ex['input'].index('\n\n')].strip(), ex['outputs'][0]) for ex in train_data.shuffle().select(range(shots))]) + "\n\n"
-            "demo": "" if shots == 0 else "For example:\n\n" + "\n\n".join(["Question: {}\nAnswer: {}".format(ex['input'][:ex['input'].index('\n\n')].strip(), ex['outputs'][0]) for ex in train_data.shuffle().select(range(shots))]) + "\n\nNow, use the following article to answer the question:\n\n"
-        }, remove_columns=["outputs"])
-        data = truncate_llama2(dataset, data)
-
-    return {"data": data, "prompt_template": prompt_template, "user_template": user_template, "system_template": system_template}
-
-
-def load_multi_lexsum(dataset, path=None, shots=0, max_samples=None, seed=42):
-    all_data = load_dataset("allenai/multi_lexsum", name="v20230518")
->>>>>>> origin
     all_data = all_data.filter(lambda x: x["summary/short"] is not None)
 
     user_template = "You are given the legal documents in a civil rights lawsuit, and you are tasked to summarize the case. Write a concise summary of one paragraph (200 to 250 words). The summary should contain a short description of the background, the parties involved, and the outcomes of the case.\n\n{demo}Legal documents:\n{context}\n\nNow please summarize the case."
@@ -298,14 +248,7 @@ def load_multi_lexsum(dataset, path=None, shots=0, max_samples=None, seed=42):
             new_mets = calculate_metrics(parsed_pred, answer)
             mets = {k: max(v, new_mets[k]) for k, v in mets.items()}
         return mets, {"parsed_output": parsed_pred}
-<<<<<<< HEAD
     
-=======
-
-    if max_samples is not None and len(test_data) > max_samples:
-        test_data = test_data.shuffle(seed=seed).select(range(max_samples))
-
->>>>>>> origin
     return {
         "data": test_data,
         "prompt_template": prompt_template,
@@ -439,13 +382,8 @@ def load_icl(dataset, max_test_sample=None, seed=42):
         num_labels = 68
     else:
         raise NotImplementedError(f"Unknown ICL dataset")
-<<<<<<< HEAD
    
     def balance_labels(data, shots, seed):
-=======
-
-    def balance_labels(data, shots):
->>>>>>> origin
         # for each data point, we are going to sample a random set of demos with balanced labels
         # there are two places where randomness is involved: the selection of the demos and the final shuffle
         rand = random.Random(seed)
@@ -659,13 +597,8 @@ def load_infbench(dataset, shots=0, max_test_samples=None, seed=42):
                 mets["exact_match"] = True
             return mets, {"parsed_output": parsed_pred}
 
-<<<<<<< HEAD
         post_process = choice_post_process
         
-=======
-        post_process = pp
-
->>>>>>> origin
     elif "sum_eng" in dataset:
         user_template = "You are given a book and you are tasked to summarize it. Write a summary of about 1000 to 1200 words. Only write about the plot and characters of the story. Do not discuss the themes or background of the book. Do not provide any analysis or commentary.\n\n{demo}{context}\n\nNow summarize the book."
         system_template = "Summary:"
@@ -681,17 +614,7 @@ def load_infbench(dataset, shots=0, max_test_samples=None, seed=42):
             update["options"] = options
             update["answer"] = [answer, f"{answer}. {example['answer'][0]}"]
         return update
-<<<<<<< HEAD
     data = data.map(process_example)
-=======
-
-    data = truncate_llama2(dataset, data)
-    all_data = data.map(process_example)
-
-    data = all_data
-    if max_test_samples is not None:
-        data = data.shuffle(seed=seed).select(range(min(len(data), max_test_samples)))
->>>>>>> origin
 
     def add_demos(example):
         demos = data.filter(lambda x: x["id"] != example["id"]).shuffle(seed=seed).select(range(shots))
@@ -722,46 +645,6 @@ def load_infbench(dataset, shots=0, max_test_samples=None, seed=42):
         "post_process": post_process,
     }
 
-<<<<<<< HEAD
-=======
-def shuffle_labels(data, method="shuffle"):
-    """
-    For classification tasks with fixed number of labels, we can shuffle the labels to make the task harder.
-    The model needs to rely on the demo more than using the clue from the label names.
-    We support different ways of doing this.
-     1. shuffle -- the label names don't change but we shuffle them (a bijection mapping from old to new and different label)
-     2. numbers -- change labels to 0 to n-1
-     3. uuid -- change labels to random uuids
-    """
-    # 1. create the mapping from original label to the new label
-    label_set = list(set(data["data"]["answer"]))
-    if method == "shuffle":
-        # random shuffle and then create a mapping, this gives us a random bijection mapping
-        random.shuffle(label_set)
-        mapping = {label_set[i]: label_set[(i+1) % len(label_set)] for i in range(len(label_set))}
-    elif method == "numbers":
-        mapping = {label: i for i, label in enumerate(label_set)}
-    elif method == "uuid":
-        import uuid
-        mapping = {label: str(uuid.uuid4()) for label in label_set}
-    else:
-        raise NotImplementedError(f"Unknown method {method}")
-
-    logger.info(f"Mapping: {mapping}")
-    # 2. replace the original label with the new label in the text
-    # we do the replace with system_template prepend to avoid replacing the label strings that are also substrings of the test text
-    pattern = re.compile("|".join(mapping.keys()))
-    def replace(sample):
-        context_mapping = {data["system_template"].format(sample) + " " + k: data["system_template"].format(sample) + " " + v for k, v in mapping.items()}
-        context_pattern = re.compile("|".join(context_mapping.keys()))
-        return {
-            "context": pattern.sub(lambda x: mapping[re.escape(x.group(0))], sample["context"]),
-            "answer": mapping[sample["answer"]],
-            "original_answer": sample["answer"],
-        }
-    data["data"] = data["data"].map(replace)
-
->>>>>>> origin
 
 def default_post_process(output, example):
     """

@@ -18,6 +18,7 @@ def parse_arguments():
     # model setting
     parser.add_argument("--model_name_or_path", type=str, default=None)
     parser.add_argument("--use_vllm", action="store_true", help="whether to use vllm engine")
+    parser.add_argument("--use_sglang", action="store_true", help="whether to use sglang engine")
 
     # data settings
     parser.add_argument("--datasets", type=str, default=None, help="comma separated list of dataset names")
@@ -42,6 +43,7 @@ def parse_arguments():
     parser.add_argument("--temperature", type=float, default=0.0, help="generation temperature")
     parser.add_argument("--top_p", type=float, default=1.0, help="top-p parameter for nucleus sampling")
     parser.add_argument("--stop_newline", type=ast.literal_eval, choices=[True, False], default=False, help="whether to stop generation at newline")
+    parser.add_argument("--system_message", type=str, default=None, help="system message to add to the beginning of context")
 
     # model specific settings
     parser.add_argument("--seed", type=int, default=42, help="random seed")
