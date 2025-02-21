@@ -232,14 +232,11 @@ If you encounter any problems, you can also open an issue here. Please try to sp
 
 If you find our work useful, please cite us:
 ```
-@misc{yen2024helmet,
+@inproceedings{yen2024helmet,
       title={HELMET: How to Evaluate Long-Context Language Models Effectively and Thoroughly}, 
       author={Howard Yen and Tianyu Gao and Minmin Hou and Ke Ding and Daniel Fleischer and Peter Izsak and Moshe Wasserblat and Danqi Chen},
-      year={2024},
-      eprint={2410.02694},
-      archivePrefix={arXiv},
-      primaryClass={cs.CL},
-      url={https://arxiv.org/abs/2410.02694}, 
+      year={2025},
+      booktitle={International Conference on Learning Representations (ICLR)},
 }
 ```
 
