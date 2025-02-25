@@ -885,8 +885,9 @@ class HFModel(LLM):
             assert prompt is not None
             if self.use_chat_template and isinstance(prompt, str):
                 chat = format_chat(prompt, system_message=self.system_message)
-                prompt = self.tokenizer.apply_chat_template(chat, tokenize=False, add_generation_prompt=True)
-            inputs = self.tokenizer([prompt], return_tensors="pt", max_length=self.max_length-self.generation_max_length, truncation=True, padding=True)
+                inputs = self.tokenizer.apply_chat_template(chat, tokenize=True, add_generation_prompt=True, return_tensors="pt", max_length=self.max_length-self.generation_max_length, truncation=True, padding=True)
+            else:
+                inputs = self.tokenizer([prompt], return_tensors="pt", max_length=self.max_length-self.generation_max_length, truncation=True, padding=True)
 
         inputs = inputs.to(self.model.device)
         input_len = inputs.input_ids.size(1)
@@ -985,6 +986,10 @@ class VLLMModel(LLM):
         )
         self.tokenizer = self.model.get_tokenizer()
 
+        if self.tokenizer.pad_token is None:
+            self.tokenizer.pad_token = self.tokenizer.eos_token
+            self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
+
 
     def prepare_inputs(self, test_item, data):
         return tokenize(
@@ -1004,8 +1009,10 @@ class VLLMModel(LLM):
             assert prompt is not None
             if self.use_chat_template and isinstance(prompt, str):
                 chat = format_chat(prompt, system_message=self.system_message)
-                prompt = self.tokenizer.apply_chat_template(chat, tokenize=False, add_generation_prompt=True)
-            inputs = self.tokenizer([prompt], return_tensors="pt", max_length=self.max_length-self.generation_max_length, truncation=True)
+                inputs = self.tokenizer.apply_chat_template(chat, tokenize=True, add_generation_prompt=True, return_tensors="pt", max_length=self.max_length-self.generation_max_length, truncation=True, padding=True)
+                inputs = {'input_ids': inputs}
+            else:
+                inputs = self.tokenizer([prompt], return_tensors="pt", max_length=self.max_length-self.generation_max_length, truncation=True, padding=True)
 
         self.sampling_params = SamplingParams(
             temperature = self.temperature if self.do_sample else 0.0,
@@ -1033,10 +1040,12 @@ class VLLMModel(LLM):
         if inputs is None:
             assert prompt is not None
             if self.use_chat_template:
-                chats = [format_chat(p, system_message=self.system_message) for p in prompt]
-                prompt = [self.tokenizer.apply_chat_template(chat, tokenize=False, add_generation_prompt=True) for chat in chats]
-            # we return tensor here because the tokenize function returns tensors
-            inputs = [self.tokenizer(p, truncation=True, max_length=self.max_length - self.generation_max_length, return_tensors='pt') for p in prompt]
+                chat = [format_chat(p, system_message=self.system_message) for p in prompt]
+                inputs = [self.tokenizer.apply_chat_template(c, tokenize=True, add_generation_prompt=True, max_length=self.max_length-self.generation_max_length, truncation=True, padding=True, return_tensors="pt") for c in chat]
+                inputs = [{'input_ids': i} for i in inputs]
+            else:
+                # we return tensor here because the tokenize function returns tensors, should be consistent
+                inputs = [self.tokenizer(p, truncation=True, max_length=self.max_length - self.generation_max_length, return_tensors='pt') for p in prompt]
 
 
         self.sampling_params = SamplingParams(
@@ -1105,14 +1114,20 @@ class SGLangModel(LLM):
         )
         self.tokenizer = self.model.tokenizer_manager.tokenizer
 
+        if self.tokenizer.pad_token is None:
+            self.tokenizer.pad_token = self.tokenizer.eos_token
+            self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
+
 
     def generate(self, inputs=None, prompt: str=None, **kwargs):
         if inputs is None:
             assert prompt is not None
             if self.use_chat_template and isinstance(prompt, str):
                 chat = format_chat(prompt, system_message=self.system_message)
-                prompt = self.tokenizer.apply_chat_template(chat, tokenize=False, add_generation_prompt=True)
-            inputs = self.tokenizer([prompt], max_length=self.max_length-self.generation_max_length, truncation=True)
+                inputs = self.tokenizer.apply_chat_template(chat, tokenize=True, add_generation_prompt=True, max_length=self.max_length-self.generation_max_length, truncation=True, padding=True)
+                inputs = {'input_ids': inputs}
+            else:
+                inputs = self.tokenizer([prompt], max_length=self.max_length-self.generation_max_length, truncation=True)
 
         self.sampling_params = {
             "temperature": self.temperature if self.do_sample else 0.0,
@@ -1139,10 +1154,12 @@ class SGLangModel(LLM):
         if inputs is None:
             assert prompt is not None
             if self.use_chat_template:
-                chats = [format_chat(p, system_message=self.system_message) for p in prompt]
-                prompt = [self.tokenizer.apply_chat_template(chat, tokenize=False, add_generation_prompt=True) for chat in chats]
-            # should use batch encode here, should be much faster...
-            inputs = [self.tokenizer(p, truncation=True, max_length=self.max_length - self.generation_max_length,) for p in prompt]
+                chat = [format_chat(p, system_message=self.system_message) for p in prompt]
+                # should use batch encode here, should be much faster...
+                inputs = [self.tokenizer.apply_chat_template(c, tokenize=True, add_generation_prompt=True, max_length=self.max_length-self.generation_max_length, truncation=True, padding=True) for c in chat]
+                inputs = [{'input_ids': i} for i in inputs]
+            else:
+                inputs = [self.tokenizer(p, truncation=True, max_length=self.max_length - self.generation_max_length) for p in prompt]
 
         self.sampling_params = {
             "temperature": self.temperature if self.do_sample else 0.0,
