@@ -1,6 +1,7 @@
 import os
 
 from collections import defaultdict
+import re
 import random
 import json
 import time
@@ -64,6 +65,15 @@ def run_test(args, model, dataset, test_file, demo_file):
         all_inputs.append(inputs)
         all_input_texts.append(input_text)
 
+    # HY: for the thinking mode, we add additional 32k tokens to allow models to generate thinking process
+    if args.thinking:
+        args.generation_max_length += 32768
+        args.input_max_length += 32768
+        model.max_length = args.input_max_length
+        model.generation_max_length = args.generation_max_length
+        args.stop_newline = False
+        logger.info(f"thinking mode, adding 32k tokens to generation and input max length, also disabling stop_newline")
+
     logger.info("Running generation...")
     start_time = time.time()
     # generate all outputs
@@ -92,6 +102,12 @@ def run_test(args, model, dataset, test_file, demo_file):
             prepend_text = data["system_template"].format(**test_item)
             output["output"] = prepend_text + output["output"]
 
+        if args.thinking:
+            matches = re.search(r"(<think>.*</think>)(.*)", output['output'], flags=re.DOTALL)
+            if matches:
+                output["output"] = matches.group(2).strip()
+                output["thoughts"] = matches.group(1).strip()
+            
         mets, others = data['post_process'](output, test_item)
         output.update({**others, **mets})
         for k, v in mets.items():

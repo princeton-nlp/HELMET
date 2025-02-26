@@ -52,6 +52,7 @@ def parse_arguments():
     parser.add_argument("--no_torch_compile", action="store_true", help="disable torchcompile")
     parser.add_argument("--use_chat_template", type=ast.literal_eval, choices=[True, False], default=False, help="whether to use chat template")
     parser.add_argument("--rope_theta", type=int, default=None, help="override rope theta")
+    parser.add_argument("--thinking", action="store_true", help="for reasoning models (e.g., Deepseek-r1), when this is set, we allow the model to generate an additional 32k tokens and exclude all texts between <think>*</think> from the output for evaluation")
 
     # misc
     parser.add_argument("--debug", action="store_true", help="for debugging")

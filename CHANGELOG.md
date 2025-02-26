@@ -1,7 +1,7 @@
 # Changelog
 All notable changes will be documented in this file.
 
-## 2025-01-xx
+## 2025-02-25
 
 In this version, we make some significant improvements to reduce the cost of running the experiments.
 
@@ -10,9 +10,11 @@ In this version, we make some significant improvements to reduce the cost of run
     - For other API providers, we use a simple multi-threading approach to parallelize the API calls
     - For open-source models, we use batching from the VLLM library for more speed-up.
 - Changes to the datasets pre-processing — the paper will be updated in a future version.
-    - ICL datasets now evaluate 500 samples instead of 100, use a different set of demonstrations for each test instance, and we balance the number of test labels
+    - ICL datasets now evaluate 500 samples instead of 100, use a different set of demonstrations for each test instance, and we balance the number of test labels—this is to make the evaluation more consistent and robust. 
     - RAG, Re-ranking, and Citation use `hashlib` for consistent hashing
 - Visualization jupyter notebook for plotting results.
+- Support for SGLang, which can be faster for certain supported models.
+- Support for reasoning models, such as DeepSeek's R1 models, where we parse out the reasoning steps from the model's output.
 - Other minor changes, such as adding documentation.
 
 ## 2024-10-04
