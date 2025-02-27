@@ -19,7 +19,23 @@
   <link rel="stylesheet" href="./static/css/index.css">
   <link rel="stylesheet" href="./static/css/dataTables.bulma.css">
   <script defer src="./static/js/fontawesome.all.min.js"></script>
-
+  <style>
+    .orange-symbol {
+      color: #E77500;
+    }
+    .blue-symbol {
+      color: #00C7FD;
+    }
+    #table-container-agg {
+      width: 95%;
+      margin: 0 auto;
+      display: flex;
+      justify-content: center;
+    }
+    .dataTables_wrapper {
+      width: 100%;
+    }
+  </style>
 </head>
 
 
@@ -36,6 +52,7 @@
           </h1>
           <br>  
           <h2 class="subtitle is-3 publication-subtitle">
+            <img src="./static/images/logo.jpeg" alt="logo" width="30"/>
             <span>HELMET: How to Evaluate Long-Context Language Models Effectively and Thoroughly</span>
           </h2>
           <div class="is-size-5 publication-authors">
@@ -43,25 +60,25 @@
             <span class="author-block">
               <a href="https://howard-yen.github.io/">
                 <span class="fancy_text_color">Howard Yen</span>
-              </a><sup>&spades;</sup>,
+              </a><sup><span class="orange-symbol">&spades;</span></sup>,
             </span>
 
             <span class="author-block">
               <a href="https://gaotianyu.xyz/about/">
                 <span class="fancy_text_color">Tianyu Gao</span>
-              </a><sup>&spades;</sup>,
+              </a><sup><span class="orange-symbol">&spades;</span></sup>,
             </span>
 
             <span class="author-block">
               <a href="">
                 <span class="fancy_text_color">Minmin Hou</span>
-              </a><sup>&diams;</sup>,
+              </a><sup><span class="blue-symbol">&clubs;</span></sup>,
             </span>
 
             <span class="author-block">
               <a href="">
                 <span class="fancy_text_color">Ke Ding</span>
-              </a><sup>&diams;</sup>,
+              </a><sup><span class="blue-symbol">&clubs;</span></sup>,
             </span>
 
 
@@ -70,31 +87,31 @@
             <span class="author-block">
               <a href="">
                 <span class="fancy_text_color">Daniel Fleischer</span>
-              </a><sup>&diams;</sup>,
+              </a><sup><span class="blue-symbol">&clubs;</span></sup>,
             </span>
 
             <span class="author-block">
               <a href="">
                 <span class="fancy_text_color">Peter Izsak</span>
-              </a><sup>&diams;</sup>,
+              </a><sup><span class="blue-symbol">&clubs;</span></sup>,
             </span>
 
             <span class="author-block">
               <a href="">
                 <span class="fancy_text_color">Moshe Wasserblat</span>
-              </a><sup>&diams;</sup>,
+              </a><sup><span class="blue-symbol">&clubs;</span></sup>,
             </span>
 
             <span class="author-block">
               <a href="https://www.cs.princeton.edu/~danqic/">
                 <span class="fancy_text_color">Danqi Chen</span>
-              </a><sup>&spades;</sup>
+              </a><sup><span class="orange-symbol">&spades;</span></sup>
             </span>
           </div>
 
           <div class="is-size-5 publication-authors">
-            <span class="author-block"><sup>&spades;</sup>Princeton Language and Intelligence (PLI), Princeton University</span><br>
-            <span class="author-block"><sup>&diams;</sup>Intel</span>
+            <span class="author-block"><sup><span class="orange-symbol">&spades;</span></sup>Princeton Language and Intelligence (PLI), Princeton University</span><br>
+            <span class="author-block"><sup><span class="blue-symbol">&clubs;</span></sup>Intel</span>
           </div>
 
           <div class="column has-text-centered">
@@ -171,16 +188,19 @@
             We present HELMET (How to Evaluate Long-context Models Effectively and Thoroughly), a comprehensive benchmark encompassing seven diverse, application-centric categories. We also address many issues in previous benchmarks by adding controllable lengths up to 128k tokens, model-based evaluation for reliable metrics, and few-shot prompting for robustly evaluating base models.
           </p>
           <p>
-            Through a comprehensive study of 51 LCLMs, we find that (1) synthetic tasks like NIAH are not good predictors of downstream performance; (2) the diverse categories in HELMET exhibit distinct trends and low correlation with each other; and (3) while most LCLMs achieve perfect NIAH scores, open-source models significantly lag behind closed ones when the task requires full-context reasoning or following complex instructions—the gap widens with increased lengths.
+            Through a comprehensive study of 59 LCLMs, we find that (1) synthetic tasks like NIAH are not good predictors of downstream performance; (2) the diverse categories in HELMET exhibit distinct trends and low correlation with each other; and (3) while most LCLMs achieve perfect NIAH scores, open-source models significantly lag behind closed ones when the task requires full-context reasoning or following complex instructions—the gap widens with increased lengths.
           </p>
         </div>
         <br>
         <h2 class="title is-3" id="leaderboard"> Leaderboard: Overall Performance</h2>
         <div class="content has-text-justified">
-          <p> <b>Table: Average performance across seven categories</b> on HELMET at <b>128K input length</b>. Frontier models struggle significantly more at more complex tasks, such as generation-with-citations and passage re-ranking. For details on the models and the full results, please refer to the paper.
+          <p> <b>Table: Average performance across seven categories</b> on HELMET at <b>128k input length</b>.
+            The context window is the training or claimed context length of the model.
+            Instruction-tuned models are highlighted in <span style="background-color: #e3eff6;">light blue</span>, and base models are highlighted in <span style="background-color: #FEF4E4;">yellow</span>.
+            Frontier models struggle significantly more at more complex tasks, such as generation-with-citations and passage re-ranking. For details on the models and the full results, please refer to the paper.
           </p>
         </div>
-        <div class="content is-9">
+        <div class="content is-9 has-text-centered">
           <div class="content has-text-justified">
             <div>
               <div id="table-container-agg"></div>
@@ -255,7 +275,7 @@
 
     <div class="columns is-centered">
       <div class="column is-four-fifths">
-        <pre style="border-radius: 25px;">
+        <pre style="border-radius: 10px;">
           <code>@inproceedings{yen2024helmet,
                 title={HELMET: How to Evaluate Long-Context Language Models Effectively and Thoroughly}, 
                 author={Howard Yen and Tianyu Gao and Minmin Hou and Ke Ding and Daniel Fleischer and Peter Izsak and Moshe Wasserblat and Danqi Chen},
@@ -263,6 +283,36 @@
                 booktitle={International Conference on Learning Representations (ICLR)},
           }</code>
         </pre>
+      </div>
+    </div>
+
+    <!-- add contacts -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Contact</h2>
+        <p>For any questions or feedback, please reach out to hyen [@] cs.princeton.edu </p>
+      </div>
+    </div>
+
+    <div class="columns is-centered">
+      <div class="institutional-logos" style="margin-top: 2rem;">
+        <div style="display: flex; flex-wrap: wrap; gap: 0px; width: 100%; justify-content: center;">
+            <div style="margin: 10px 20px; display: flex; justify-content: center;">
+                <a href="https://www.princeton.edu/" target="_blank" style="display: flex; justify-content: center;">
+                    <img src="static/images/princeton_logo.png" alt="Princeton Logo" style="height: 90px;">
+                </a>
+            </div>
+            <div style="margin: 10px 20px; display: flex; justify-content: center;">
+                <a href="https://pli.princeton.edu/" target="_blank" style="display: flex; justify-content: center;">
+                    <img src="static/images/pli_logo.svg" alt="Princeton Language and Intelligence Logo" style="height: 90px;">
+                </a>
+            </div>
+            <div style="margin: 10px 20px; display: flex; justify-content: center;">
+                <a href="https://www.intel.com/" target="_blank" style="display: flex; justify-content: center;">
+                    <img src="static/images/intel_logo.png" alt="Intel Logo" style="height: 90px;">
+                </a>
+            </div>
+        </div>
       </div>
     </div>
       
@@ -298,7 +348,7 @@
         "paging": false, 
         "searching": false,
         "info": false,
-        "order": [[8, 'desc']],
+        "order": [[10, 'desc']],
         "columnDefs": [
         {targets: [0], className: 'dt-left', className: 'dt-head-left', className: 'fw-bold'},
         ],
@@ -308,25 +358,25 @@
       }
     });
 
-    CsvToHtmlTableFull.init({
-      csv_path: 'data/full_results.csv', 
-      element: 'table-container-full', 
-      csv_options: {separator: ',', delimiter: '"'},
-      datatables_options: {
-        "paging": false, 
-        "searching": false,
-        "info": false,
-        "order": [[4, 'desc']],
-        "scrollX": true,
-        "scrollCollapse": false,
-        "columnDefs": [
-        {targets: 0, className: 'dt-left', className: 'dt-head-left', className: 'fw-bold', className: 'nowrap'},
-        ],
-        "createdRow": function(row, data, dataIndex) {
-          $(row).find('td:first').css('font-weight', 'bold').css('white-space', 'nowrap');
-        }
-      }
-    });
+    // CsvToHtmlTableFull.init({
+    //   csv_path: 'data/full_results.csv', 
+    //   element: 'table-container-full', 
+    //   csv_options: {separator: ',', delimiter: '"'},
+    //   datatables_options: {
+    //     "paging": false, 
+    //     "searching": false,
+    //     "info": false,
+    //     "order": [[4, 'desc']],
+    //     "scrollX": true,
+    //     "scrollCollapse": false,
+    //     "columnDefs": [
+    //     {targets: 0, className: 'dt-left', className: 'dt-head-left', className: 'fw-bold', className: 'nowrap'},
+    //     ],
+    //     "createdRow": function(row, data, dataIndex) {
+    //       $(row).find('td:first').css('font-weight', 'bold').css('white-space', 'nowrap');
+    //     }
+    //   }
+    // });
   </script>
 </body>
 </html>

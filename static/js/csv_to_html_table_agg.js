@@ -26,7 +26,7 @@ CsvToHtmlTableAgg = {
                 var csvHeaderRow = csvData[0];
 
                 var $tableHeadRow1 = $("<tr></tr>");
-                $tableHeadRow1.append($("<th colspan='1' data-dt-order='disable' class='has-text-centered'></th>").text(""));
+                $tableHeadRow1.append($("<th colspan='3' data-dt-order='disable' class='has-text-centered'></th>").text(""));
                 $tableHeadRow1.append($("<th colspan='8' data-dt-order='disable' class='has-text-centered'></th>").text("Average Performance Across Seven Tasks"));
                 $tableHeadRow1.css("background-color", "#f5f5f5");
                 $tableHead.append($tableHeadRow1);
@@ -34,6 +34,10 @@ CsvToHtmlTableAgg = {
                 var $tableHeadRow2 = $("<tr></tr>");
 
                 for (var headerIdx = 0; headerIdx < csvHeaderRow.length; headerIdx++) {
+                    if (headerIdx == 3) {
+                        // skip the third column
+                        continue;
+                    }
                     $tableHeadRow2Cell = $("<th class='tooltip'></th>").text(csvHeaderRow[headerIdx]);
                     $tableHeadRow2.append($tableHeadRow2Cell);
                 }
@@ -46,6 +50,10 @@ CsvToHtmlTableAgg = {
                 for (var rowIdx = 1; rowIdx < csvData.length; rowIdx++) {
                     var $tableBodyRow = $("<tr></tr>");
                     for (var colIdx = 0; colIdx < csvData[rowIdx].length; colIdx++) {
+                        if (colIdx == 3) {
+                            // skip the third column
+                            continue;
+                        }
                         var $tableBodyRowTd = $("<td></td>");
                         var cellTemplateFunc = customTemplates[colIdx];
                         if (cellTemplateFunc) {
@@ -53,7 +61,7 @@ CsvToHtmlTableAgg = {
                         } else {
                             $tableBodyRowTd.text(csvData[rowIdx][colIdx]);
                         }
-                        if (colIdx == 0 ||  colIdx == 7 || colIdx == 10 || colIdx == 13 || colIdx == 16 ) {
+                        if (colIdx == 0 ||  colIdx == 2 || colIdx == 10 || colIdx == 13 || colIdx == 16 ) {
                             $tableBodyRowTd.css("border-right", "1px solid #dbdbdb");
                         }
                         // // if the second column equals to "Proprietary", then set the background color of the row to light red
@@ -69,6 +77,19 @@ CsvToHtmlTableAgg = {
                         //     $tableBodyRow.css("background-color", "#ECFFE6");
                         // }
                         // if N/A, light blue
+
+                        if (csvData[rowIdx][3] == "♭") {
+                            $tableBodyRow.css("background-color", "#FEF4E4");
+                        }
+                        if (csvData[rowIdx][3] == "♯") {
+                            $tableBodyRow.css("background-color", "#e3eff6");
+                        }
+
+                        // right align the second and third columns
+                        if (colIdx == 1 || colIdx == 2) {
+                            $tableBodyRowTd.css("text-align", "right");
+                        }
+
                         if (csvData[rowIdx][colIdx] == "N/A") {
                             $tableBodyRow.css("background-color", "#FEF4E4");
                         }
