@@ -2,7 +2,8 @@
 
 ---
 
-[[Paper](https://arxiv.org/abs/2410.02694)] 
+![Static Badge](https://img.shields.io/badge/paper-paper?logo=arxiv&logoColor=%23B31B1B&labelColor=white&color=%23B31B1B&link=https%3A%2F%2Farxiv.org%2Fabs%2F2410.02694)
+
 
 HELMET <img src="assets/logo.jpeg" alt="HELMET" width="30"> (How to Evaluate Long-context Models Effectively and Thoroughly) is a comprehensive benchmark for long-context language models covering seven diverse categories of tasks.
 The datasets are application-centric and are designed to evaluate models at different lengths and levels of complexity.
@@ -66,7 +67,7 @@ The data is hosted on this Huggingface [repo](https://huggingface.co/datasets/pr
 For Recall, RAG, Passage Re-ranking, and ALCE, we either generate the data ourselves or do retrieval, so these are stored in jsonl files, whereas our script will load the data from Huggingface for the other tasks, LongQA, Summ, and ICL.
 The data also contains the key points extracted for evaluating summarization with model-based evaluation.
 
-In the future, we will add support for simply loading from Huggingface with all the input-outputs formatted, so you can plug in your own evaluation pipeline easily, stay tuned!
+<!-- In the future, we will add support for simply loading from Huggingface with all the input-outputs formatted, so you can plug in your own evaluation pipeline easily, stay tuned! -->
 
 
 ## Running evaluation
@@ -76,18 +77,16 @@ To run the evaluation, simply use one of the config files in the `configs` direc
 python eval.py --config configs/cite.yaml --model_name_or_path {local model path or huggingface model name} --output_dir {output directory, defaults to output/{model_name}}
 ```
 This will output the results file under the output directory in two files: `.json` contains all the data point details while `.json.score` only contain the aggregated metrics.
-Note: for non-instruction-tuned models (e.g., `Llama-3-8B`), you should ALWAYS set `--use_chat_template False`, the defaults are set for instruction-tuned models.
+Note: for non-instruction-tuned models (e.g., `Llama-3-8B`), you should ALWAYS set `--use_chat_template False`, the defaults in the config files are set for instruction-tuned models.
 
 You may also run the whole suite with a simple bash statement:
 ```bash
-bash scripts/run_eval.sh
-
 # I recommend using these slurm scripts as they contain more details (including all the model names) and can be easily modified to fit your setup
-# you can also run them interactive by replacing sbatch with bash, check out the file for more details
-sbatch scripts/run_eval_slurm.sh
-sbatch scripts/run_short_slurm.sh
+# you can also run them in your shell by replacing sbatch with bash, check out the file for more details
+sbatch scripts/run_eval_slurm.sh # 128k
+sbatch scripts/run_short_slurm.sh # 8k-64k
 
-# for the API models, note that API models results may vary due to the randomness in the API calls
+# for the API models, note that API results may vary due to the randomness in the API calls
 bash scripts/run_api.sh 
 ```
 Check out the script file for more details!
@@ -103,16 +102,16 @@ See [Contacts](#contacts) for my email.
 
 To run the model-based evaluation for LongQA and Summarization, please make sure that you have set the environmental variables for OpenAI so you can make calls to GPT-4o, then you can run:
 ```bash
-python scripts/eval_gpt4_longqa.py
-python scripts/eval_gpt4_summ.py
+# by default, we assume all output files are stored in output/{model_name}
+python scripts/eval_gpt4_longqa.py --model_name_or_path {local model path or huggingface model name} --tag {tag for the model}
+python scripts/eval_gpt4_summ.py --model_name_or_path {local model path or huggingface model name} --tag {tag for the model}
 
 # Alternatively, if you want to shard the process
 bash scripts/eval_gpt4_longqa.sh
 bash scripts/eval_gpt4_summ.sh
 ```
 
-To specify which model/paths you want to run model-based evaluation for, check out the python scripts and modify the `model_to_check` field.
-You may also use Claude, Gemini, or other models for model-based evaluation by modifying the class but we have tested for `gpt-4o-2024-05-13`.
+<!-- You may also use Claude, Gemini, or other models for model-based evaluation by modifying the class but we have tested for `gpt-4o-2024-05-13`. -->
 
 ## Adding new models
 

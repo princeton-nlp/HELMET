@@ -302,7 +302,7 @@ if __name__ == "__main__":
                 })
 
     all_df = pd.DataFrame(df)
-    lf_df = all_df.pivot_table(index=["model", "input_max_length", ], columns="dataset_simple", values="metric", sort=False)
+    lf_df = all_df.pivot_table(index=["input_max_length", "model", ], columns="dataset_simple", values="metric", sort=False)
     lf_df = lf_df.reset_index()
 
     print(lf_df.to_csv(index=False))
