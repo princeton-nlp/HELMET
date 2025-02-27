@@ -279,6 +279,20 @@ def helmet_configs(input_lengths = ["128k"], fname_postfix = ""):
         use_chat_template=False, max_test_samples=100, shots=0, stop_new_line=False
     )
 
+def separate_configs(input_lengths = ["128k"], fname_postfix = ""):
+    # separate rag and icl configs into individual files
+    for name in ['kilt_nq', 'kilt_triviaqa', 'kilt_hotpotqa', 'kilt_popqa']:
+        process_configs(
+            f"configs/rag/{name}{fname_postfix}.yaml", [name], input_lengths,
+            use_chat_template=False, max_test_samples=100, shots=2, stop_new_line=True
+        )
+
+    for name in ['icl_trec_coarse', 'icl_trec_fine', 'icl_banking77', 'icl_clinic150', 'icl_nlu']:
+        process_configs(
+            f"configs/icl/{name}{fname_postfix}.yaml", [name], input_lengths,
+            use_chat_template=False, max_test_samples=500, shots=0, stop_new_line=True
+        )
+    
 
 def niah_configs():
     input_lengths = [8192, 16384, 32768, 65536, 131072]
@@ -300,3 +314,5 @@ if __name__ == "__main__":
     helmet_configs()
     helmet_configs(input_lengths=["8k", "16k", "32k", "64k"], fname_postfix="_short")
     niah_configs()
+    separate_configs()
+    separate_configs(input_lengths=["8k", "16k", "32k", "64k"], fname_postfix="_short")
