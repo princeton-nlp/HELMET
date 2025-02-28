@@ -56,8 +56,7 @@ custom_avgs = {
     "Re-rank": ['msmarco_rerank_psg NDCG@10', ],
     "LongQA": ['narrativeqa gpt-4-score', 'infbench_qa rougeL_f1', 'infbench_choice exact_match', ],
     "Summ": ['infbench_sum gpt-4-f1', 'multi_lexsum gpt-4-f1', ],
-    "RULER": ['ruler_niah_s_1 ruler_recall', 'ruler_niah_s_2 ruler_recall', 'ruler_niah_s_3 ruler_recall', 'ruler_niah_mk_1 ruler_recall', 'ruler_niah_mk_2 ruler_recall', 'ruler_niah_mk_3 ruler_recall', 'ruler_niah_mq ruler_recall', 'ruler_niah_mv ruler_recall', 'ruler_cwe ruler_recall', 'ruler_fwe ruler_recall', 'ruler_vt ruler_recall', 'ruler_qa_1 substring_exact_match', 'ruler_qa_2 substring_exact_match'],
-    "Ours-Real": ['RAG', 'ICL', 'Cite', 'Re-rank', 'LongQA', 'Summ'],
+    # "RULER": ['ruler_niah_s_1 ruler_recall', 'ruler_niah_s_2 ruler_recall', 'ruler_niah_s_3 ruler_recall', 'ruler_niah_mk_1 ruler_recall', 'ruler_niah_mk_2 ruler_recall', 'ruler_niah_mk_3 ruler_recall', 'ruler_niah_mq ruler_recall', 'ruler_niah_mv ruler_recall', 'ruler_cwe ruler_recall', 'ruler_fwe ruler_recall', 'ruler_vt ruler_recall', 'ruler_qa_1 substring_exact_match', 'ruler_qa_2 substring_exact_match'],
     "Ours": ['Recall', 'RAG', 'ICL', 'Cite', 'Re-rank', 'LongQA', 'Summ'],
 }
 
@@ -78,7 +77,6 @@ class arguments:
     dataset: str = "nq"
     output_dir: str = "output"
     popularity_threshold: float = 3
-    flenqa_ctx_size: int = 1000
         
     category: str = "synthetic"
     
@@ -89,8 +87,6 @@ class arguments:
                 
     def get_path(self):
         tag = self.tag
-        if "flenqa" in self.dataset:
-            tag += f"_ctx{self.flenqa_ctx_size}"
         path = os.path.join(self.output_dir, "{args.dataset}_{tag}_{args.test_name}_in{args.input_max_length}_size{args.max_test_samples}_shots{args.shots}_samp{args.do_sample}max{args.generation_max_length}min{args.generation_min_length}t{args.temperature}p{args.top_p}_chat{args.use_chat_template}_{args.seed}.json".format(args=self, tag=tag))
 
         if os.path.exists(path.replace(".json", "-gpt4eval_o.json")):
@@ -255,6 +251,16 @@ if __name__ == "__main__":
         {"model": "AI21-Jamba-1.5-Mini", "training_length": 262144},
     ]
 
+    
+    models_configs = [
+            {"model": "Llama-3.1-8B", "use_chat_template": False, "training_length": 131072},
+            {"model": "Llama-3.1-8B-Instruct", "training_length": 131072},
+            {"model": "DeepSeek-R1-Distill-Llama-8B", "training_length": 131072, "do_sample": True, "temperature": 0.6},
+            {"model": "Qwen2-7B", "use_chat_template": False, "training_length": 32768},
+            {"model": "Qwen2-7B-Instruct", "training_length": 32768},
+            {"model": "DeepSeek-R1-Distill-Qwen-7B", "training_length": 131072, "do_sample": True, "temperature": 0.6},
+    ]
+
     # set your configs here, only include the ones that you ran
     config_files = [
         "configs/recall.yaml", "configs/recall_short.yaml", 
@@ -304,6 +310,9 @@ if __name__ == "__main__":
     all_df = pd.DataFrame(df)
     lf_df = all_df.pivot_table(index=["input_max_length", "model", ], columns="dataset_simple", values="metric", sort=False)
     lf_df = lf_df.reset_index()
+
+    for k, v in custom_avgs.items():
+        lf_df[k] = lf_df[v].mean(axis=1)
 
     print(lf_df.to_csv(index=False))
 
