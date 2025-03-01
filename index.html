@@ -35,6 +35,12 @@
     .dataTables_wrapper {
       width: 100%;
     }
+    .button.is-dark.active {
+      background-color: #E77500 !important;
+    }
+    .category-btn, .dataset-btn {
+      transition: background-color 0.3s ease;
+    }
   </style>
 </head>
 
@@ -211,62 +217,140 @@
             </div>
           </div>
         </div>
-        <!-- <div class="has-text-centered">
-          <img src="./static/images/overall_scores.png" width="70%">
-        </div>
-        <div class="has-text-centered">
-          <p>
-            <b>Figure:</b> Average performance across tasks of different LCLMs on LONGPROC at three difficulty levels (0.5K, 2K, 8K). All models show performance degradation with increased output length. Even frontier models struggle with 8K-token procedural generation tasks.</p>
-        </div> -->
       </div>
     </div>
 </div>
 </section>
 
-<!-- <section class="section">
-  <div class="container" style="margin-bottom: 2vh;">
-    <div class="columns is-centered has-text-centered">
-      <div class="column is-11">
-        <h2 class="title is-3" id="leaderboard"> Detail Results across Tasks</h2>
-        <div class="content is-11">
-          <div class="content has-text-justified">
-            <div>
-              <div id="table-container-full"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-</div>
-</section> -->
-
-<!-- <section id="full_examples" class="section">
+<section id="full_examples" class="section">
   <div class="container" style="margin-bottom: 2vh;">
     <div class="columns is-centered has-text-centered">
       <div class="column is-four-fifths">
         <h2 id="full_examples" class="title is-3">Data Examples</h2>
-          <button class="button is-rounded is-dark" onclick="document.getElementById('example_viewer').style.display='block'; document.getElementById('example_pdf').src='./static/pdfs/exs_htmltotsv.pdf'; document.getElementById('example_caption').textContent='HTML to TSV: Extract specified information from HTML pages and structure it into a table format (TSV).'">HTML to TSV</button>
-          <button class="button is-rounded is-dark" onclick="document.getElementById('example_viewer').style.display='block'; document.getElementById('example_pdf').src='./static/pdfs/exs_pseudocode.pdf'; document.getElementById('example_caption').textContent='Pseudocode to Code. Translate pseudocode that is structured line-by-line into corresponding C++ code.'">Code to Pseudocode</button>
-          <button class="button is-rounded is-dark" onclick="document.getElementById('example_viewer').style.display='block'; document.getElementById('example_pdf').src='./static/pdfs/exs_path.pdf'; document.getElementById('example_caption').textContent='Path Traversal: Traverse a route that connects two cities in a graph where each city has only one outgoing connection.'">Path Traversal</button>
-        <br>
-        <br>
-          <button class="button is-rounded is-dark" onclick="document.getElementById('example_viewer').style.display='block'; document.getElementById('example_pdf').src='./static/pdfs/exs_tom.pdf'; document.getElementById('example_caption').textContent='Theory-of-Mind Tracking. Track the locations and beliefs in stories about object placement asked in the question.'">Theory-of-Mind Tracking</button>
-          <button class="button is-rounded is-dark" onclick="document.getElementById('example_viewer').style.display='block'; document.getElementById('example_pdf').src='./static/pdfs/exs_countdown.pdf'; document.getElementById('example_caption').textContent='Countdown. Search to combine a set of numbers with basic arithmetic operations to reach a target number.'">Countdown</button>
-          <button class="button is-rounded is-dark" onclick="document.getElementById('example_viewer').style.display='block'; document.getElementById('example_pdf').src='./static/pdfs/exs_travel.pdf'; document.getElementById('example_caption').textContent='Travel Planning. Search to create a trip plan based on constraints regarding duration of stays, and direct flights.'">Travel Planning</button>
-        <br>
-        <div id="example_viewer" style="display: none;">
-          <br>
-          <h3 class="caption">
-            <b>Example:</b> <span id="example_caption"> Travel Planning. Search to create a trip plan based on constraints regarding duration of stays, and direct flights.</span></h3>
-          <br>
-          <div class="content has-text-centered">
-              <embed id="example_pdf" type="application/pdf" src="" width= "100%" height= "600" >
+          <!-- Category buttons -->
+          <div class="content has-text-justified">
+            <p> Click on a category to explore the data. Note that we only show one demonstration in the examples in this viewer, while the actual data contains two in-context learning examples. We also truncate most of the text for brevity.
+            </p>
           </div>
-        </div>
+          <div class="category-buttons" style="margin-bottom: 1rem;">
+            <button class="button is-rounded is-dark category-btn" onclick="showDatasetButtons('RAG', this)">RAG</button>
+            <button class="button is-rounded is-dark category-btn" onclick="showDatasetButtons('Recall', this)">Recall</button>
+            <button class="button is-rounded is-dark category-btn" onclick="showDatasetButtons('Long-document QA', this)">Long-document QA</button>
+            <button class="button is-rounded is-dark category-btn" onclick="showDatasetButtons('Passage Re-ranking', this)">Passage Re-ranking</button>
+            <button class="button is-rounded is-dark category-btn" onclick="showDatasetButtons('Citation', this)">Citation</button>
+            <button class="button is-rounded is-dark category-btn" onclick="showDatasetButtons('Summarization', this)">Summarization</button>
+            <button class="button is-rounded is-dark category-btn" onclick="showDatasetButtons('ICL', this)">ICL</button>
+          </div>
+
+          <!-- Dataset buttons - initially hidden -->
+          <div id="dataset-buttons" style="display: none; margin-bottom: 1rem;">
+            <!-- RAG datasets -->
+            <div class="dataset-group" id="RAG-datasets" style="display: none;">
+              <button class="button is-rounded is-dark dataset-btn" onclick="loadExample('NQ', this)">NQ</button>
+              <button class="button is-rounded is-dark dataset-btn" onclick="loadExample('TriviaQA', this)">TriviaQA</button>
+              <button class="button is-rounded is-dark dataset-btn" onclick="loadExample('HotpotQA', this)">HotpotQA</button>
+              <button class="button is-rounded is-dark dataset-btn" onclick="loadExample('PopQA', this)">PopQA</button>
+            </div>
+            <!-- Recall datasets -->
+            <div class="dataset-group" id="Recall-datasets" style="display: none;">
+              <button class="button is-rounded is-dark dataset-btn" onclick="loadExample('JSON KV', this)">JSON KV</button>
+              <button class="button is-rounded is-dark dataset-btn" onclick="loadExample('RULER MV', this)">RULER MV</button>
+              <button class="button is-rounded is-dark dataset-btn" onclick="loadExample('RULER MK UUID', this)">RULER MK UUID</button>
+              <button class="button is-rounded is-dark dataset-btn" onclick="loadExample('RULER MK NEEDLE', this)">RULER MK NEEDLE</button>
+            </div>
+            <!-- Long-document QA datasets -->
+            <div class="dataset-group" id="Long-document QA-datasets" style="display: none;">
+              <button class="button is-rounded is-dark dataset-btn" onclick="loadExample('NarrativeQA', this)">NarrativeQA</button>
+              <button class="button is-rounded is-dark dataset-btn" onclick="loadExample('InfBench QA', this)">InfBench QA</button>
+              <button class="button is-rounded is-dark dataset-btn" onclick="loadExample('InfBench MC', this)">InfBench MC</button>
+            </div>
+            <!-- Passage Re-ranking datasets -->
+            <div class="dataset-group" id="Passage Re-ranking-datasets" style="display: none;">
+              <button class="button is-rounded is-dark dataset-btn" onclick="loadExample('MS MARCO', this)">MS MARCO</button>
+            </div>
+            <!-- Citation datasets -->
+            <div class="dataset-group" id="Citation-datasets" style="display: none;">
+              <button class="button is-rounded is-dark dataset-btn" onclick="loadExample('ALCE ASQA', this)">ALCE ASQA</button>
+              <button class="button is-rounded is-dark dataset-btn" onclick="loadExample('ALCE Qampari', this)">ALCE Qampari</button>
+            </div>
+            <!-- Summarization datasets -->
+            <div class="dataset-group" id="Summarization-datasets" style="display: none;">
+              <button class="button is-rounded is-dark dataset-btn" onclick="loadExample('InfBench Summarization', this)">InfBench Summarization</button>
+              <button class="button is-rounded is-dark dataset-btn" onclick="loadExample('Multi-LexSum', this)">Multi-LexSum</button>
+            </div>
+            <!-- ICL datasets -->
+            <div class="dataset-group" id="ICL-datasets" style="display: none;">
+              <button class="button is-rounded is-dark dataset-btn" onclick="loadExample('TREC Coarse', this)">TREC Coarse</button>
+              <button class="button is-rounded is-dark dataset-btn" onclick="loadExample('TREC Fine', this)">TREC Fine</button>
+              <button class="button is-rounded is-dark dataset-btn" onclick="loadExample('NLU', this)">NLU</button>
+              <button class="button is-rounded is-dark dataset-btn" onclick="loadExample('BANKING77', this)">BANKING77</button>
+              <button class="button is-rounded is-dark dataset-btn" onclick="loadExample('CLINC150', this)">CLINC150</button>
+            </div>
+          </div>
+
+          <div id="example_viewer" style="display: none;">
+            <br>
+            <h3 class="caption">
+              <b>Example:</b> <span id="example_caption"></span></h3>
+            <br>
+            <div class="content has-text-centered">
+              <pre id="example_content" style="text-align: left; white-space: pre-wrap;"></pre>
+            </div>
+          </div>
+
+        <script>
+          function showDatasetButtons(category, clickedButton) {
+            // Remove active class from all category buttons
+            document.querySelectorAll('.category-btn').forEach(btn => {
+              btn.classList.remove('active');
+            });
+            
+            // Add active class to clicked button
+            clickedButton.classList.add('active');
+            
+            // Show the dataset buttons container
+            document.getElementById('dataset-buttons').style.display = 'block';
+            
+            // Hide all dataset groups
+            document.querySelectorAll('.dataset-group').forEach(group => {
+              group.style.display = 'none';
+            });
+            
+            // Show the selected category's datasets
+            document.getElementById(category + '-datasets').style.display = 'block';
+            
+            // Remove active class from all dataset buttons
+            document.querySelectorAll('.dataset-btn').forEach(btn => {
+              btn.classList.remove('active');
+            });
+          }
+
+          async function loadExample(key, clickedButton) {
+            // Remove active class from all dataset buttons
+            document.querySelectorAll('.dataset-btn').forEach(btn => {
+              btn.classList.remove('active');
+            });
+            
+            // Add active class to clicked button
+            clickedButton.classList.add('active');
+            
+            try {
+              const response = await fetch('data/examples.json');
+              const data = await response.json();
+              const content = data[key];
+              
+              document.getElementById('example_viewer').style.display = 'block';
+              document.getElementById('example_caption').textContent = key;
+              document.getElementById('example_content').textContent = content;
+            } catch (error) {
+              console.error('Error loading example:', error);
+            }
+          }
+        </script>
       </div>
     </div>
   </div> 
-</section> -->
+</section>
 
 <section class="section">
   <div class="container is-max-desktop content">
