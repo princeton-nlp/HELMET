@@ -76,13 +76,13 @@
             </span>
 
             <span class="author-block">
-              <a href="">
+              <a href="https://scholar.google.com/citations?user=TDWUh9MAAAAJ">
                 <span class="fancy_text_color">Minmin Hou</span>
               </a><sup><span class="blue-symbol">&clubs;</span></sup>,
             </span>
 
             <span class="author-block">
-              <a href="">
+              <a href="https://scholar.google.com/citations?user=143et9UAAAAJ">
                 <span class="fancy_text_color">Ke Ding</span>
               </a><sup><span class="blue-symbol">&clubs;</span></sup>,
             </span>
@@ -91,19 +91,19 @@
             <br>
 
             <span class="author-block">
-              <a href="">
+              <a href="https://www.linkedin.com/in/daniel-fleischer/?originalSubdomain=il">
                 <span class="fancy_text_color">Daniel Fleischer</span>
               </a><sup><span class="blue-symbol">&clubs;</span></sup>,
             </span>
 
             <span class="author-block">
-              <a href="">
+              <a href="https://peteriz.github.io/">
                 <span class="fancy_text_color">Peter Izsak</span>
               </a><sup><span class="blue-symbol">&clubs;</span></sup>,
             </span>
 
             <span class="author-block">
-              <a href="">
+              <a href="https://scholar.google.com/citations?user=V5ohkLUAAAAJ&hl=en">
                 <span class="fancy_text_color">Moshe Wasserblat</span>
               </a><sup><span class="blue-symbol">&clubs;</span></sup>,
             </span>
@@ -374,14 +374,14 @@
     </div>
 
     <div class="columns is-centered">
-      <div class="column is-four-fifths">
-        <pre style="border-radius: 10px;">
-          <code>@inproceedings{yen2024helmet,
-                title={HELMET: How to Evaluate Long-Context Language Models Effectively and Thoroughly}, 
-                author={Howard Yen and Tianyu Gao and Minmin Hou and Ke Ding and Daniel Fleischer and Peter Izsak and Moshe Wasserblat and Danqi Chen},
-                year={2025},
-                booktitle={International Conference on Learning Representations (ICLR)},
-          }</code>
+      <div class="column is-three-fifths">
+        <pre style="border-radius: 0px;">
+<code>@inproceedings{yen2024helmet,
+  title={HELMET: How to Evaluate Long-Context Language Models Effectively and Thoroughly}, 
+  author={Howard Yen and Tianyu Gao and Minmin Hou and Ke Ding and Daniel Fleischer and Peter Izsak and Moshe Wasserblat and Danqi Chen},
+  year={2025},
+  booktitle={International Conference on Learning Representations (ICLR)},
+}</code>
         </pre>
       </div>
     </div>
@@ -450,7 +450,26 @@
         "info": false,
         "order": [[10, 'desc']],
         "columnDefs": [
-        {targets: [0], className: 'dt-left', className: 'dt-head-left', className: 'fw-bold'},
+          {targets: [0], className: 'dt-left', className: 'dt-head-left', className: 'fw-bold'},
+          {
+            targets: [1],
+            render: function(data, type) {
+              if (type === 'display') {
+                return data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+              }
+              return data;
+            }
+          },
+          {
+            targets: [2],
+            type: 'num',
+            render: function(data, type) {
+              if (type === 'sort') {
+                return data === '?' ? Number.MAX_SAFE_INTEGER : parseFloat(data);
+              }
+              return data;
+            }
+          }
         ],
         "createdRow": function(row, data, dataIndex) {
           $(row).find('td:first').css('font-weight', 'bold');
