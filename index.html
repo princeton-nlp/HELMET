@@ -35,7 +35,10 @@
     .dataTables_wrapper {
       width: 100%;
     }
-    .button.is-dark.active {
+    .button.is-dark.category-btn.active {
+      background-color: #ffb67e !important;
+    }
+    .button.is-dark.dataset-btn.active {
       background-color: #E77500 !important;
     }
     .category-btn, .dataset-btn {
@@ -205,7 +208,7 @@
             models (LCLMs), but developers often rely on synthetic tasks like needle-in-a-haystack (NIAH) or arbitrary subsets of tasks. 
           </p>
           <p>
-            We present HELMET (How to Evaluate Long-context Models Effectively and Thoroughly), a comprehensive benchmark encompassing seven diverse, application-centric categories. We also address many issues in previous benchmarks by adding controllable lengths up to 128k tokens, model-based evaluation for reliable metrics, and few-shot prompting for robustly evaluating base models.
+            We present HELMET (How to Evaluate Long-context Models Effectively and Thoroughly), a comprehensive benchmark encompassing seven diverse, application-centric categories. We also address many issues in previous benchmarks by adding controllable lengths up to 128K tokens, model-based evaluation for reliable metrics, and few-shot prompting for robustly evaluating base models.
           </p>
           <p>
             Through a comprehensive study of 59 LCLMs, we find that (1) synthetic tasks like NIAH are not good predictors of downstream performance; (2) the diverse categories in HELMET exhibit distinct trends and low correlation with each other; and (3) while most LCLMs achieve perfect NIAH scores, open-source models significantly lag behind closed ones when the task requires full-context reasoning or following complex instructions—the gap widens with increased lengths.
@@ -214,7 +217,7 @@
         <br>
         <h2 class="title is-3" id="leaderboard"> Leaderboard: Overall Performance</h2>
         <div class="content has-text-justified">
-          <p> <b>Table: Average performance across seven categories</b> on HELMET at <b>128k input length</b>.
+          <p> <b>Table: Average performance across seven categories</b> on HELMET at <b>128K input length</b>.
             The context window is the training or claimed context length of the model.
             Instruction-tuned models are highlighted in <span style="background-color: #e3eff6;">light blue</span>, and base models are highlighted in <span style="background-color: #FEF4E4;">yellow</span>.
             Frontier models struggle significantly more at more complex tasks, such as generation-with-citations and passage re-ranking. 
@@ -329,12 +332,20 @@
             });
             
             // Show the selected category's datasets
-            document.getElementById(category + '-datasets').style.display = 'block';
+            const datasetGroup = document.getElementById(category + '-datasets');
+            datasetGroup.style.display = 'block';
             
             // Remove active class from all dataset buttons
             document.querySelectorAll('.dataset-btn').forEach(btn => {
               btn.classList.remove('active');
             });
+
+            // Activate the first dataset button in this category and trigger its click
+            const firstDatasetBtn = datasetGroup.querySelector('.dataset-btn');
+            if (firstDatasetBtn) {
+              firstDatasetBtn.classList.add('active');
+              firstDatasetBtn.click();
+            }
           }
 
           async function loadExample(key, clickedButton) {
