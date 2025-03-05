@@ -29,8 +29,8 @@ See `CHANGELOG.md` for updates and more details.
 - [x] HELMET Code
 - [x] HELMET data
 - [x] VLLM Support
+- [x] Correlation analysis notebook
 - [ ] Support >128k input length
-- [ ] Correlation analysis notebook
 - [ ] Retrieval setup
 
 
