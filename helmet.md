@@ -45,6 +45,11 @@ From summarizing numerous legal documents to learning new tasks on the fly, long
 Traditionally, language models have been limited by their context window, which is typically around 2k tokens (e.g., [GPT-3](https://arxiv.org/abs/2005.14165)).
 Recently, model developers are constantly increasing the context window of their models, with recent models like [GPT-4o](https://openai.com/index/hello-gpt-4o/), [Claude](https://www.anthropic.com/news/claude-3-family), and [Gemini](https://blog.google/technology/ai/google-gemini-next-generation-model-february-2024/#ethics-safety) supporting context windows of up to millions of tokens.
 
+<figure>
+  <img src="./static/images/teaser.png" alt="logo" width="800"/>
+  <figcaption>Figure 1: existing benchmarks show counterintuitive trends such as smaller models outperforming larger ones.</figcaption>
+</figure>
+
 However, despite the increasing interest in LCLMs, model developers often evaluate on different datasets, which makes it difficult to compare different models.
 With longer context windows, previous natural language benchmarks are no longer suitable for evaluating LCLMs.
 Consequently, perplexity and synthetic tasks (e.g., needle-in-a-haystack) emerged as the most popular evaluation metrics for LCLMs, but they often **do not reflect real-world performance**.
@@ -54,13 +59,8 @@ Furthermore, existing benchmarks for LCLMs may show confusing and counterintuiti
 In this work, we propose HELMET (How to Evaluate Long-Context Models Effectively and Thoroughly), a comprehensive benchmark for evaluating LCLMs that improves upon existing benchmarks in several ways—*diversity, controllability, and reliability*.
 We evaluate 59 recent LCLMs and find that simple synthetic tasks, such as needle-in-a-haystack, do not reflect real-world performance, and it is crucial to evaluate model across diverse applications to understand their capabilities.
 
-<figure>
-  <img src="./static/images/teaser.png" alt="logo" width="800"/>
-  <figcaption>Figure 1: existing benchmarks show counterintuitive trends such as smaller models outperforming larger ones.</figcaption>
-</figure>
 
 <!-- Since the initial release, model developers have adopted HELMET for evaluating their models, such as [Microsoft's Phi-4](https://arxiv.org/abs/2412.08905), and we hope that HELMET will be useful for future development of LCLMs. -->
-\
 
 <!-- We evaluate over 50 recent models on diverse, application-centric tasks, which enables researchers and practitioners to compare models across different axes. -->
 
@@ -206,7 +206,8 @@ Additional analysis, such as performance of different positional extrapolation m
 
 ## Using HELMET for future developments
 
-To use HELMET, it's easy! Simply clone our [GitHub repository](https://github.com/princeton-nlp/HELMET) and everything is ready to go after setting up the environment!
+Using HELMET is easy!
+Simply clone our [GitHub repository](https://github.com/princeton-nlp/HELMET) and everything is ready to go after setting up the environment; see the repo for more details!
 There are many practical reasons to using HELMET as well:
 
 ### Diverse domains
