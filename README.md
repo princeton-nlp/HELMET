@@ -1,12 +1,18 @@
-# HELMET: How to Evaluate Long-context Language Models Effectively and Thoroughly <img src="assets/logo.jpeg" alt="HELMET" width="30">
+# <img src="assets/logo.jpeg" alt="HELMET" width="30"> HELMET: How to Evaluate Long-context Language Models Effectively and Thoroughly
 
 ---
 
-![Static Badge](https://img.shields.io/badge/paper-paper?logo=arxiv&logoColor=%23B31B1B&labelColor=white&color=%23B31B1B&link=https%3A%2F%2Farxiv.org%2Fabs%2F2410.02694)
-![Static Badge](https://img.shields.io/badge/website-website?logo=safari&logoColor=blue&labelColor=white&color=blue)
 
+<p align="center">
+    <a href="https://arxiv.org/abs/2410.02694">
+        <img alt="paper" src="https://img.shields.io/badge/paper-paper?logo=arxiv&logoColor=%23B31B1B&labelColor=white&color=%23B31B1B">
+    </a>
+    <a href="https://princeton-nlp.github.io/HELMET/">
+        <img alt="Static Badge" src="https://img.shields.io/badge/website-website?logo=safari&logoColor=%23006CFF&labelColor=white&color=%23006CFF">
+    </a>
+</p>
 
-HELMET <img src="assets/logo.jpeg" alt="HELMET" width="30"> (How to Evaluate Long-context Models Effectively and Thoroughly) is a comprehensive benchmark for long-context language models covering seven diverse categories of tasks.
+<img src="assets/logo.jpeg" alt="HELMET" width="30"> HELMET (How to Evaluate Long-context Models Effectively and Thoroughly) is a comprehensive benchmark for long-context language models covering seven diverse categories of tasks.
 The datasets are application-centric and are designed to evaluate models at different lengths and levels of complexity.
 Please check out the paper for more details, and this repo will detail how to run the evaluation.
 
