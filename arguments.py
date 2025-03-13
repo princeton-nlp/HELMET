@@ -19,6 +19,8 @@ def parse_arguments():
     parser.add_argument("--model_name_or_path", type=str, default=None)
     parser.add_argument("--use_vllm", action="store_true", help="whether to use vllm engine")
     parser.add_argument("--use_sglang", action="store_true", help="whether to use sglang engine")
+    parser.add_argument("--use_tgi_or_vllm_serving", action="store_true", help="whether to use tgi or vllm serving engine")
+    parser.add_argument("--endpoint_url", type=str,default="http://localhost:8080/v1/", help="endpoint url for tgi or vllm serving engine")
 
     # data settings
     parser.add_argument("--datasets", type=str, default=None, help="comma separated list of dataset names")
@@ -33,6 +35,7 @@ def parse_arguments():
     parser.add_argument("--popularity_threshold", type=int, default=3, help="popularity threshold for popqa, in log scale")
 
     # evaluation settings
+    parser.add_argument("--batch_mode", type=str, default="batch_api", help="batch mode for OpenAIModel and AnthropicModel, can select batch_api or multi_thread")
     parser.add_argument("--shots", type=int, default=2, help="total number of ICL demos")
     parser.add_argument("--input_max_length", type=str, default='8192', help="the maximum number of tokens of the input, we truncate the end of the context; can be separated by comma to match the specified datasets")
 
