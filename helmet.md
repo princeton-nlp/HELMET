@@ -14,16 +14,15 @@ and Danqi Chen<sup><span style="color: #E77500">&spades;</span></sup>\
 <sup><span style="color: #00C7FD">&clubs;</span></sup>Intel\
 2025-02-29
 
-Correspondence: hyen@cs.princeton.edu \
+Contact: hyen@cs.princeton.edu \
 Paper: https://arxiv.org/abs/2410.02694 \
 Code & Data: https://github.com/princeton-nlp/HELMET \
 Website: https://princeton-nlp.github.io/HELMET 
 
-
 Since we first released HELMET last October, there has been more development on long-context language models than ever before, and we are thrilled to see the adoption of HELMET by the community, such as [Microsoft's Phi-4](https://arxiv.org/abs/2412.08905) and [AI21's Jamba 1.6](https://www.ai21.com/blog/introducing-jamba-1-6/).
 After the initial release, we have added more models to our evaluation suite and conducted additional analyses. We are excited to share our new results and present HELMET at ICLR 2025!
 
-In this blog, we will describe the construction of HELMET, our key findings, and how practitioners can use HELMET to differentiate between various LCLMs in future research and applications.
+In this blog, we will describe the construction of HELMET, our key findings, and how practitioners can use HELMET to differentiate between various long-context language models (LCLMs) in future research and applications.
 
 ## Evaluating long-context language models is challenging but important
 
@@ -140,7 +139,7 @@ Long-context benchmarks are often constructed with specific applications in mind
    <figcaption>Figure 4: Different categories do not correlate well with each other.</figcaption>
 </figure>
 
-While some tasks moderately correlate with each other (e.g., RAG and MS-MARCO) due to their retrieval-based nature, others show little correlation (e.g., Summ and Cite). Notably, ICL has the lowest correlation with other tasks, which suggests that it is a unique task that requires different capabilities from the model. Therefore, model developers should evaluate across these distinct axes to draw a more holistic picture of the model's capabilities.
+While some tasks moderately correlate with each other (e.g., RAG and MS-MARCO) due to their retrieval-based nature, others show little correlation (e.g., LongQA and Cite). Notably, ICL has the lowest correlation with other tasks, which suggests that it is a unique task that requires different capabilities from the model. Therefore, model developers should evaluate across these distinct axes to draw a more holistic picture of the model's capabilities.
 
 ### Models degrade with increasing lengths and task complexity
 
