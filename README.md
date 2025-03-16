@@ -570,7 +570,7 @@ Please also cite the original dataset creators, listed below:
 
 @article{ye25longproc,
     title={LongProc: Benchmarking Long-Context Language Models on Long Procedural Generation},
-    author={Ye, Xi and Yin, Fangcong and He, Yinghui and Zhang, Joie and Howard, Yen and Gao, Tianyu and Durrett, Greg and Chen, Danqi},
+    author={Ye, Xi and Yin, Fangcong and He, Yinghui and Zhang, Joie and Yen, Howard and Gao, Tianyu and Durrett, Greg and Chen, Danqi},
     journal={arXiv preprint},
     year={2025}
 }
