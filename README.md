@@ -4,11 +4,11 @@
 
 
 <p align="center">
-    <a href="https://arxiv.org/abs/2410.02694">
+    <a href="https://arxiv.org/abs/2410.02694" target="_blank" rel="noopener noreferrer">
         <img alt="paper" src="https://img.shields.io/badge/paper-paper?logo=arxiv&logoColor=%23B31B1B&labelColor=white&color=%23B31B1B">
     </a>
-    <a href="https://princeton-nlp.github.io/HELMET/">
-        <img alt="Static Badge" src="https://img.shields.io/badge/website-website?logo=safari&logoColor=%23006CFF&labelColor=white&color=%23006CFF">
+    <a href="https://princeton-nlp.github.io/HELMET/" target="_blank" rel="noopener noreferrer">
+        <img alt="website" src="https://img.shields.io/badge/website-website?logo=safari&logoColor=%23006CFF&labelColor=white&color=%23006CFF">
     </a>
 </p>
 
