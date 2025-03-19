@@ -6,6 +6,5 @@ datasets
 transformers
 accelerate
 sentencepiece
-flash-attn
 pytrec_eval
 rouge_score
