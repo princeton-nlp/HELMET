@@ -1,11 +1,18 @@
-# HELMET: How to Evaluate Long-context Language Models Effectively and Thoroughly <img src="assets/logo.jpeg" alt="HELMET" width="30">
+# <img src="assets/logo.jpeg" alt="HELMET" width="30"> HELMET: How to Evaluate Long-context Language Models Effectively and Thoroughly
 
 ---
 
-![Static Badge](https://img.shields.io/badge/paper-paper?logo=arxiv&logoColor=%23B31B1B&labelColor=white&color=%23B31B1B&link=https%3A%2F%2Farxiv.org%2Fabs%2F2410.02694)
 
+<p align="center">
+    <a href="https://arxiv.org/abs/2410.02694" target="_blank" rel="noopener noreferrer">
+        <img alt="paper" src="https://img.shields.io/badge/paper-paper?logo=arxiv&logoColor=%23B31B1B&labelColor=white&color=%23B31B1B">
+    </a>
+    <a href="https://princeton-nlp.github.io/HELMET/" target="_blank" rel="noopener noreferrer">
+        <img alt="website" src="https://img.shields.io/badge/website-website?logo=safari&logoColor=%23006CFF&labelColor=white&color=%23006CFF">
+    </a>
+</p>
 
-HELMET <img src="assets/logo.jpeg" alt="HELMET" width="30"> (How to Evaluate Long-context Models Effectively and Thoroughly) is a comprehensive benchmark for long-context language models covering seven diverse categories of tasks.
+<img src="assets/logo.jpeg" alt="HELMET" width="30"> HELMET (How to Evaluate Long-context Models Effectively and Thoroughly) is a comprehensive benchmark for long-context language models covering seven diverse categories of tasks.
 The datasets are application-centric and are designed to evaluate models at different lengths and levels of complexity.
 Please check out the paper for more details, and this repo will detail how to run the evaluation.
 
@@ -79,12 +86,17 @@ The data also contains the key points extracted for evaluating summarization wit
 
 To run the evaluation, simply use one of the config files in the `configs` directory, you may also overwrite any arguments in the config file or add new arguments simply through the command line (see `arguments.py`):
 ```bash
-python eval.py --config configs/cite.yaml --model_name_or_path {local model path or huggingface model name} --output_dir {output directory, defaults to output/{model_name}}
+for task in recall rag rerank cite longqa summ icl; do
+  python eval.py --config configs/${task}.yaml \
+    --model_name_or_path {local model path or huggingface model name} \
+    --output_dir {output directory, defaults to output/{model_name}} \
+    --use_chat_template False # only if you are using non-instruction-tuned models, otherwise use the default.
+done
 ```
-This will output the results file under the output directory in two files: `.json` contains all the data point details while `.json.score` only contain the aggregated metrics.
-Note: for non-instruction-tuned models (e.g., `Llama-3-8B`), you should ALWAYS set `--use_chat_template False`, the defaults in the config files are set for instruction-tuned models.
 
-You may also run the whole suite with a simple bash statement:
+This will output the results file under the output directory in two files: `.json` contains all the data point details while `.json.score` only contain the aggregated metrics.
+
+For slurm users, you may find our slurm scripts useful:
 ```bash
 # I recommend using these slurm scripts as they contain more details (including all the model names) and can be easily modified to fit your setup
 # you can also run them in your shell by replacing sbatch with bash, check out the file for more details
@@ -251,7 +263,7 @@ If you encounter any problems, you can also open an issue here. Please try to sp
 
 If you find our work useful, please cite us:
 ```
-@inproceedings{yen2024helmet,
+@inproceedings{yen2025helmet,
       title={HELMET: How to Evaluate Long-Context Language Models Effectively and Thoroughly}, 
       author={Howard Yen and Tianyu Gao and Minmin Hou and Ke Ding and Daniel Fleischer and Peter Izsak and Moshe Wasserblat and Danqi Chen},
       year={2025},
