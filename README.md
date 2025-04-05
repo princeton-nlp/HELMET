@@ -16,6 +16,10 @@
 The datasets are application-centric and are designed to evaluate models at different lengths and levels of complexity.
 Please check out the paper for more details, and this repo will detail how to run the evaluation.
 
+This repo also supports [LongProc](https://princeton-pli.github.io/LongProc/), our new benchmark for long-context procedural generation.
+Please see [longproc_addon](longproc_addon/README.md) to see how to run the evaluation.
+The overall structure is the same as HELMET, but uses additional data, configs, and evaluation metrics.
+
 
 ## Quick Links
 
