@@ -50,10 +50,7 @@ source env/bin/activate
 pip install -r requirements.txt
 ```
 
-If you want to evalute on NVIDIA GPU, pip install `flash-attn` as your requirements.
-```bash
-pip install flash-attn
-```
+For evaluating on NVIDIA GPUs, please install `flash-attn` by referring to the [flash attention repo](https://github.com/Dao-AILab/flash-attention).
 
 Additionally, if you wish to use the API models, you will need to install the package corresponding to the API you wish to use
 ```bash
@@ -114,10 +111,10 @@ cd scripts/vllm-gaudi
 bash build_image.sh
 
 ## launch vllm container, change `LLM_MODEL_ID` and `NUM_CARDS` as your need
-cd scripts/vllm-gaudi
 bash launch_container.sh
 
 ## evalute
+cd ../../
 bash scripts/run_eval_vllm_gaudi.sh
 ```
 

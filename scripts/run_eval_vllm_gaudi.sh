@@ -5,5 +5,5 @@ export LLM_ENDPOINT="http://${host_ip}:${LLM_ENDPOINT_PORT}/v1"
 export HF_HOME=$DATA_PATH
 
 for task in "recall" "rag"; do
-    python eval.py --config configs/${task}_vllm.yaml --endpoint_url $LLM_ENDPOINT --overwrite --batch_mode multi_thread --no_cuda
+    python eval.py --config configs/${task}_vllm.yaml --endpoint_url $LLM_ENDPOINT --overwrite --no_cuda
 done

@@ -12,7 +12,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from arguments import parse_arguments
-from model_utils import load_LLM, OpenAIModel, AnthropicModel
+from model_utils import load_LLM, OpenAIModel, AnthropicModel, TgiVllmModel
 
 from data import (
     load_data,
@@ -77,7 +77,7 @@ def run_test(args, model, dataset, test_file, demo_file):
     logger.info("Running generation...")
     start_time = time.time()
     # generate all outputs
-    if (isinstance(model, OpenAIModel) or isinstance(model, AnthropicModel)) and args.batch_mode == "batch_api":
+    if (isinstance(model, OpenAIModel) or isinstance(model, AnthropicModel)) and (not isinstance(model, TgiVllmModel)):
         # using the batch API makes it cheaper and faster
         logger.info(f"Using the OpenAI/Anthropic batch API by default, if you want to use the iterative API, please change the code")
         all_outputs = model.generate_batch(all_inputs, batch_file=output_path+".batch")

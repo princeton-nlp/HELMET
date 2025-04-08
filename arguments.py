@@ -35,7 +35,6 @@ def parse_arguments():
     parser.add_argument("--popularity_threshold", type=int, default=3, help="popularity threshold for popqa, in log scale")
 
     # evaluation settings
-    parser.add_argument("--batch_mode", type=str, default="batch_api", help="batch mode for OpenAIModel and AnthropicModel, can select batch_api or multi_thread")
     parser.add_argument("--shots", type=int, default=2, help="total number of ICL demos")
     parser.add_argument("--input_max_length", type=str, default='8192', help="the maximum number of tokens of the input, we truncate the end of the context; can be separated by comma to match the specified datasets")
 

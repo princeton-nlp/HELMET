@@ -368,7 +368,22 @@ class TgiVllmModel(OpenAIModel):
         self.model_name = model_name
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.seed = seed
-        self.API_MAX_LENGTH = 128000 # this is defined by the OPENAI API
+        self.API_MAX_LENGTH = float('inf')
+
+    def generate_batch(self, inputs=None, prompt=None, **kwargs):
+        if inputs is None:
+            inputs = [None for _ in prompt]
+        else:
+            prompt = [None for _ in inputs]
+
+        # we don't support kwargs here for now
+        if len(kwargs) > 0:
+            logger.warning("kwargs are not supported for batch generation")
+        # use thread_map instead of process_map since the bottleneck is the api call
+        outputs = thread_map(self.generate, inputs, prompt, max_workers=32)
+
+        return outputs
+
 
 class AnthropicModel(LLM):
     def __init__(
