@@ -687,6 +687,9 @@ def load_data(args, dataset, path=None, demo_path=None):
         data = load_ruler(dataset, path, args.max_test_samples, seed=args.seed)
     elif "infbench" in dataset:
         data = load_infbench(dataset, args.shots, args.max_test_samples, seed=args.seed)
+    elif any([x in dataset for x in ["html_to_tsv", "pseudo_to_code", "path_traversal", "tom_tracking", "countdown", "travel_planning"]]):
+        from longproc_addon.longproc_helmet_loader import load_longproc_data_for_helmet
+        data = load_longproc_data_for_helmet(dataset, path=path, max_test_samples=args.max_test_samples, seed=args.seed)
     else:
         raise ValueError(f"Unknown dataset {dataset}")
 

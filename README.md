@@ -16,6 +16,10 @@
 The datasets are application-centric and are designed to evaluate models at different lengths and levels of complexity.
 Please check out the paper for more details, and this repo will detail how to run the evaluation.
 
+This repo also supports [LongProc](https://princeton-pli.github.io/LongProc/), our new benchmark for long-context procedural generation.
+Please see [longproc_addon](longproc_addon/README.md) to see how to run the evaluation.
+The overall structure is the same as HELMET, but uses additional data, configs, and evaluation metrics.
+
 
 ## Quick Links
 
@@ -583,6 +587,13 @@ Please also cite the original dataset creators, listed below:
     url = "https://aclanthology.org/D19-1131",
     doi = "10.18653/v1/D19-1131",
     pages = "1311--1316",
+}
+
+@article{ye25longproc,
+    title={LongProc: Benchmarking Long-Context Language Models on Long Procedural Generation},
+    author={Ye, Xi and Yin, Fangcong and He, Yinghui and Zhang, Joie and Yen, Howard and Gao, Tianyu and Durrett, Greg and Chen, Danqi},
+    journal={arXiv preprint},
+    year={2025}
 }
 ```
 

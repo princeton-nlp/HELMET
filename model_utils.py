@@ -1096,6 +1096,7 @@ class VLLMModel(LLM):
     def generate_batch(self, inputs: Optional[List[dict[str, any]]]=None, prompt: Optional[List[str]]=None, **kwargs):
         from vllm import SamplingParams, TokensPrompt
         if inputs is None:
+            start_time = time.time()
             assert prompt is not None
             if self.use_chat_template:
                 chat = [format_chat(p, system_message=self.system_message) for p in prompt]
@@ -1104,7 +1105,8 @@ class VLLMModel(LLM):
             else:
                 # we return tensor here because the tokenize function returns tensors, should be consistent
                 inputs = [self.tokenizer(p, truncation=True, max_length=self.max_length - self.generation_max_length, return_tensors='pt') for p in prompt]
-
+            end_time = time.time()
+            logger.info(f"Finished preparing inputs for {len(inputs)} samples in {end_time - start_time} seconds")
 
         self.sampling_params = SamplingParams(
             temperature = self.temperature if self.do_sample else 0.0,

@@ -103,11 +103,11 @@ def run_test(args, model, dataset, test_file, demo_file):
             output["output"] = prepend_text + output["output"]
 
         if args.thinking:
-            matches = re.search(r"(<think>.*</think>)(.*)", output['output'], flags=re.DOTALL)
+            matches = re.search(r"(.*</think>)(.*)", output['output'], flags=re.DOTALL)
             if matches:
                 output["output"] = matches.group(2).strip()
                 output["thoughts"] = matches.group(1).strip()
-            
+
         mets, others = data['post_process'](output, test_item)
         output.update({**others, **mets})
         for k, v in mets.items():
