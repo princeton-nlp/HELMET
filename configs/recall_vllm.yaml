@@ -1,0 +1,12 @@
+input_max_length: 131072,131072,131072,131072
+datasets: ruler_niah_mk_2,ruler_niah_mk_3,ruler_niah_mv,json_kv
+generation_max_length: 50,100,50,100
+test_files: data/ruler/niah_multikey_2/validation_131072.jsonl,data/ruler/niah_multikey_3/validation_131072.jsonl,data/ruler/niah_multivalue/validation_131072.jsonl,data/json_kv/test_k1800_dep6.jsonl
+demo_files: ',,,'
+use_chat_template: false
+max_test_samples: 100
+shots: 2
+stop_new_line: false
+model_name_or_path: meta-llama/Llama-3.3-70B-Instruct
+output_dir: output/vllm-gaudi/Llama-3.3-70B-Instruct
+use_tgi_or_vllm_serving: true

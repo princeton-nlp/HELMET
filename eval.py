@@ -12,7 +12,7 @@ import torch
 from torch.utils.data import DataLoader
 
 from arguments import parse_arguments
-from model_utils import load_LLM, OpenAIModel, AnthropicModel
+from model_utils import load_LLM, OpenAIModel, AnthropicModel, TgiVllmModel
 
 from data import (
     load_data,
@@ -77,7 +77,7 @@ def run_test(args, model, dataset, test_file, demo_file):
     logger.info("Running generation...")
     start_time = time.time()
     # generate all outputs
-    if isinstance(model, OpenAIModel) or isinstance(model, AnthropicModel):
+    if (isinstance(model, OpenAIModel) or isinstance(model, AnthropicModel)) and (not isinstance(model, TgiVllmModel)):
         # using the batch API makes it cheaper and faster
         logger.info(f"Using the OpenAI/Anthropic batch API by default, if you want to use the iterative API, please change the code")
         all_outputs = model.generate_batch(all_inputs, batch_file=output_path+".batch")
@@ -138,8 +138,9 @@ def run_test(args, model, dataset, test_file, demo_file):
         if args.debug:
             import pdb; pdb.set_trace()
 
-    mem_usage = sum([torch.cuda.max_memory_allocated(i) for i in range(torch.cuda.device_count())])
-    logger.info(f"Memory usage: {mem_usage/1000**3:.02f} GB")
+    if not args.no_cuda:
+        mem_usage = sum([torch.cuda.max_memory_allocated(i) for i in range(torch.cuda.device_count())])
+        logger.info(f"Memory usage: {mem_usage/1000**3:.02f} GB")
     logger.info(f"Total time: {end_time - start_time:.02f} s")
     logger.info(f"Throughput: {len(results) / (end_time - start_time):.02f} samples/s")
 
@@ -162,9 +163,10 @@ def run_test(args, model, dataset, test_file, demo_file):
         "data": results,
         "metrics": metrics,
         "averaged_metrics": averaged_metrics,
-        "memory_usage": mem_usage,
         "throughput": len(results) / (end_time - start_time),
     }
+    if not args.no_cuda:
+        output["memory_usage"] = mem_usage
 
     if args.output_dir is not None:
         with open(output_path, "w") as f:

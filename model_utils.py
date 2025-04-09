@@ -326,6 +326,64 @@ class OpenAIModel(LLM):
 
         return outputs
 
+class TgiVllmModel(OpenAIModel):
+    def __init__(
+        self, 
+        model_name, 
+        temperature=0.9, 
+        top_p=0.9, 
+        max_length=32768, 
+        generation_max_length=2048, 
+        generation_min_length=0, 
+        do_sample=True, 
+        stop_newline=False, 
+        use_chat_template=True, 
+        system_message=None,
+        seed=42,
+        **kwargs
+    ):
+        self.model_name = model_name
+        self.temperature = temperature
+        self.top_p = top_p
+        self.max_length = max_length
+        self.generation_max_length = generation_max_length
+        self.generation_min_length = generation_min_length
+        self.do_sample = do_sample
+        self.use_chat_template = use_chat_template
+        self.system_message = system_message
+        self.stops = None
+        if stop_newline:
+            self.stops = ["\n", "\n\n"]
+        
+        from openai import OpenAI
+        from transformers import AutoTokenizer
+        
+        endpoint_url = kwargs["endpoint_url"]
+        print(f"** Endpoint URL: {endpoint_url}")
+
+        self.model = OpenAI(
+                base_url=endpoint_url,
+                api_key="EMPTY_KEY"
+            )
+        self.model_name = model_name
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.seed = seed
+        self.API_MAX_LENGTH = float('inf')
+
+    def generate_batch(self, inputs=None, prompt=None, **kwargs):
+        if inputs is None:
+            inputs = [None for _ in prompt]
+        else:
+            prompt = [None for _ in inputs]
+
+        # we don't support kwargs here for now
+        if len(kwargs) > 0:
+            logger.warning("kwargs are not supported for batch generation")
+        # use thread_map instead of process_map since the bottleneck is the api call
+        outputs = thread_map(self.generate, inputs, prompt, max_workers=32)
+
+        return outputs
+
 
 class AnthropicModel(LLM):
     def __init__(
@@ -1203,6 +1261,10 @@ def load_LLM(args):
     elif args.use_vllm:
         model_cls = VLLMModel
         kwargs['seed'] = args.seed
+    elif args.use_tgi_or_vllm_serving:
+        model_cls = TgiVllmModel
+        kwargs['seed'] = args.seed
+        kwargs["endpoint_url"] = args.endpoint_url
     elif args.use_sglang:
         model_cls = SGLangModel
         kwargs['seed'] = args.seed

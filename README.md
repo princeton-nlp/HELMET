@@ -54,6 +54,8 @@ source env/bin/activate
 pip install -r requirements.txt
 ```
 
+For evaluating on NVIDIA GPUs, please install `flash-attn` by referring to the [flash attention repo](https://github.com/Dao-AILab/flash-attention).
+
 Additionally, if you wish to use the API models, you will need to install the package corresponding to the API you wish to use
 ```bash
 pip install openai # OpenAI API (GPT)
@@ -105,6 +107,21 @@ sbatch scripts/run_short_slurm.sh # 8k-64k
 # for the API models, note that API results may vary due to the randomness in the API calls
 bash scripts/run_api.sh 
 ```
+### Run on Intel Gaudi
+If you want to enable the evaluation on vLLM with Intel Gaudi, you can use the following commands:
+```bash
+## Build vllm docker image
+cd scripts/vllm-gaudi
+bash build_image.sh
+
+## launch vllm container, change `LLM_MODEL_ID` and `NUM_CARDS` as your need
+bash launch_container.sh
+
+## evalute
+cd ../../
+bash scripts/run_eval_vllm_gaudi.sh
+```
+
 Check out the script file for more details!
 See [Others](#others) for the slurm scripts, easily collecting all the results, and using VLLM.
 

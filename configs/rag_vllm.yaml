@@ -1,0 +1,12 @@
+input_max_length: 131072,131072,131072,131072
+datasets: kilt_nq,kilt_triviaqa,kilt_hotpotqa,kilt_popqa_3
+generation_max_length: 20,20,20,20
+test_files: data/kilt/nq-dev-multikilt_1000_k1000_dep6.jsonl,data/kilt/triviaqa-dev-multikilt_1000_k1000_dep6.jsonl,data/kilt/hotpotqa-dev-multikilt_1000_k1000_dep3.jsonl,data/kilt/popqa_test_1000_k1000_dep6.jsonl
+demo_files: data/kilt/nq-train-multikilt_1000_k3_dep6.jsonl,data/kilt/triviaqa-train-multikilt_1000_k3_dep6.jsonl,data/kilt/hotpotqa-train-multikilt_1000_k3_dep3.jsonl,data/kilt/popqa_test_1000_k3_dep6.jsonl
+use_chat_template: false
+max_test_samples: 100
+shots: 2
+stop_new_line: true
+model_name_or_path: meta-llama/Llama-3.3-70B-Instruct
+output_dir: output/vllm-gaudi/Llama-3.3-70B-Instruct
+use_tgi_or_vllm_serving: true
