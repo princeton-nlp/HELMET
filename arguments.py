@@ -19,8 +19,10 @@ def parse_arguments():
     parser.add_argument("--model_name_or_path", type=str, default=None)
     parser.add_argument("--use_vllm", action="store_true", help="whether to use vllm engine")
     parser.add_argument("--use_sglang", action="store_true", help="whether to use sglang engine")
-    parser.add_argument("--use_tgi_or_vllm_serving", action="store_true", help="whether to use tgi or vllm serving engine")
+    parser.add_argument("--use_vllm_serving", action="store_true", help="whether to use vllm serving engine")
+    parser.add_argument("--use_tgi_serving", action="store_true", help="whether to use tgi serving engine")
     parser.add_argument("--endpoint_url", type=str,default="http://localhost:8080/v1/", help="endpoint url for tgi or vllm serving engine")
+    parser.add_argument("--api_key", type=str, default="EMPTY", help="api key for model endpoint")
 
     # data settings
     parser.add_argument("--datasets", type=str, default=None, help="comma separated list of dataset names")

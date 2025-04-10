@@ -1,0 +1,13 @@
+input_max_length: 8192
+datasets: ruler_niah_mk_2
+generation_max_length: 50
+test_files: data/ruler/niah_multikey_2/validation_8192.jsonl
+demo_files: ''
+use_chat_template: true
+max_test_samples: 5
+shots: 2
+top_p: 0.95 # need to be >0 and <1
+stop_new_line: false
+model_name_or_path: tgi:meta-llama/Llama-3.2-1B-Instruct
+output_dir: output/tgi/meta-llama/Llama-3.2-1B-Instruct
+use_tgi_serving: true

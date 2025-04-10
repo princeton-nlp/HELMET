@@ -107,7 +107,7 @@ sbatch scripts/run_short_slurm.sh # 8k-64k
 # for the API models, note that API results may vary due to the randomness in the API calls
 bash scripts/run_api.sh 
 ```
-### Run on Intel Gaudi
+### Run on Intel Gaudi Accelerators
 If you want to enable the evaluation on vLLM with Intel Gaudi, you can use the following commands:
 ```bash
 ## Build vllm docker image
