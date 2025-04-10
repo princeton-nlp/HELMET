@@ -8,3 +8,4 @@ accelerate
 sentencepiece
 pytrec_eval
 rouge_score
+openai

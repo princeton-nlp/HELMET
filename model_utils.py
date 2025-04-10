@@ -363,10 +363,18 @@ class TgiVllmModel(OpenAIModel):
 
         self.model = OpenAI(
                 base_url=endpoint_url,
-                api_key="EMPTY_KEY"
+                api_key=kwargs["api_key"],
             )
-        self.model_name = model_name
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        if "tgi" in model_name:
+            # remove the tgi: prefix
+            model_name = model_name[model_name.index(":")+1:]
+            print(f"** Model: {model_name}")
+            self.model_name = "tgi"
+            self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        else:
+            print(f"** Model: {model_name}")
+            self.model_name = model_name
+            self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.seed = seed
         self.API_MAX_LENGTH = float('inf')
 
@@ -1261,10 +1269,11 @@ def load_LLM(args):
     elif args.use_vllm:
         model_cls = VLLMModel
         kwargs['seed'] = args.seed
-    elif args.use_tgi_or_vllm_serving:
+    elif args.use_tgi_serving or args.use_vllm_serving:
         model_cls = TgiVllmModel
         kwargs['seed'] = args.seed
         kwargs["endpoint_url"] = args.endpoint_url
+        kwargs["api_key"] = args.api_key
     elif args.use_sglang:
         model_cls = SGLangModel
         kwargs['seed'] = args.seed
