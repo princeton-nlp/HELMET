@@ -217,8 +217,9 @@
         <br>
         <h2 class="title is-3" id="leaderboard"> Leaderboard: Overall Performance</h2>
         <div class="content has-text-justified">
-          <p> <b>Table: Average performance across seven categories</b> on HELMET at <b>128K input length</b>.
+          <p> <b>Table: Average performance across seven categories</b> on HELMET.
             The context window is the training or claimed context length of the model.
+            For MoE models, we show the number of active parameters.
             Instruction-tuned models are highlighted in <span style="background-color: #e3eff6;">light blue</span>, and base models are highlighted in <span style="background-color: #FEF4E4;">yellow</span>.
             Frontier models struggle significantly more at more complex tasks, such as generation-with-citations and passage re-ranking. 
             For details on the models and more results, please refer to the paper.
@@ -228,7 +229,21 @@
         <div class="content is-9 has-text-centered">
           <div class="content has-text-justified">
             <div>
-              <div id="table-container-agg"></div>
+              <div class="mb-3">
+                <label for="tableSelector" class="form-label">Select input length:</label>
+                <select id="tableSelector" class="form-select">
+                  <option value="128k" selected>128k</option>
+                  <option value="64k">64k</option>
+                  <option value="32k">32k</option>
+                  <option value="16k">16k</option>
+                  <option value="8k">8k</option>
+                </select>
+              </div>
+              <div id="table-container-128k" class="table-container"></div>
+              <div id="table-container-64k" class="table-container" style="display: none;"></div>
+              <div id="table-container-32k" class="table-container" style="display: none;"></div>
+              <div id="table-container-16k" class="table-container" style="display: none;"></div>
+              <div id="table-container-8k" class="table-container" style="display: none;"></div>
             </div>
           </div>
         </div>
@@ -451,62 +466,59 @@
   <script src="./static/js/csv_to_html_table_agg.js"></script>
   <script src="./static/js/csv_to_html_table_full.js"></script>
   <script>
-    CsvToHtmlTableAgg.init({
-      csv_path: 'data/agg_results.csv', 
-      element: 'table-container-agg', 
-      csv_options: {separator: ',', delimiter: '"'},
-      datatables_options: {
-        "paging": false, 
-        "searching": false,
-        "info": false,
-        "order": [[10, 'desc']],
-        "columnDefs": [
-          {targets: [0], className: 'dt-left', className: 'dt-head-left', className: 'fw-bold'},
-          {
-            targets: [1],
-            render: function(data, type) {
-              if (type === 'display') {
-                return data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    // Initialize all tables
+    const modelSizes = ['128k', '64k', '32k', '16k', '8k'];
+    
+    modelSizes.forEach(size => {
+      CsvToHtmlTableAgg.init({
+        csv_path: `data/agg_results_${size}.csv`, 
+        element: `table-container-${size}`, 
+        csv_options: {separator: ',', delimiter: '"'},
+        datatables_options: {
+          "paging": false, 
+          "searching": false,
+          "info": false,
+          "order": [[10, 'desc']],
+          "columnDefs": [
+            {targets: [0], className: 'dt-left', className: 'dt-head-left', className: 'fw-bold'},
+            {
+              targets: [1],
+              render: function(data, type) {
+                if (type === 'display') {
+                  return data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                }
+                return data;
               }
-              return data;
-            }
-          },
-          {
-            targets: [2],
-            type: 'num',
-            render: function(data, type) {
-              if (type === 'sort') {
-                return data === '?' ? Number.MAX_SAFE_INTEGER : parseFloat(data);
+            },
+            {
+              targets: [2],
+              type: 'num',
+              render: function(data, type) {
+                if (type === 'sort') {
+                  return data === '?' ? Number.MAX_SAFE_INTEGER : parseFloat(data);
+                }
+                return data;
               }
-              return data;
             }
+          ],
+          "createdRow": function(row, data, dataIndex) {
+            $(row).find('td:first').css('font-weight', 'bold');
           }
-        ],
-        "createdRow": function(row, data, dataIndex) {
-          $(row).find('td:first').css('font-weight', 'bold');
         }
-      }
+      });
     });
-
-    // CsvToHtmlTableFull.init({
-    //   csv_path: 'data/full_results.csv', 
-    //   element: 'table-container-full', 
-    //   csv_options: {separator: ',', delimiter: '"'},
-    //   datatables_options: {
-    //     "paging": false, 
-    //     "searching": false,
-    //     "info": false,
-    //     "order": [[4, 'desc']],
-    //     "scrollX": true,
-    //     "scrollCollapse": false,
-    //     "columnDefs": [
-    //     {targets: 0, className: 'dt-left', className: 'dt-head-left', className: 'fw-bold', className: 'nowrap'},
-    //     ],
-    //     "createdRow": function(row, data, dataIndex) {
-    //       $(row).find('td:first').css('font-weight', 'bold').css('white-space', 'nowrap');
-    //     }
-    //   }
-    // });
+    
+    // Add event listener to the dropdown
+    document.getElementById('tableSelector').addEventListener('change', function() {
+      // Hide all tables
+      document.querySelectorAll('.table-container').forEach(container => {
+        container.style.display = 'none';
+      });
+      
+      // Show selected table
+      const selectedSize = this.value;
+      document.getElementById(`table-container-${selectedSize}`).style.display = 'block';
+    });
   </script>
 </body>
 </html>
