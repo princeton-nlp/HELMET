@@ -2,16 +2,19 @@ import json
 import copy
 import math
 import random
-import numpy as np
+import re
 import hashlib
-from typing import Dict, List, Tuple, Any
 
+from typing import Dict, List, Tuple, Any
+from difflib import SequenceMatcher
+
+import tiktoken
 import datasets
+import numpy as np
 from datasets import load_dataset, load_from_disk
 from torch.utils.data import Dataset
 from transformers import AutoTokenizer
 
-import re
 from utils import calculate_metrics, parse_output, parse_rankings, calculate_retrieval_metrics
 
 import logging
@@ -646,6 +649,104 @@ def load_infbench(dataset, shots=0, max_test_samples=None, seed=42):
     }
 
 
+def load_mrcr(dataset, shots=0, max_test_samples=None, seed=42):
+    """
+    https://huggingface.co/datasets/openai/mrcr
+    MRCR is already formatted for chat convos, so we need to add support for when the inputs are already in chat format instead of just a string.
+    """
+    from datasets import load_dataset
+    data = load_dataset("openai/mrcr")['train']
+
+    # n_needles can be 2, 4, or 8
+    _, n_needles, length = dataset.split("_")
+
+    enc = tiktoken.get_encoding("o200k_base")
+    def n_tokens(example) -> int:
+        return sum([len(enc.encode(m["content"])) for m in example['prompt']]) + len(enc.encode(example['answer']))
+
+    # this should yield ~100 samples 
+    data = data.filter(lambda x: x['n_needles'] == int(n_needles))
+    data = data.map(lambda example: {'prompt': json.loads(example['prompt'])})
+    data = data.filter(lambda x: int(length) / 2 < n_tokens(x) <= int(length))
+
+    def grade(response, answer, random_string_to_prepend) -> float:
+        """
+        Compare response and answer.
+        """
+        if not response.startswith(random_string_to_prepend):
+            return 0
+        response = response.removeprefix(random_string_to_prepend)
+        answer = answer.removeprefix(random_string_to_prepend)
+        return float(SequenceMatcher(None, response, answer).ratio())
+
+    def post_process(output, example):
+        prediction = output['output']
+        score = grade(prediction, example['answer'], example['random_string_to_prepend'])
+        return {"score": score}, {"parsed_output": prediction}
+    
+    if max_test_samples is not None:
+        data = data.shuffle(seed=seed).select(range(min(len(data), max_test_samples)))
+
+    return {
+        "data": data,
+        "system_template": "",
+        "is_chat": True,
+        "post_process": post_process,
+    }
+
+# TODO: LongBenchv2
+def load_longbenchv2(dataset, shots=0, max_test_samples=None, seed=42):
+    from datasets import load_dataset
+    # short medium or long
+    data = load_dataset('THUDM/LongBench-v2', split='train')
+    _, split = dataset.split("_")
+    data = data.filter(lambda x: x['length'] == split)
+    user_template = """Please read the following text and answer the question below.
+
+<text>
+{context}
+</text>
+
+What is the correct answer to this question: {question}
+Choices:
+(A) {choice_A}
+(B) {choice_B}
+(C) {choice_C}
+(D) {choice_D}
+
+Format your response as follows: "The correct answer is (insert answer here)"."""
+
+    system_template = "The correct answer is"
+    prompt_template = user_template + "\n" + system_template
+
+    def preprocess_example(example):
+        example["answer"] = [example["answer"], example["answer"] + ". " + example[f"choice_{example['answer']}"]]
+        return example
+    data = data.map(preprocess_example)
+    
+    def post_process(output, example):
+        prediction = output["output"]
+        answer = example["answer"]
+        mets = calculate_metrics(prediction, answer)
+        parsed_pred = parse_output(prediction, prefix=system_template)
+        if parsed_pred is not None:
+            mets = calculate_metrics(parsed_pred, answer)
+            mets.pop("substring_exact_match")
+            mets = {k: max(v, mets[k]) for k, v in mets.items()}
+        return mets, {"parsed_output": parsed_pred}
+
+    data = truncate_llama2("_65536" if split == 'short' else "_262144" if split == 'medium' else "_1048576", data)
+    if max_test_samples is not None:
+        data = data.shuffle(seed=seed).select(range(min(len(data), max_test_samples)))
+
+    return {
+        "data": data,
+        "user_template": user_template,
+        "system_template": system_template,
+        "prompt_template": prompt_template,
+        "post_process": post_process,
+    }
+
 def default_post_process(output, example):
     """
     Returns: metrics (dict) and additional info to update the original sample with (dict)
@@ -690,6 +791,10 @@ def load_data(args, dataset, path=None, demo_path=None):
     elif any([x in dataset for x in ["html_to_tsv", "pseudo_to_code", "path_traversal", "tom_tracking", "countdown", "travel_planning"]]):
         from longproc_addon.longproc_helmet_loader import load_longproc_data_for_helmet
         data = load_longproc_data_for_helmet(dataset, path=path, max_test_samples=args.max_test_samples, seed=args.seed)
+    elif "mrcr" in dataset:
+        data = load_mrcr(dataset, 0, args.max_test_samples, seed=args.seed)
+    elif "longbenchv2" in dataset:
+        data = load_longbenchv2(dataset, 0, args.max_test_samples, seed=args.seed)
     else:
         raise ValueError(f"Unknown dataset {dataset}")
 
@@ -716,6 +821,8 @@ class TestItemDataset(Dataset):
     def __getitem__(self, idx):
         inputs = self.llm.prepare_inputs(self.data["data"][idx], self.data)
         original_text = None
-        if "input_ids" in inputs:
+        if "original_text" in inputs:
+            original_text = inputs["original_text"]
+        elif "input_ids" in inputs:
             original_text = self.tokenizer.decode(inputs["input_ids"][0], skip_special_tokens=False)
         return inputs, original_text

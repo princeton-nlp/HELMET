@@ -41,8 +41,8 @@ See `CHANGELOG.md` for updates and more details.
 - [x] HELMET data
 - [x] VLLM Support
 - [x] Correlation analysis notebook
-- [ ] Support >128k input length
-- [ ] Retrieval setup
+- [x] Support >128k input length
+- [x] Retrieval setup (see [RetrievalTools](https://github.com/howard-yen/RetrievalTools))
 
 
 ## Setup

@@ -65,14 +65,14 @@ def run_test(args, model, dataset, test_file, demo_file):
         all_inputs.append(inputs)
         all_input_texts.append(input_text)
 
-    # HY: for the thinking mode, we add additional 32k tokens to allow models to generate thinking process
+    # HY: enable thinking mode
     if args.thinking:
-        args.generation_max_length += 32768
-        args.input_max_length += 32768
+        args.generation_max_length += args.thinking
+        args.input_max_length += args.thinking
         model.max_length = args.input_max_length
         model.generation_max_length = args.generation_max_length
         args.stop_newline = False
-        logger.info(f"thinking mode, adding 32k tokens to generation and input max length, also disabling stop_newline")
+        logger.info(f"thinking mode, adding {args.thinking} tokens to generation and input max length, also disabling stop_newline")
 
     logger.info("Running generation...")
     start_time = time.time()

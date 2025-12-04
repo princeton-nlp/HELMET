@@ -449,6 +449,10 @@ class AnthropicModel(LLM):
 
 
     def prepare_inputs(self, test_item, data):
+        if data.get("is_chat", False):
+            # if it's already in chat format, then skip formatting and truncation
+            return test_item['prompt']
+
         buffer = 100
         # for anthropic, the system message is passed through the function not in the prompt
         prompt = format_chat(data["user_template"].format(**test_item), system_message=None)
@@ -596,7 +600,7 @@ class GeminiModel(LLM):
             generation_max_length=generation_max_length,
             generation_min_length=generation_min_length,
             do_sample=do_sample,
-            stop_newline=stop_newline,
+            stop_new_line=stop_new_line,
             use_chat_template=use_chat_template,
             system_message=system_message,
         )
@@ -702,7 +706,7 @@ class TogetherModel(LLM):
             generation_max_length=generation_max_length,
             generation_min_length=generation_min_length,
             do_sample=do_sample,
-            stop_newline=stop_newline,
+            stop_new_line=stop_new_line,
             use_chat_template=use_chat_template,
             system_message=system_message,
         )
@@ -789,6 +793,7 @@ def tokenize(
     tokenizer,
     max_length: int,
     generation_max_length: int,
+    is_chat: bool=False,
     use_chat_template: bool=False,
     continue_final_message: bool=False,
     system_message: Optional[str]="You are a helpful assistant.",
@@ -796,6 +801,20 @@ def tokenize(
     """
     Tokenize the input for HF-based models.
     """
+    if is_chat:
+        # if it's already in chat format, then skip formatting and truncation
+        try:
+            # some models dont support system message
+            ids = tokenizer.apply_chat_template(sample['prompt'], return_tensors="pt", add_generation_prompt=True)
+        except Exception as e:
+            prompt = sample['prompt']
+            for p in prompt:
+                if p['role'] == 'system':
+                    p['role'] = 'user'
+            ids = tokenizer.apply_chat_template(prompt, return_tensors="pt", add_generation_prompt=True)
+            
+        return {"input_ids": ids, "original_text": sample['prompt']}
+
     if continue_final_message:
         assert use_chat_template
 
@@ -817,16 +836,17 @@ def tokenize(
                     chat.append({"role": "assistant", "content": data['system_template'].format(**sample)})
                 prompt = tokenizer.apply_chat_template(chat, tokenize=False, add_generation_prompt=not continue_final_message, continue_final_message=continue_final_message)
 
+            # note: special tokens are added by default in the chat template
             tokenized_input = tokenizer([prompt], return_tensors="pt", add_special_tokens=False)
         else:
             prompt = data["prompt_template"].format(**sample)
             tokenized_input = tokenizer([prompt], return_tensors="pt")
         return tokenized_input
 
-    if "Phi3SmallTokenizer" in str(type(tokenizer)):
-        buffer = 64 if max_length == 131072 else 0 # there is some problem with their rotary emb implementation
+    if "Phi3SmallTokenizer" in str(type(tokenizer)) and max_length == 131072:
+        buffer = 64 # there is some problem with their rotary emb implementation
     else:
-        buffer = 0
+        buffer = 4 # sometimes there may be extra tokens due to changing the context
 
     tokenized_input = format_input(sample)
     if tokenized_input.input_ids.size(1) > max_length - generation_max_length - buffer:
@@ -869,7 +889,7 @@ class HFModel(LLM):
             generation_max_length=generation_max_length,
             generation_min_length=generation_min_length,
             do_sample=do_sample,
-            stop_newline=stop_newline,
+            stop_new_line=stop_new_line,
             use_chat_template=use_chat_template,
             system_message=system_message,
         )
@@ -918,7 +938,7 @@ class HFModel(LLM):
         # use the default if possible, append if necessary
         stop_token_ids = self.model.generation_config.eos_token_id
         stop_token_ids = [stop_token_ids] if not isinstance(stop_token_ids, list) else stop_token_ids
-        if stop_newline:
+        if stop_new_line:
             stop = list(set(["\n", "Ċ", "ĊĊ", "<0x0A>"]))
             stop_token_ids = list(set([self.tokenizer.convert_tokens_to_ids(stop_token) for stop_token in stop] + stop_token_ids))
             if "llama" in model_name.lower():
@@ -940,6 +960,7 @@ class HFModel(LLM):
             tokenizer=self.tokenizer,
             max_length=self.max_length,
             generation_max_length=self.generation_max_length,
+            is_chat=data.get("is_chat", False),
             use_chat_template=self.use_chat_template,
             system_message=self.system_message,
         )
@@ -1043,12 +1064,13 @@ class VLLMModel(LLM):
         self.model = LLM(
             model_name,
             tensor_parallel_size=torch.cuda.device_count(),
-            dtype="bfloat16",
+            dtype="auto", # most default to bfloat16, but auto will use the best dtype for the model
             trust_remote_code=True,
             enforce_eager=True,
             seed=seed,
             #max_seq_len_to_capture=max_length, # we cannot set unless we are using a constant max length for the run
             max_model_len=max_length,
+            enable_chunked_prefill=True,
         )
         self.tokenizer = self.model.get_tokenizer()
 
@@ -1064,6 +1086,7 @@ class VLLMModel(LLM):
             tokenizer=self.tokenizer,
             max_length=self.max_length,
             generation_max_length=self.generation_max_length,
+            is_chat=data.get("is_chat", False),
             use_chat_template=self.use_chat_template,
             system_message=self.system_message,
         )
@@ -1086,6 +1109,10 @@ class VLLMModel(LLM):
             max_tokens = self.generation_max_length,
             stop=self.stops,
         )
+
+        # error handling
+        if inputs['input_ids'].shape[1] > self.max_length - self.generation_max_length:
+            return None
 
         outputs = self.model.generate(
             prompts=TokensPrompt(prompt_token_ids=inputs["input_ids"][0].tolist()),
@@ -1123,23 +1150,34 @@ class VLLMModel(LLM):
             stop=self.stops,
         )
 
+        # check for possible length generation errors
+        idxs = []
+        prompts = []
+        final_outputs = {}
+        for idx, i in enumerate(inputs):
+            if i['input_ids'].size(1) > self.max_length - self.generation_max_length:
+                final_outputs[idx] = None
+            else:
+                idxs.append(idx)
+                prompts.append(TokensPrompt(prompt_token_ids=i['input_ids'][0].tolist()))
+
         start_time = time.time()
         outputs = self.model.generate(
-            prompts=[TokensPrompt(prompt_token_ids=i['input_ids'][0].tolist()) for i in inputs],
+            prompts=prompts,
             sampling_params=self.sampling_params,
             **kwargs
         )
         end_time = time.time()
-        logger.info(f"Finished batch generation for {len(inputs)} samples in {end_time - start_time} seconds")
+        logger.info(f"Finished batch generation for {len(idxs)} samples in {end_time - start_time} seconds")
 
-        return [
-            {
+        for idx, output in zip(idxs, outputs):
+            final_outputs[idx] = {
                 "output": output.outputs[0].text,
                 "input_len": len(output.prompt_token_ids),
                 "output_len": len(output.outputs[0].token_ids),
                 'input_text': (self.tokenizer.decode(output.prompt_token_ids[:500]) + " <skip> " + self.tokenizer.decode(output.prompt_token_ids[-500:])) if len(output.prompt_token_ids) > 1000 else self.tokenizer.decode(output.prompt_token_ids),
-            } for output in outputs
-        ]
+            }
+        return [final_outputs[idx] for idx in range(len(inputs))]
 
 
 class SGLangModel(LLM):
@@ -1296,7 +1334,7 @@ def load_LLM(args):
         generation_max_length=args.generation_max_length,
         generation_min_length=args.generation_min_length,
         do_sample=args.do_sample,
-        stop_newline=args.stop_newline,
+        stop_new_line=args.stop_new_line,
         use_chat_template=args.use_chat_template,
         system_message=args.system_message,
         **kwargs,

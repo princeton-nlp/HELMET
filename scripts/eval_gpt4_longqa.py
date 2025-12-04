@@ -47,8 +47,7 @@ Now, read the following question, answer, and correct answers. First think step-
 
 Question: {question}
 Correct answers: {correct_answers}
-Answer: {parsed_output}
-"""
+Answer: {parsed_output}"""
 
 def parse_json(text):
     matches = re.findall(r"\{.*?\}", text, re.DOTALL)

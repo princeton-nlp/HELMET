@@ -1,0 +1,10 @@
+input_max_length: 32768,65536,32768,65536
+datasets: mrcr_4_32768,mrcr_4_65536,mrcr_8_32768,mrcr_8_65536
+generation_max_length: 1000,1000,1000,1000
+test_files: ',,,'
+demo_files: ',,,'
+use_chat_template: true
+max_test_samples: 100
+shots: 0
+stop_new_line: false
+model_name_or_path: meta-llama/Llama-3.1-8B-Instruct
