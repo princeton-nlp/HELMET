@@ -7,76 +7,109 @@ long_lengths_mapping = {"4k": 4096, "8k": 8192, "16k": 16384, "32k": 32768, "64k
 master_mapping = {
     # ruler tasks, shots: 0, use_chat_template: False, and stop_new_line: False
     "ruler_niah_s_1": { # NIAH Repeat
-        k: {
-            "input_length": v, "generation_max_length": 50, "test_files": f"data/ruler/niah_single_1/validation_{v}.jsonl"
-        } for k, v in long_lengths_mapping.items()
+        k: {"input_length": v, "generation_max_length": 50, "test_files": f"data/ruler/niah_single_1/validation_{v}.jsonl"} for k, v in long_lengths_mapping.items()
     },
     "ruler_niah_s_2": { # NIAH 
-        k: {
-            "input_length": v, "generation_max_length": 50, "test_files": f"data/ruler/niah_single_2/validation_{v}.jsonl"
-        } for k, v in long_lengths_mapping.items()
+        k: {"input_length": v, "generation_max_length": 50, "test_files": f"data/ruler/niah_single_2/validation_{v}.jsonl"} for k, v in long_lengths_mapping.items()
     },
     "ruler_niah_s_3": { # NIAH UUID
-        k: {
-            "input_length": v, "generation_max_length": 50, "test_files": f"data/ruler/niah_single_3/validation_{v}.jsonl"
-        } for k, v in long_lengths_mapping.items()
+        k: {"input_length": v, "generation_max_length": 50, "test_files": f"data/ruler/niah_single_3/validation_{v}.jsonl"} for k, v in long_lengths_mapping.items()
     },
     "ruler_niah_mk_1": { # NIAH MK Essay
-        k: {
-            "input_length": v, "generation_max_length": 50, "test_files": f"data/ruler/niah_multikey_1/validation_{v}.jsonl"
-        } for k, v in long_lengths_mapping.items()
+        k: {"input_length": v, "generation_max_length": 50, "test_files": f"data/ruler/niah_multikey_1/validation_{v}.jsonl"} for k, v in long_lengths_mapping.items()
     },
     "ruler_niah_mk_2": { # NIAH MK Needle
-        k: {
-            "input_length": v, "generation_max_length": 50, "test_files": f"data/ruler/niah_multikey_2/validation_{v}.jsonl"
-        } for k, v in long_lengths_mapping.items()
+        k: {"input_length": v, "generation_max_length": 50, "test_files": f"data/ruler/niah_multikey_2/validation_{v}.jsonl"} for k, v in long_lengths_mapping.items()
     },
     "ruler_niah_mk_3": { # NIAH MK UUID
-        k: {
-            "input_length": v, "generation_max_length": 100, "test_files": f"data/ruler/niah_multikey_3/validation_{v}.jsonl"
-        } for k, v in long_lengths_mapping.items()
+        k: {"input_length": v, "generation_max_length": 100, "test_files": f"data/ruler/niah_multikey_3/validation_{v}.jsonl"} for k, v in long_lengths_mapping.items()
     },
     "ruler_niah_mq": { # NIAH MQ
-        k: {
-            "input_length": v, "generation_max_length": 100, "test_files": f"data/ruler/niah_multiquery/validation_{v}.jsonl"
-        } for k, v in long_lengths_mapping.items()
+        k: {"input_length": v, "generation_max_length": 100, "test_files": f"data/ruler/niah_multiquery/validation_{v}.jsonl"} for k, v in long_lengths_mapping.items()
     },
     "ruler_niah_mv": { # NIAH MV
-        k: {
-            "input_length": v, "generation_max_length": 50, "test_files": f"data/ruler/niah_multivalue/validation_{v}.jsonl"
-        } for k, v in long_lengths_mapping.items()
+        k: {"input_length": v, "generation_max_length": 50, "test_files": f"data/ruler/niah_multivalue/validation_{v}.jsonl"} for k, v in long_lengths_mapping.items()
     },
     "ruler_cwe": { # RULER CWE
-        k: {
-            "input_length": v, "generation_max_length": 100, "test_files": f"data/ruler/cwe/validation_{v}.jsonl"
-        } for k, v in long_lengths_mapping.items()
+        k: {"input_length": v, "generation_max_length": 100, "test_files": f"data/ruler/cwe/validation_{v}.jsonl"} for k, v in long_lengths_mapping.items()
     },
     "ruler_fwe": { # RULER FWE
-        k: {
-            "input_length": v, "generation_max_length": 50, "test_files": f"data/ruler/fwe/validation_{v}.jsonl"
-        } for k, v in long_lengths_mapping.items()
+        k: {"input_length": v, "generation_max_length": 50, "test_files": f"data/ruler/fwe/validation_{v}.jsonl"} for k, v in long_lengths_mapping.items()
     },
     "ruler_vt": { # RULER VT
-        k: {
-            "input_length": v, "generation_max_length": 50, "test_files": f"data/ruler/vt/validation_{v}.jsonl"
-        } for k, v in long_lengths_mapping.items()
+        k: {"input_length": v, "generation_max_length": 50, "test_files": f"data/ruler/vt/validation_{v}.jsonl"} for k, v in long_lengths_mapping.items()
     },
     "ruler_qa_1": { # SQuAD
-        k: {
-            "input_length": v, "generation_max_length": 50, "test_files": f"data/ruler/qa_1/validation_{v}.jsonl"
-        } for k, v in long_lengths_mapping.items()
+        k: {"input_length": v, "generation_max_length": 50, "test_files": f"data/ruler/qa_1/validation_{v}.jsonl"} for k, v in long_lengths_mapping.items()
     },
     "ruler_qa_2": { # HotpotQA
-        k: {
-            "input_length": v, "generation_max_length": 50, "test_files": f"data/ruler/qa_2/validation_{v}.jsonl"
-        } for k, v in long_lengths_mapping.items()
+        k: {"input_length": v, "generation_max_length": 50, "test_files": f"data/ruler/qa_2/validation_{v}.jsonl"} for k, v in long_lengths_mapping.items()
+    },
+
+    # ruler tasks, shots: 0, use_chat_template: False, and stop_new_line: False, with llama 3 tokenizer
+    "ruler_niah_s_1_llama3": { # NIAH Repeat
+        k: {"input_length": v, "generation_max_length": 50, "test_files": f"data/ruler_llama3/niah_single_1/validation_{v}.jsonl"} for k, v in long_lengths_mapping.items()
+    },
+    "ruler_niah_s_2_llama3": { # NIAH 
+        k: {"input_length": v, "generation_max_length": 50, "test_files": f"data/ruler_llama3/niah_single_2/validation_{v}.jsonl"} for k, v in long_lengths_mapping.items()
+    },
+    "ruler_niah_s_3_llama3": { # NIAH UUID
+        k: {"input_length": v, "generation_max_length": 50, "test_files": f"data/ruler_llama3/niah_single_3/validation_{v}.jsonl"} for k, v in long_lengths_mapping.items()
+    },
+    "ruler_niah_mk_1_llama3": { # NIAH MK Essay
+        k: {"input_length": v, "generation_max_length": 50, "test_files": f"data/ruler_llama3/niah_multikey_1/validation_{v}.jsonl"} for k, v in long_lengths_mapping.items()
+    },
+    "ruler_niah_mk_2_llama3": { # NIAH MK Needle
+        k: {"input_length": v, "generation_max_length": 50, "test_files": f"data/ruler_llama3/niah_multikey_2/validation_{v}.jsonl"} for k, v in long_lengths_mapping.items()
+    },
+    "ruler_niah_mk_3_llama3": { # NIAH MK UUID
+        k: {"input_length": v, "generation_max_length": 100, "test_files": f"data/ruler_llama3/niah_multikey_3/validation_{v}.jsonl"} for k, v in long_lengths_mapping.items()
+    },
+    "ruler_niah_mq_llama3": { # NIAH MQ
+        k: {"input_length": v, "generation_max_length": 100, "test_files": f"data/ruler_llama3/niah_multiquery/validation_{v}.jsonl"} for k, v in long_lengths_mapping.items()
+    },
+    "ruler_niah_mv_llama3": { # NIAH MV
+        k: {"input_length": v, "generation_max_length": 50, "test_files": f"data/ruler_llama3/niah_multivalue/validation_{v}.jsonl"} for k, v in long_lengths_mapping.items()
+    },
+    "ruler_cwe_llama3": { # RULER CWE
+        k: {"input_length": v, "generation_max_length": 100, "test_files": f"data/ruler_llama3/cwe/validation_{v}.jsonl"} for k, v in long_lengths_mapping.items()
+    },
+    "ruler_fwe_llama3": { # RULER FWE
+        k: {"input_length": v, "generation_max_length": 50, "test_files": f"data/ruler_llama3/fwe/validation_{v}.jsonl"} for k, v in long_lengths_mapping.items()
+    },
+    "ruler_vt_llama3": { # RULER VT
+        k: {"input_length": v, "generation_max_length": 50, "test_files": f"data/ruler_llama3/vt/validation_{v}.jsonl"} for k, v in long_lengths_mapping.items()
+    },
+    "ruler_qa_1_llama3": { # SQuAD
+        k: {"input_length": v, "generation_max_length": 50, "test_files": f"data/ruler_llama3/qa_1/validation_{v}.jsonl"} for k, v in long_lengths_mapping.items()
+    },
+    "ruler_qa_2_llama3": { # HotpotQA
+        k: {"input_length": v, "generation_max_length": 50, "test_files": f"data/ruler_llama3/qa_2/validation_{v}.jsonl"} for k, v in long_lengths_mapping.items()
     },
 
     "json_kv": {
         k: {
-            "input_length": v, "generation_max_length": 100, "test_files": f"data/json_kv/test_k" + ["50", "105", "220", "440", "900", "1800"][i] + "_dep6.jsonl", "demo_files": ""
-        } for i, (k, v) in enumerate(lengths_mapping.items())
+            "input_length": v, "generation_max_length": 100, "test_files": f"data/json_kv/test_k" + ["50", "105", "220", "440", "900", "1800", "3600", "7200", "14400"][i] + "_dep6.jsonl", "demo_files": ""
+        } for i, (k, v) in enumerate(long_lengths_mapping.items())
     },
+    "json_kv_llama3": {
+        k: {
+            "name": "json_kv", "input_length": v, "generation_max_length": 100, "test_files": f"data/json_kv/test_k" + ["75", "150", "310", "630", "1260", "2550", "5125", "10250", "20500"][i] + "_dep6.jsonl", "demo_files": ""
+        } for i, (k, v) in enumerate(long_lengths_mapping.items())
+    },
+
+    "graphwalk_bfs": {
+        k: {
+            "input_length": v, "generation_max_length": 1000, "test_files": f"data/graphwalk/bfs_k" + ["250", "500", "1000", "2100", "4400", "8800", "17600", "35200", "70400", "140800"][i] + ".jsonl", "demo_files": ""
+        } for i, (k, v) in enumerate(long_lengths_mapping.items())
+    },
+    "graphwalk_parent": {
+        k: {
+            "input_length": v, "generation_max_length": 1000, "test_files": f"data/graphwalk/parent_k" + ["250", "500", "1000", "2100", "4400", "8800", "17600", "35200", "70400", "140800"][i] + ".jsonl", "demo_files": ""
+        } for i, (k, v) in enumerate(long_lengths_mapping.items())
+    },
+
+
 
     # generation with citations -- alce
     "alce_asqa": { # ASQA
@@ -203,20 +236,20 @@ master_mapping = {
     "mrcr_4": {
         k: {
             "input_length": v, "generation_max_length": 1000, 
-            "test_files": "", "demo_files": "", "name_postfix": f"_{v}"
+            "test_files": "", "demo_files": "", "name_postfix": f"_{v}", "use_chat_template": True,
         } for k, v in {"8k": 8192, "16k": 16384, "32k": 32768, "64k": 65536, "128k": 131072, "256k": 262144, "512k": 524288, "1m": 1048576}.items()
     },
     "mrcr_8": {
         k: {
             "input_length": v, "generation_max_length": 1000, 
-            "test_files": "", "demo_files": "", "name_postfix": f"_{v}"
+            "test_files": "", "demo_files": "", "name_postfix": f"_{v}", "use_chat_template": True,
         } for k, v in {"8k": 8192, "16k": 16384, "32k": 32768, "64k": 65536, "128k": 131072, "256k": 262144, "512k": 524288, "1m": 1048576}.items()
     },
 
     "longbenchv2": {
         k: {
             "input_length": v, "generation_max_length": 128,
-            "test_files": "", "demo_files": "", "name_postfix": f"_{l}"
+            "test_files": "", "demo_files": "", "name_postfix": f"_{l}", "use_chat_template": True,
         } for k, (v, l) in {"64k": (65536, "short"), "256k": (262144, "medium"), "1m": (1048576, "long")}.items()
     }
     
@@ -232,19 +265,21 @@ def process_configs(config_name, datasets, input_lengths, **kwargs):
             print(c)
             configs.append({
                 "input_max_length": c['input_length'],
-                "datasets": d + c.get("name_postfix", ""),
+                "datasets": c.get("name", d) + c.get("name_postfix", ""),
                 "generation_max_length": c['generation_max_length'],
                 "test_files": c.get("test_files", ""),
                 "demo_files": c.get("demo_files", ""),
+                "use_chat_template": c.get("use_chat_template", False),
             })
-        out_config = {k: ",".join([str(c[k]) for c in configs]) for k in configs[0]}
-        # llama 3 by default but you can change it to anything else
-        out_config.update({
-            **kwargs,
-            "model_name_or_path": "meta-llama/Llama-3.1-8B-Instruct",
-        })
+
+    out_config = {k: ",".join([str(c[k]) for c in configs]) for k in configs[0]}
+    # llama 3 by default but you can change it to anything else
+    out_config.update(kwargs)
+
+    out_config = {"dataset_options": out_config, "model_name_or_path": "meta-llama/Llama-3.1-8B-Instruct"}
     with open(config_name, "w") as f:
         yaml.dump(out_config, f, sort_keys=False)
+
 
 def helmet_configs(input_lengths = ["128k"], fname_postfix = ""):
     synthetic = ["ruler_niah_mk_2", "ruler_niah_mk_3", "ruler_niah_mv", "json_kv"]
@@ -305,7 +340,7 @@ def helmet_configs(input_lengths = ["128k"], fname_postfix = ""):
 
 def additional_configs(input_lengths = ["128k"], fname_postfix = ""):
     # mrcr and other long tasks
-    mrcr = ["mrcr_4", "mrcr_8"]
+    # mrcr = ["mrcr_4", "mrcr_8"]
     mrcr = ["mrcr_8"]
     process_configs(
         f"configs/mrcr{fname_postfix}.yaml", mrcr, input_lengths,
@@ -359,6 +394,33 @@ def niah_configs():
         yaml.dump(config, f, sort_keys=False)
     
 
+def dev_configs():
+    # configs for development purposes
+    # 32k and 128k are the same
+    datasets = ["json_kv", "ruler_niah_mk_2", "ruler_niah_mv", "kilt_nq", "kilt_popqa", "msmarco_rerank_psg", "mrcr_8", 'icl_clinic150', 'icl_nlu']
+    process_configs("configs/dev_32k.yaml", datasets, ["32k"], max_test_samples=100, shots=2, stop_new_line=False)
+    process_configs("configs/dev_128k.yaml", datasets, ["128k"], max_test_samples=100, shots=2, stop_new_line=False)
+
+    # 64k and 256k gets longbenchv2
+    datasets = ["json_kv", "ruler_niah_mk_2", "ruler_niah_mv", "kilt_nq", "kilt_popqa", "msmarco_rerank_psg", "mrcr_8", 'icl_clinic150', 'icl_nlu', 'longbenchv2']
+    process_configs("configs/dev_64k.yaml", datasets, ["64k"], max_test_samples=100, shots=2, stop_new_line=False)
+
+    # but 256k dont have a lot of the other datasets
+    datasets = ["json_kv", "ruler_niah_mk_2", "ruler_niah_mv", "mrcr_8", "longbenchv2"]
+    process_configs("configs/dev_256k.yaml", datasets, ["256k"], max_test_samples=100, shots=2, stop_new_line=False)
+
+
+def synthetic_configs():
+    # only synthetic datasets: json_kv, ruler_niah_*, mrcr, graphwalk
+    # here i want to change the json_kv to use the llama 3 tokenzier version
+    datasets = ["json_kv_llama3", "ruler_niah_mk_2_llama3", "ruler_niah_mv_llama3", "ruler_niah_mq_llama3", "ruler_fwe_llama3", "mrcr_4", "mrcr_8", "graphwalk_bfs", "graphwalk_parent"]
+    process_configs("configs/dev_syn_32k.yaml", datasets, ["32k"], use_chat_template=False, max_test_samples=100, shots=2, stop_new_line=False)
+    process_configs("configs/dev_syn_64k.yaml", datasets, ["64k"], use_chat_template=False, max_test_samples=100, shots=2, stop_new_line=False)
+    process_configs("configs/dev_syn_128k.yaml", datasets, ["128k"], use_chat_template=False, max_test_samples=100, shots=2, stop_new_line=False)
+    process_configs("configs/dev_syn_256k.yaml", datasets, ["256k"], use_chat_template=False, max_test_samples=100, shots=2, stop_new_line=False)
+    process_configs("configs/dev_syn_512k.yaml", datasets, ["512k"], use_chat_template=False, max_test_samples=100, shots=2, stop_new_line=False)
+    process_configs("configs/dev_syn_1m.yaml", datasets, ["1m"], use_chat_template=False, max_test_samples=100, shots=2, stop_new_line=False)
+
 if __name__ == "__main__":
     helmet_configs()
     helmet_configs(input_lengths=["8k", "16k", "32k", "64k"], fname_postfix="_short")
@@ -373,3 +435,11 @@ if __name__ == "__main__":
     longbenchv2_configs(input_lengths=['1m'], fname_postfix="_long")
     longbenchv2_configs(input_lengths=['256k'])
     longbenchv2_configs(input_lengths=['64k'], fname_postfix="_short")
+
+    dev_configs()
+    synthetic_configs()
+
+    process_configs(
+        f"configs/json_kv_256k.yaml", ['json_kv'], ['256k'], 
+        use_chat_template=False, max_test_samples=100, shots=0, stop_new_line=False
+    )
