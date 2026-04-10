@@ -787,6 +787,19 @@ class TogetherModel(LLM):
         return outputs
 
 
+def merge_user_messages(messages: List[Dict[str, str]]) -> List[Dict[str, str]]:
+    """
+    Merge consecutive user messages into a single message. Necessary for models like Gemma 3 that don't support multiple user messages.
+    """
+    merged_messages = []
+    for message in messages:
+        if message['role'] == 'user' and len(merged_messages) > 0 and merged_messages[-1]['role'] == 'user':
+            merged_messages[-1]['content'] += "\n" + message['content']
+        else:
+            merged_messages.append(message)
+    return merged_messages
+
+
 def tokenize(
     sample: Dict[str, Any],
     data: Dict[str, Any],
@@ -811,7 +824,11 @@ def tokenize(
             for p in prompt:
                 if p['role'] == 'system':
                     p['role'] = 'user'
-            ids = tokenizer.apply_chat_template(prompt, return_tensors="pt", add_generation_prompt=True)
+            try:
+                ids = tokenizer.apply_chat_template(prompt, return_tensors="pt", add_generation_prompt=True)
+            except Exception as e:
+                prompt = merge_user_messages(prompt)
+                ids = tokenizer.apply_chat_template(prompt, return_tensors="pt", add_generation_prompt=True)
             
         return {"input_ids": ids, "original_text": sample['prompt']}
 
@@ -925,7 +942,7 @@ class HFModel(LLM):
         self.model = AutoModelForCausalLM.from_pretrained(
             model_name,
             config=config,
-            torch_dtype=kwargs.get("torch_dtype", torch.bfloat16),
+            dtype=kwargs.get("dtype", torch.bfloat16),
             device_map="auto",
             trust_remote_code=True,
             **model_kwargs
@@ -1044,6 +1061,7 @@ class VLLMModel(LLM):
         use_chat_template=False,
         system_message=None,
         seed=42,
+        **kwargs
     ):
         super().__init__(
             model_name,
@@ -1061,6 +1079,13 @@ class VLLMModel(LLM):
         from vllm import LLM
         # at the time of testing: note that the max model length is derived from the config file, and if max_length is larger than that length, there will be an error. it appears that vllm does not support positional extrapolation
         # there are some work arounds to this, but it may give unexpected results.
+        model_kwargs = {}
+        if kwargs.get("rope_scaling", None) is not None:
+            # should probably not hardcode this
+            model_kwargs["rope_scaling"] = {"type": "dynamic", "factor": kwargs["rope_scaling"], "original_max_position_embeddings": 32768} 
+        if kwargs.get("rope_theta", None) is not None:
+            model_kwargs["rope_theta"] = kwargs["rope_theta"]
+
         self.model = LLM(
             model_name,
             tensor_parallel_size=torch.cuda.device_count(),
@@ -1071,6 +1096,7 @@ class VLLMModel(LLM):
             #max_seq_len_to_capture=max_length, # we cannot set unless we are using a constant max length for the run
             max_model_len=max_length,
             enable_chunked_prefill=True,
+            **model_kwargs,
         )
         self.tokenizer = self.model.get_tokenizer()
 
@@ -1295,7 +1321,7 @@ class SGLangModel(LLM):
 
 def load_LLM(args):
     kwargs = {}
-    if "gpt" in args.model_name_or_path:
+    if "gpt" in args.model_name_or_path and "oss" not in args.model_name_or_path:
         model_cls = OpenAIModel
         kwargs['seed'] = args.seed
     elif "claude" in args.model_name_or_path:

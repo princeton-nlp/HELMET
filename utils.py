@@ -77,9 +77,9 @@ def drqa_exact_match_score(prediction, ground_truth):
     return normalize_answer(prediction) == normalize_answer(ground_truth)
 
 
-def substring_exact_match_score(prediciton, ground_truth):
+def substring_exact_match_score(prediction, ground_truth):
     """Check if the ground truth is a (soft) exact match substring of the prediction."""
-    return normalize_answer(ground_truth) in normalize_answer(prediciton) 
+    return normalize_answer(ground_truth) in normalize_answer(prediction) 
 
 
 def drqa_metric_max_over_ground_truths(metric_fn, prediction, ground_truths):

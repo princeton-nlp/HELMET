@@ -1,10 +1,11 @@
-input_max_length: '131072'
-datasets: kilt_hotpotqa
-generation_max_length: '20'
-test_files: data/kilt/hotpotqa-dev-multikilt_1000_k1000_dep3.jsonl
-demo_files: data/kilt/hotpotqa-train-multikilt_1000_k3_dep3.jsonl
-use_chat_template: false
-max_test_samples: 100
-shots: 2
-stop_new_line: true
+dataset_options:
+  input_max_length: '131072'
+  datasets: kilt_hotpotqa
+  generation_max_length: '20'
+  test_files: data/kilt/hotpotqa-dev-multikilt_1000_k1000_dep3.jsonl
+  demo_files: data/kilt/hotpotqa-train-multikilt_1000_k3_dep3.jsonl
+  use_chat_template: false
+  max_test_samples: 100
+  shots: 2
+  stop_new_line: true
 model_name_or_path: meta-llama/Llama-3.1-8B-Instruct

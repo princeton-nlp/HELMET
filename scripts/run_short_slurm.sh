@@ -27,6 +27,8 @@
 # Remember to set your email address here instead of nobody
 #SBATCH --mail-user=nobody
 
+module load proxy/default
+
 echo "Date              = $(date)"
 echo "Hostname          = $(hostname -s)"
 echo "Working Directory = $(pwd)"
@@ -43,19 +45,23 @@ source env/bin/activate
 IDX=$SLURM_ARRAY_TASK_ID
 NGPU=$SLURM_GPUS_ON_NODE
 if [[ -z $SLURM_ARRAY_TASK_ID ]]; then
-    IDX=0
+    IDX=1
     NGPU=1
 fi
 PORT=$(shuf -i 30000-65000 -n 1)
 echo "Port                          = $PORT"
 
 export OMP_NUM_THREADS=8
+export HF_DATASETS_OFFLINE=1
+export HF_HUB_OFFLINE=1
 
 TAG=v1
 
 CONFIGS=(recall_short.yaml rag_short.yaml longqa_short.yaml summ_short.yaml icl_short.yaml rerank_short.yaml cite_short.yaml)
+CONFIGS=(longbenchv2_short.yaml)
 #CONFIGS=(${CONFIGS[8]})
 SEED=42
+OPTIONS="--use_vllm --debug"
 
 M_IDX=$IDX
 
@@ -77,6 +83,11 @@ L_MODELS=(
 
 # Array for models 13B and smaller (36 models)
 S_MODELS=(
+  "Llama-3.1-8B-Instruct"
+  "Llama-3.1-Nemotron-8B-UltraLong-1M-Instruct"
+  "Llama-3.1-Nemotron-8B-UltraLong-2M-Instruct"
+  "Llama-3.1-Nemotron-8B-UltraLong-4M-Instruct"
+  "gemma-3-4b-it"
   "LLaMA-2-7B-32K" # 0
   "Llama-2-7B-32K-Instruct" # 1
   "llama-2-7b-80k-basefixed" # 2
@@ -117,7 +128,7 @@ S_MODELS=(
 MNAME="${S_MODELS[$M_IDX]}"
 
 OUTPUT_DIR="output/$MNAME"
-MODEL_NAME="/path/to/your/model/$MNAME" # CHANGE PATH HERE or you can change the array to load from HF
+MODEL_NAME="/scratch/gpfs/PLI/models/$MNAME" # CHANGE PATH HERE or you can change the array to load from HF
 
 shopt -s nocasematch
 chat_models=".*(chat|instruct|it$|nous|command|Jamba-1.5|MegaBeam).*"

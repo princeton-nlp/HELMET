@@ -1,10 +1,11 @@
-input_max_length: 8192,16384,32768,65536
-datasets: icl_trec_coarse_400shot_balance,icl_trec_coarse_800shot_balance,icl_trec_coarse_1600shot_balance,icl_trec_coarse_3300shot_balance
-generation_max_length: 20,20,20,20
-test_files: ',,,'
-demo_files: ',,,'
-use_chat_template: false
-max_test_samples: 500
-shots: 0
-stop_new_line: true
+dataset_options:
+  input_max_length: 8192,16384,32768,65536
+  datasets: icl_trec_coarse_400shot_balance,icl_trec_coarse_800shot_balance,icl_trec_coarse_1600shot_balance,icl_trec_coarse_3300shot_balance
+  generation_max_length: 20,20,20,20
+  test_files: ',,,'
+  demo_files: ',,,'
+  use_chat_template: false
+  max_test_samples: 500
+  shots: 0
+  stop_new_line: true
 model_name_or_path: meta-llama/Llama-3.1-8B-Instruct

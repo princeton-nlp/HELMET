@@ -1,0 +1,11 @@
+dataset_options:
+  input_max_length: 131072,131072,131072,131072,131072,131072
+  datasets: json_kv,ruler_niah_mk_2,ruler_niah_mv,mrcr_8_131072,graphwalk_bfs,graphwalk_parent
+  generation_max_length: 100,50,50,1000,1000,1000
+  test_files: data/json_kv/test_k2550_dep6.jsonl,data/ruler/niah_multikey_2/validation_131072.jsonl,data/ruler/niah_multivalue/validation_131072.jsonl,,data/graphwalk/bfs_k8800.jsonl,data/graphwalk/parent_k8800.jsonl
+  demo_files: ',,,,,'
+  use_chat_template: false
+  max_test_samples: 100
+  shots: 2
+  stop_new_line: false
+model_name_or_path: meta-llama/Llama-3.1-8B-Instruct

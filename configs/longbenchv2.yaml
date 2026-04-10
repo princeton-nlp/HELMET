@@ -1,10 +1,11 @@
-input_max_length: 262144,1048576
-datasets: longbenchv2_medium,longbenchv2_long
-generation_max_length: 128,128
-test_files: ','
-demo_files: ','
-use_chat_template: true
-max_test_samples: null
-shots: 2
-stop_new_line: false
+dataset_options:
+  input_max_length: '262144'
+  datasets: longbenchv2_medium
+  generation_max_length: '128'
+  test_files: ''
+  demo_files: ''
+  use_chat_template: true
+  max_test_samples: null
+  shots: 2
+  stop_new_line: false
 model_name_or_path: meta-llama/Llama-3.1-8B-Instruct

@@ -105,10 +105,9 @@ master_mapping = {
     },
     "graphwalk_parent": {
         k: {
-            "input_length": v, "generation_max_length": 1000, "test_files": f"data/graphwalk/parent_k" + ["250", "500", "1000", "2100", "4400", "8800", "17600", "35200", "70400", "140800"][i] + ".jsonl", "demo_files": ""
+            "input_length": v, "generation_max_length": 100, "test_files": f"data/graphwalk/parent_k" + ["250", "500", "1000", "2100", "4400", "8800", "17600", "35200", "70400", "140800"][i] + ".jsonl", "demo_files": ""
         } for i, (k, v) in enumerate(long_lengths_mapping.items())
     },
-
 
 
     # generation with citations -- alce
@@ -251,8 +250,14 @@ master_mapping = {
             "input_length": v, "generation_max_length": 128,
             "test_files": "", "demo_files": "", "name_postfix": f"_{l}", "use_chat_template": True,
         } for k, (v, l) in {"64k": (65536, "short"), "256k": (262144, "medium"), "1m": (1048576, "long")}.items()
-    }
+    },
     
+    "ppl_longmino": {
+        k: {
+            "input_length": v, "generation_max_length": 0,
+            "test_files": "data/longmino/524288_10.jsonl", "demo_files": "", "name_postfix": f"_{v}_8192", "use_chat_template": False,
+        } for k, v in {"32k": 32768, "64k": 65536, "128k": 131072, "256k": 262144, "512k": 524288, "1m": 1048576}.items()
+    },
 }
 
 def process_configs(config_name, datasets, input_lengths, **kwargs):
@@ -414,12 +419,19 @@ def synthetic_configs():
     # only synthetic datasets: json_kv, ruler_niah_*, mrcr, graphwalk
     # here i want to change the json_kv to use the llama 3 tokenzier version
     datasets = ["json_kv_llama3", "ruler_niah_mk_2_llama3", "ruler_niah_mv_llama3", "ruler_niah_mq_llama3", "ruler_fwe_llama3", "mrcr_4", "mrcr_8", "graphwalk_bfs", "graphwalk_parent"]
-    process_configs("configs/dev_syn_32k.yaml", datasets, ["32k"], use_chat_template=False, max_test_samples=100, shots=2, stop_new_line=False)
-    process_configs("configs/dev_syn_64k.yaml", datasets, ["64k"], use_chat_template=False, max_test_samples=100, shots=2, stop_new_line=False)
-    process_configs("configs/dev_syn_128k.yaml", datasets, ["128k"], use_chat_template=False, max_test_samples=100, shots=2, stop_new_line=False)
-    process_configs("configs/dev_syn_256k.yaml", datasets, ["256k"], use_chat_template=False, max_test_samples=100, shots=2, stop_new_line=False)
-    process_configs("configs/dev_syn_512k.yaml", datasets, ["512k"], use_chat_template=False, max_test_samples=100, shots=2, stop_new_line=False)
-    process_configs("configs/dev_syn_1m.yaml", datasets, ["1m"], use_chat_template=False, max_test_samples=100, shots=2, stop_new_line=False)
+    process_configs("configs/dev_syn_32k_v2.yaml", datasets, ["32k"], use_chat_template=False, max_test_samples=100, shots=2, stop_new_line=False)
+    process_configs("configs/dev_syn_64k_v2.yaml", datasets, ["64k"], use_chat_template=False, max_test_samples=100, shots=2, stop_new_line=False)
+    process_configs("configs/dev_syn_128k_v2.yaml", datasets, ["128k"], use_chat_template=False, max_test_samples=100, shots=2, stop_new_line=False)
+    process_configs("configs/dev_syn_256k_v2.yaml", datasets, ["256k"], use_chat_template=False, max_test_samples=100, shots=2, stop_new_line=False)
+    process_configs("configs/dev_syn_512k_v2.yaml", datasets, ["512k"], use_chat_template=False, max_test_samples=100, shots=2, stop_new_line=False)
+    process_configs("configs/dev_syn_1m_v2.yaml", datasets, ["1m"], use_chat_template=False, max_test_samples=100, shots=2, stop_new_line=False)
+
+    
+def ppl_configs():
+    datasets = ["ppl_longmino"]
+    process_configs("configs/ppl_longmino_short.yaml", datasets, ['32k', '64k'], use_chat_template=False, max_test_samples=300, stop_new_line=False)
+    process_configs("configs/ppl_longmino_64k.yaml", datasets, ['64k'], use_chat_template=False, max_test_samples=300, stop_new_line=False)
+    
 
 if __name__ == "__main__":
     helmet_configs()
@@ -438,6 +450,7 @@ if __name__ == "__main__":
 
     dev_configs()
     synthetic_configs()
+    ppl_configs()
 
     process_configs(
         f"configs/json_kv_256k.yaml", ['json_kv'], ['256k'], 

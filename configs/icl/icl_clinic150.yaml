@@ -1,10 +1,11 @@
-input_max_length: '131072'
-datasets: icl_clinic150_7050shot_balance
-generation_max_length: '20'
-test_files: ''
-demo_files: ''
-use_chat_template: false
-max_test_samples: 500
-shots: 0
-stop_new_line: true
+dataset_options:
+  input_max_length: '131072'
+  datasets: icl_clinic150_7050shot_balance
+  generation_max_length: '20'
+  test_files: ''
+  demo_files: ''
+  use_chat_template: false
+  max_test_samples: 500
+  shots: 0
+  stop_new_line: true
 model_name_or_path: meta-llama/Llama-3.1-8B-Instruct

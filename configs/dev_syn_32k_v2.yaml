@@ -1,0 +1,11 @@
+dataset_options:
+  input_max_length: 32768,32768,32768,32768,32768,32768,32768,32768,32768
+  datasets: json_kv,ruler_niah_mk_2_llama3,ruler_niah_mv_llama3,ruler_niah_mq_llama3,ruler_fwe_llama3,mrcr_4_32768,mrcr_8_32768,graphwalk_bfs,graphwalk_parent
+  generation_max_length: 100,50,50,100,50,1000,1000,1000,1000
+  test_files: data/json_kv/test_k630_dep6.jsonl,data/ruler_llama3/niah_multikey_2/validation_32768.jsonl,data/ruler_llama3/niah_multivalue/validation_32768.jsonl,data/ruler_llama3/niah_multiquery/validation_32768.jsonl,data/ruler_llama3/fwe/validation_32768.jsonl,,,data/graphwalk/bfs_k2100.jsonl,data/graphwalk/parent_k2100.jsonl
+  demo_files: ',,,,,,,,'
+  use_chat_template: false
+  max_test_samples: 100
+  shots: 2
+  stop_new_line: false
+model_name_or_path: meta-llama/Llama-3.1-8B-Instruct

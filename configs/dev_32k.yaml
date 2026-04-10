@@ -1,0 +1,11 @@
+dataset_options:
+  input_max_length: 32768,32768,32768,32768,32768,32768,32768,32768,32768
+  datasets: json_kv,ruler_niah_mk_2,ruler_niah_mv,kilt_nq,kilt_popqa_3,msmarco_rerank_psg,mrcr_8_32768,icl_clinic150_1750shot_balance,icl_nlu_2040shot_balance
+  generation_max_length: 100,50,50,20,20,200,1000,20,20
+  test_files: data/json_kv/test_k440_dep6.jsonl,data/ruler/niah_multikey_2/validation_32768.jsonl,data/ruler/niah_multivalue/validation_32768.jsonl,data/kilt/nq-dev-multikilt_1000_k220_dep6.jsonl,data/kilt/popqa_test_1000_k220_dep6.jsonl,data/msmarco/test_reranking_data_k285_dep3.jsonl,,,
+  demo_files: ',,,data/kilt/nq-train-multikilt_1000_k3_dep6.jsonl,data/kilt/popqa_test_1000_k3_dep6.jsonl,data/msmarco/test_reranking_data_k10_dep3.jsonl,,,'
+  use_chat_template: False,False,False,False,False,False,True,False,False
+  max_test_samples: 100
+  shots: 2
+  stop_new_line: false
+model_name_or_path: meta-llama/Llama-3.1-8B-Instruct

@@ -694,7 +694,63 @@ def load_mrcr(dataset, shots=0, max_test_samples=None, seed=42):
         "post_process": post_process,
     }
 
-# TODO: LongBenchv2
+def load_graphwalk(path, shots=0, max_test_samples=None, seed=42):
+    if path.endswith(".json"):
+        data = load_dataset("json", data_files=path, field="data")["train"]
+    elif path.endswith(".jsonl"):
+        data = load_dataset("json", data_files=path)["train"]
+    else: 
+        raise ValueError(f"Unknown dataset {path}")
+
+    if max_test_samples is not None:
+        data = data.shuffle(seed=seed).select(range(min(max_test_samples, len(data))))
+
+    user_template = "{context}\n\n{question}"
+    system_template = "Final Answer:"
+    prompt_template = user_template + "\n\n" + system_template
+
+    def get_list(response: str) -> tuple[list[str], bool]:
+        # get the very last line of the response
+        # check if formatted correctly
+        # try to parse the first list
+        list_part = re.search(r"final answer: ?\[([^\]]*)\]?", response, re.IGNORECASE)
+        if list_part:
+            result_list = list_part.group(1).split(",")
+            # if the list was empty, then get [] not [""]
+            result_list = [item.strip() for item in result_list if item.strip()]
+            return result_list, False
+        else:
+            list_part = re.search(r"?\[([^\]]*)\]?", response)
+            if list_part:
+                result_list = list_part.group(1).split(",")
+                # if the list was empty, then get [] not [""]
+                result_list = [item.strip() for item in result_list if item.strip()]
+                return result_list, False
+            return [], True
+
+    def post_process(output, example):
+        prediction, _ = get_list(output['output'])
+        answer = example['answer']
+
+        f1 = 0
+        if len(answer) == 0:
+            f1 = 1 if len(prediction) == 0 else 0
+        else:
+            n_overlap = len(set(prediction) & set(answer))
+            recall = n_overlap / len(answer)
+            precision = n_overlap / len(prediction) if len(prediction) > 0 else 0
+            f1 = 2 * (recall * precision) / (recall + precision) if recall + precision > 0 else 0
+        return {"f1": f1}, {"parsed_output": prediction}
+        
+    return {
+        "data": data,
+        "user_template": user_template,
+        "system_template": system_template,
+        "prompt_template": prompt_template,
+        "post_process": post_process,
+    }
+
+
 def load_longbenchv2(dataset, shots=0, max_test_samples=None, seed=42):
     from datasets import load_dataset
     # short medium or long
@@ -747,6 +803,61 @@ Format your response as follows: "The correct answer is (insert answer here)".""
         "post_process": post_process,
     }
 
+
+def load_ppl(dataset, path, tokenizer_name, max_test_samples=None, seed=42):
+    # load dataset, chunk and tokenize, take stride size
+    length = int(dataset.split("_")[-2])
+    stride = int(dataset.split("_")[-1])
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
+    ds = load_dataset("json", data_files=path)["train"]
+    
+    def preprocess_example(examples):
+        output = []
+        all_input_ids = tokenizer(examples['context'], add_special_tokens=True)['input_ids']
+        for idx in range(len(all_input_ids)):
+            input_ids = all_input_ids[idx]
+            if len(input_ids) < length:
+                continue
+            
+            for i in range(0, len(input_ids)-length+1, stride):
+                output.append({
+                    "input_ids": input_ids[i:i+length],
+                    "labels": input_ids[i+1:i+length+1],
+                    "domain": examples['domain'][idx],
+                    'created': examples['created'][idx],
+                    'length': len(input_ids),
+                    "stride": stride,
+                })
+                # handle the case where the labels do not match the input_ids because we reach the end of the text
+                if i+length+1 > len(input_ids):
+                    # -100 is ignored in loss calculation
+                    output[-1]['labels'].append(-100)
+                assert len(output[-1]['input_ids']) == len(output[-1]['labels'])
+                    
+        output = {
+            "input_ids": [o['input_ids'] for o in output],
+            "labels": [o['labels'] for o in output],
+            "domain": [o['domain'] for o in output],
+            "created": [o['created'] for o in output],
+            "stride": [o['stride'] for o in output],
+            "length": [o['length'] for o in output],
+        }
+        return output
+    
+    ds = ds.map(preprocess_example, batched=True, remove_columns=ds.column_names)
+    print(f"Loaded {len(ds)} samples from {dataset}")
+    if max_test_samples is not None and max_test_samples < len(ds):
+        ds = ds.shuffle(seed=seed).select(range(max_test_samples))
+        
+    return {
+        "data": ds,
+        "prompt_template": "{context}",
+        "user_template": "",
+        "system_template": "",
+        "post_process": default_post_process,
+    }
+
+
 def default_post_process(output, example):
     """
     Returns: metrics (dict) and additional info to update the original sample with (dict)
@@ -764,6 +875,7 @@ def default_post_process(output, example):
 
 def load_data(args, dataset, path=None, demo_path=None):
     if "popqa" in dataset:
+        print(dataset)
         popularity_threshold = float(dataset.split("_")[-1])
         data = load_qa(dataset, path, demo_path, max_test_samples=args.max_test_samples, popularity_threshold=popularity_threshold, shots=args.shots)
     elif any([x in dataset for x in ["nq", "hotpotqa", "triviaqa"]]):
@@ -793,8 +905,12 @@ def load_data(args, dataset, path=None, demo_path=None):
         data = load_longproc_data_for_helmet(dataset, path=path, max_test_samples=args.max_test_samples, seed=args.seed)
     elif "mrcr" in dataset:
         data = load_mrcr(dataset, 0, args.max_test_samples, seed=args.seed)
+    elif "graphwalk" in dataset:
+        data = load_graphwalk(path, 0, args.max_test_samples, seed=args.seed)
     elif "longbenchv2" in dataset:
         data = load_longbenchv2(dataset, 0, args.max_test_samples, seed=args.seed)
+    elif "ppl" in dataset:
+        data = load_ppl(dataset, path, args.tokenizer, args.max_test_samples, seed=args.seed)
     else:
         raise ValueError(f"Unknown dataset {dataset}")
 

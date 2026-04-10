@@ -8,15 +8,21 @@ dependencies = [
     "accelerate>=1.12.0",
     "anthropic>=0.71.0",
     "datasets>=4.4.1",
+    "datatools-py>=0.5",
     "flash-attn>=1.12.0",
-    "flashinfer-jit-cache",
+    "flashinfer-jit-cache==0.5.2",
     "flashinfer-python>=0.5.2",
+    "networkx>=3.6",
     "ninja>=1.13.0",
     "openai>=2.8.1",
     "orjson>=3.11.4",
     "packaging>=25.0",
+    "plotly>=6.6.0",
     "pytrec-eval>=0.5",
     "rouge-score>=0.1.2",
+    "seaborn>=0.13.2",
+    "simple-parsing>=0.1.7",
+    "slurmer",
     "torch==2.8.0",
     "vllm==0.11.0",
     "wheel>=0.45.1",
@@ -25,3 +31,9 @@ dependencies = [
 [[tool.uv.index]]
 name = "flashinfer"
 url = "https://flashinfer.ai/whl/cu128"
+
+[tool.uv.sources]
+slurmer = { path = "../slurmer", editable = true }
+
+[tool.uv]
+no-build-isolation-package = ["flash-attn"]

@@ -6,7 +6,7 @@
 
 # Give your job a name, so you can recognize it in the queue overview
 #SBATCH --job-name=helmet ## CHANGE JOBNAME HERE
-#SBATCH --array=0-35
+#SBATCH --array=0-5
 
 # Remove one # to uncommment
 #SBATCH --output=./joblog/%x-%A_%a.out                          ## Stdout
@@ -18,7 +18,7 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=100G
 #SBATCH --time=0-24:00:00
-#SBATCH --gres=gpu:1 --ntasks-per-node=1 -N 1
+#SBATCH --gres=gpu:1
 #SBATCH --constraint=gpu80
 # Turn on mail notification. There are many possible self-explaining values:
 # NONE, BEGIN, END, FAIL, ALL (including all aforementioned)
@@ -26,6 +26,8 @@
 #SBATCH --mail-type=ALL
 # Remember to set your email address here instead of nobody
 #SBATCH --mail-user=nobody
+
+module load proxy/default
 
 echo "Date              = $(date)"
 echo "Hostname          = $(hostname -s)"
@@ -38,28 +40,55 @@ echo "Array Job ID                   = $SLURM_ARRAY_JOB_ID"
 echo "Array Task ID                  = $SLURM_ARRAY_TASK_ID"
 echo "Cache                          = $TRANSFORMERS_CACHE"
 
-source env/bin/activate
+source .venv/bin/activate
 
 IDX=$SLURM_ARRAY_TASK_ID
 NGPU=$SLURM_GPUS_ON_NODE
 if [[ -z $SLURM_ARRAY_TASK_ID ]]; then
-    IDX=31
-    NGPU=1
+    IDX=0
+    NGPU=0
 fi
 export OMP_NUM_THREADS=8
+export HF_DATASETS_OFFLINE=1
+export HF_HUB_OFFLINE=1
+export VLLM_ALLOW_LONG_MAX_MODEL_LEN=1
 
 # change the tag to distinguish different runs
 TAG=v1
 
-CONFIGS=(recall.yaml rag.yaml longqa.yaml summ.yaml icl.yaml rerank.yaml cite.yaml)
+CONFIGS=(recall rag longqa summ icl rerank cite mrcr longbenchv2 dev_128k dev_256k)
+#CONFIGS=(mrcr.yaml)
 SEED=42
 
-OPTIONS=""
+OPTIONS="--use_vllm"
 
 M_IDX=$IDX
 
+
+TO_TEST=(
+  "Llama-3.1-8B"
+  "Llama-3.1-8B-Instruct"
+  "Llama-3-8B-ProLong-512k-Base"
+  "Llama-3-8B-ProLong-512k-Instruct"
+  "Meta-Llama-3-8B"
+  "Meta-Llama-3-8B-Instruct"
+  "Llama-3.1-Nemotron-8B-UltraLong-1M-Instruct"
+  "Llama-3.1-Nemotron-8B-UltraLong-2M-Instruct"
+  "Llama-3.1-Nemotron-8B-UltraLong-8M-Instruct"
+  "gemma-3-7b-it"
+  "Qwen2.5-7B-Instruct"
+  "Qwen2.5-7B-Instrct-1M"
+  "Kimi-Linear-48B-A3B-Instruct"
+  "Qwen3-30B-A3B-Instruct-2507"
+)
+
+
 # Array for models larger than 13B (12 models)
 L_MODELS=(
+  "Kimi-Linear-48B-A3B-Instruct"
+  "Qwen3-30B-A3B-Instruct-2507"
+  "Qwen3-235B-A22B-Thinking-2507"
+  "MiniMax-M2"
   "Meta-Llama-3-70B-Theta8M"
   "Meta-Llama-3-70B-Instruct-Theta8M"
   "Meta-Llama-3.1-70B"
@@ -76,6 +105,11 @@ L_MODELS=(
 
 # Array for models 13B and smaller (36 models)
 S_MODELS=(
+  "Llama-3.1-8B-Instruct"
+  "Llama-3.1-Nemotron-8B-UltraLong-1M-Instruct"
+  "Llama-3.1-Nemotron-8B-UltraLong-2M-Instruct"
+  "Llama-3.1-Nemotron-8B-UltraLong-4M-Instruct"
+  "gemma-3-4b-it"
   "LLaMA-2-7B-32K"
   "Llama-2-7B-32K-Instruct"
   "llama-2-7b-80k-basefixed"
@@ -113,10 +147,10 @@ S_MODELS=(
   "Llama-3.2-3B" # 34
   "Llama-3.2-3B-Instruct" # 35
 )
-MNAME="${S_MODELS[$M_IDX]}"
+MNAME="${TO_TEST[$M_IDX]}"
 
 OUTPUT_DIR="output/$MNAME"
-MODEL_NAME="/path/to/your/model/$MNAME" # CHANGE PATH HERE or you can change the array to load from HF
+MODEL_NAME="/scratch/gpfs/PLI/models/$MNAME" # CHANGE PATH HERE or you can change the array to load from HF
 
 shopt -s nocasematch
 chat_models=".*(chat|instruct|it$|nous|command|Jamba-1.5|MegaBeam).*"
@@ -134,10 +168,10 @@ echo "Options                       = $OPTIONS"
 
 
 for CONFIG in "${CONFIGS[@]}"; do
-    echo "Config file: $CONFIG"
+    echo "Config file: $CONFIG.yaml"
 
     python eval.py \
-        --config configs/$CONFIG \
+        --config configs/$CONFIG.yaml \
         --seed $SEED \
         --output_dir $OUTPUT_DIR \
         --tag $TAG \
