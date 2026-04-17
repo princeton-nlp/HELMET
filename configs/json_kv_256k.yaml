@@ -1,11 +1,5 @@
 dataset_options:
-  input_max_length: '262144'
-  datasets: json_kv
-  generation_max_length: '100'
-  test_files: data/json_kv/test_k3600_dep6.jsonl
-  demo_files: ''
-  use_chat_template: false
+  datasets:
+  - json_kv_256k
   max_test_samples: 100
-  shots: 0
-  stop_new_line: false
 model_name_or_path: meta-llama/Llama-3.1-8B-Instruct

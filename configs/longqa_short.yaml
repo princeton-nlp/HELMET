@@ -1,11 +1,16 @@
 dataset_options:
-  input_max_length: 8192,16384,32768,65536,8192,16384,32768,65536,8192,16384,32768,65536
-  datasets: narrativeqa_7892,narrativeqa_16084,narrativeqa_32468,narrativeqa_65236,infbench_qa_eng_7982,infbench_qa_eng_16174,infbench_qa_eng_32558,infbench_qa_eng_65326,infbench_choice_eng_7982,infbench_choice_eng_16174,infbench_choice_eng_32558,infbench_choice_eng_65326
-  generation_max_length: 100,100,100,100,10,10,10,10,10,10,10,10
-  test_files: ',,,,,,,,,,,'
-  demo_files: ',,,,,,,,,,,'
-  use_chat_template: true
+  datasets:
+  - narrativeqa_8k
+  - narrativeqa_16k
+  - narrativeqa_32k
+  - narrativeqa_64k
+  - infbench_qa_8k
+  - infbench_qa_16k
+  - infbench_qa_32k
+  - infbench_qa_64k
+  - infbench_choice_8k
+  - infbench_choice_16k
+  - infbench_choice_32k
+  - infbench_choice_64k
   max_test_samples: 100
-  shots: 2
-  stop_new_line: false
 model_name_or_path: meta-llama/Llama-3.1-8B-Instruct

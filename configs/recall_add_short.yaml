@@ -1,11 +1,16 @@
 dataset_options:
-  input_max_length: 32768,65536,32768,65536,32768,65536,32768,65536,32768,65536,32768,65536
-  datasets: ruler_niah_mk_2,ruler_niah_mk_2,ruler_niah_mk_3,ruler_niah_mk_3,ruler_niah_mv,ruler_niah_mv,json_kv,json_kv,ruler_qa_1,ruler_qa_1,ruler_qa_2,ruler_qa_2
-  generation_max_length: 50,50,100,100,50,50,100,100,50,50,50,50
-  test_files: data/ruler/niah_multikey_2/validation_32768.jsonl,data/ruler/niah_multikey_2/validation_65536.jsonl,data/ruler/niah_multikey_3/validation_32768.jsonl,data/ruler/niah_multikey_3/validation_65536.jsonl,data/ruler/niah_multivalue/validation_32768.jsonl,data/ruler/niah_multivalue/validation_65536.jsonl,data/json_kv/test_k440_dep6.jsonl,data/json_kv/test_k900_dep6.jsonl,data/ruler/qa_1/validation_32768.jsonl,data/ruler/qa_1/validation_65536.jsonl,data/ruler/qa_2/validation_32768.jsonl,data/ruler/qa_2/validation_65536.jsonl
-  demo_files: ',,,,,,,,,,,'
-  use_chat_template: false
+  datasets:
+  - ruler_niah_mk_2_32k
+  - ruler_niah_mk_2_64k
+  - ruler_niah_mk_3_32k
+  - ruler_niah_mk_3_64k
+  - ruler_niah_mv_32k
+  - ruler_niah_mv_64k
+  - json_kv_32k
+  - json_kv_64k
+  - ruler_qa_1_32k
+  - ruler_qa_1_64k
+  - ruler_qa_2_32k
+  - ruler_qa_2_64k
   max_test_samples: 100
-  shots: 2
-  stop_new_line: false
 model_name_or_path: meta-llama/Llama-3.1-8B-Instruct

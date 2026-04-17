@@ -1,0 +1,12 @@
+dataset_options:
+  datasets:
+  - kilt_nq_64k
+  - kilt_popqa_64k
+  - msmarco_rerank_psg_64k
+  - icl_clinic150_64k
+  - icl_nlu_64k
+  - longbenchv2_64k
+  - infbench_qa_64k
+  - infbench_choice_64k
+  max_test_samples: 100
+model_name_or_path: meta-llama/Llama-3.1-8B-Instruct

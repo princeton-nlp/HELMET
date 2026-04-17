@@ -1,11 +1,8 @@
 dataset_options:
-  input_max_length: 8192,16384,32768,65536
-  datasets: msmarco_rerank_psg,msmarco_rerank_psg,msmarco_rerank_psg,msmarco_rerank_psg
-  generation_max_length: 200,200,200,200
-  test_files: data/msmarco/test_reranking_data_k50_dep3.jsonl,data/msmarco/test_reranking_data_k130_dep3.jsonl,data/msmarco/test_reranking_data_k285_dep3.jsonl,data/msmarco/test_reranking_data_k600_dep3.jsonl
-  demo_files: data/msmarco/test_reranking_data_k10_dep3.jsonl,data/msmarco/test_reranking_data_k10_dep3.jsonl,data/msmarco/test_reranking_data_k10_dep3.jsonl,data/msmarco/test_reranking_data_k10_dep3.jsonl
-  use_chat_template: false
+  datasets:
+  - msmarco_rerank_psg_8k
+  - msmarco_rerank_psg_16k
+  - msmarco_rerank_psg_32k
+  - msmarco_rerank_psg_64k
   max_test_samples: 100
-  shots: 2
-  stop_new_line: true
 model_name_or_path: meta-llama/Llama-3.1-8B-Instruct

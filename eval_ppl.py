@@ -13,7 +13,7 @@ from torch.utils.data import Dataset, DataLoader
 from arguments import parse_arguments, args_to_dict
 from model_utils import load_LLM, HFModel, VLLMModel
 
-from data import load_data
+from data_module import load_data, TASK_REGISTRY
 
 
 class PPLDataset(Dataset):
@@ -94,17 +94,12 @@ def compute_ppl_vllm(model, all_input_ids, all_labels, all_strides):
 
     results = []
     for output, labels, stride in zip(outputs, all_labels, all_strides):
-        # prompt_logprobs[i] gives logprob of prompt_token_ids[i] given tokens 0..i-1
-        # This corresponds to predicting labels[i-1] (since labels[j] = input_ids[j+1])
-        # So to get the logprob for labels[j], we look at prompt_logprobs[j+1]
         prompt_logprobs = output.prompt_logprobs
-        # only evaluate the last stride tokens of labels
         start_j = len(labels) - stride
         log_probs = []
         for j in range(start_j, len(labels)):
             if labels[j] == -100:
                 continue
-            # logprob for labels[j] is at prompt_logprobs[j+1]
             if j + 1 >= len(prompt_logprobs) or prompt_logprobs[j + 1] is None:
                 continue
             token_id = output.prompt_token_ids[j + 1]  # == labels[j]
@@ -127,8 +122,7 @@ def compute_ppl_vllm(model, all_input_ids, all_labels, all_strides):
     return results
 
 
-def run_test(args, model, dataset, test_file, demo_file):
-    logger.info(f"running perplexity evaluation on {dataset} with test {test_file} and demo {demo_file}")
+def run_test(args, model, dataset):
     tag = args.tag
 
     output_path = os.path.join(args.output_dir, f"{dataset}_{tag}_{args.seed}.json")
@@ -138,10 +132,9 @@ def run_test(args, model, dataset, test_file, demo_file):
         return output_path, averaged_metrics
 
     random.seed(args.seed)
-    data = load_data(args, dataset, test_file, demo_file)
+    data = load_data(args, dataset)
     logger.info(f"loaded {len(data['data'])} samples from {dataset}")
 
-    # data['data'] already has input_ids, labels, and stride from load_ppl
     all_input_ids = [sample['input_ids'] for sample in data['data']]
     all_labels = [sample['labels'] for sample in data['data']]
     all_strides = [sample['stride'] for sample in data['data']]
@@ -233,19 +226,15 @@ def main():
     os.makedirs(args.output_dir, exist_ok=True)
 
     datasets = args.dataset_options.datasets
-    test_files = args.dataset_options.test_files
-    demo_files = args.dataset_options.demo_files
-    max_lengths = args.dataset_options.input_max_length
-    gen_lengths = args.dataset_options.generation_max_length
-    use_chat_template = args.dataset_options.use_chat_template
     args.max_test_samples = args.dataset_options.max_test_samples
-    args.shots = args.dataset_options.shots
-    args.stop_new_line = args.dataset_options.stop_new_line
     args.tokenizer = args.model_name_or_path
 
-    args.input_max_length = max(max_lengths)
-    args.generation_max_length = max(gen_lengths)
-    args.use_chat_template = any(use_chat_template)
+    task_configs = [TASK_REGISTRY[d] for d in datasets]
+
+    args.input_max_length = max(tc.input_max_length for tc in task_configs)
+    args.generation_max_length = max(tc.generation_max_length for tc in task_configs)
+    args.use_chat_template = any(tc.use_chat_template for tc in task_configs)
+    args.stop_new_line = any(tc.stop_new_line for tc in task_configs)
     model = load_LLM(args)
 
     if not isinstance(model, (HFModel, VLLMModel)):
@@ -254,20 +243,13 @@ def main():
     success = True
     all_metrics = {}
 
-    for dataset, test_file, demo_file, max_length, gen_length, uct in zip(datasets, test_files, demo_files, max_lengths, gen_lengths, use_chat_template):
-        args.datasets = dataset
-        args.test_files = test_file
-        args.demo_files = demo_file
-        args.input_max_length = max_length
-        args.generation_max_length = gen_length
-        args.use_chat_template = uct
-
-        model.max_length = max_length
-        model.generation_max_length = gen_length
-        model.use_chat_template = uct
+    for dataset, task_config in zip(datasets, task_configs):
+        model.max_length = task_config.input_max_length
+        model.generation_max_length = task_config.generation_max_length
+        model.use_chat_template = task_config.use_chat_template
 
         try:
-            output_path, metrics = run_test(args, model, dataset, test_file, demo_file)
+            output_path, metrics = run_test(args, model, dataset)
             all_metrics[dataset] = metrics
 
         except Exception as e:

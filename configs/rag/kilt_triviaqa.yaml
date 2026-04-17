@@ -1,11 +1,5 @@
 dataset_options:
-  input_max_length: '131072'
-  datasets: kilt_triviaqa
-  generation_max_length: '20'
-  test_files: data/kilt/triviaqa-dev-multikilt_1000_k1000_dep6.jsonl
-  demo_files: data/kilt/triviaqa-train-multikilt_1000_k3_dep6.jsonl
-  use_chat_template: false
+  datasets:
+  - kilt_triviaqa_128k
   max_test_samples: 100
-  shots: 2
-  stop_new_line: true
 model_name_or_path: meta-llama/Llama-3.1-8B-Instruct

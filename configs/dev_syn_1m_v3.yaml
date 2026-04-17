@@ -1,0 +1,13 @@
+dataset_options:
+  datasets:
+  - json_kv_1m
+  - ruler_niah_mk_2_1m
+  - ruler_niah_mv_1m
+  - ruler_niah_mq_1m
+  - ruler_fwe_1m
+  - mrcr_4_1m
+  - mrcr_8_1m
+  - graphwalk_bfs_dep8_1m
+  - graphwalk_parent_1m
+  max_test_samples: 100
+model_name_or_path: meta-llama/Llama-3.1-8B-Instruct

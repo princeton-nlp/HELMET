@@ -1,11 +1,5 @@
 dataset_options:
-  input_max_length: '1048576'
-  datasets: longbenchv2_long
-  generation_max_length: '128'
-  test_files: ''
-  demo_files: ''
-  use_chat_template: true
+  datasets:
+  - longbenchv2_1m
   max_test_samples: null
-  shots: 2
-  stop_new_line: false
 model_name_or_path: meta-llama/Llama-3.1-8B-Instruct

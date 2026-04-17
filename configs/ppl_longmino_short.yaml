@@ -1,10 +1,6 @@
 dataset_options:
-  input_max_length: 32768,65536
-  datasets: ppl_longmino_32768_8192,ppl_longmino_65536_8192
-  generation_max_length: 0,0
-  test_files: data/longmino/524288_10.jsonl,data/longmino/524288_10.jsonl
-  demo_files: ','
-  use_chat_template: false
+  datasets:
+  - ppl_longmino_32768_8192
+  - ppl_longmino_65536_8192
   max_test_samples: 300
-  stop_new_line: false
 model_name_or_path: meta-llama/Llama-3.1-8B-Instruct
