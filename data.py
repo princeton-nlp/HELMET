@@ -181,6 +181,12 @@ def filter_length(data, min_length, key):
     return data
 
 
+def demo_seed(key, seed):
+    # a different seed for every sample, but deterministic and affected by the set seed
+    # hashlib is deterministic while hash() is not in Python>=3.3, the seed has to be a positive integer
+    return (int(hashlib.sha256(key.encode("utf-8")).hexdigest(), 16) + seed) % 2**31
+
+
 def load_narrativeqa(dataset, shots=0, max_samples=None, seed=42):
     user_template = "You are given a story, which can be either a novel or a movie script, and a question. Answer the question as concisely as you can, using a single phrase if possible.\n\n{demo}{context}\n\nQuestion: {question}"
     system_template = "Answer:"
@@ -199,7 +205,7 @@ def load_narrativeqa(dataset, shots=0, max_samples=None, seed=42):
         "context": example["document"]["text"],
         "question": example["question"]["text"],
         "answer": [ex["text"] for ex in example["answers"]],
-        "demo": "" if shots == 0 else "For example:\n\n" + "\n\n".join([f"Question: {ex['question']['text']}\nAnswer: {ex['answers'][0]['text']}" for ex in all_data["train"].shuffle().select(range(shots))]) + "\n\nNow, use the following story to answer the question:\n\n"
+        "demo": "" if shots == 0 else "For example:\n\n" + "\n\n".join([f"Question: {ex['question']['text']}\nAnswer: {ex['answers'][0]['text']}" for ex in all_data["train"].shuffle(seed=demo_seed(example["document"]["id"] + example["question"]["text"], seed)).select(range(shots))]) + "\n\nNow, use the following story to answer the question:\n\n"
     }, remove_columns=["document", "answers"])
 
     data = filter_length(data, 131072, "context")
@@ -226,7 +232,7 @@ def load_multi_lexsum(dataset, shots=0, max_samples=None, seed=42):
 
     all_data = all_data.map(lambda x: {
         "context": '\n\n'.join(x["sources"]),
-        "demo": "" if shots == 0 else "Example summaries:\n\n" + "\n\n".join(["Summary: {}".format(ex["summary/short"]) for ex in train_data.shuffle().select(range(shots))]) + "\n\nNow, write a summary of the following legal documents.\n",
+        "demo": "" if shots == 0 else "Example summaries:\n\n" + "\n\n".join(["Summary: {}".format(ex["summary/short"]) for ex in train_data.shuffle(seed=demo_seed(x["id"], seed)).select(range(shots))]) + "\n\nNow, write a summary of the following legal documents.\n",
         "answer": x["summary/short"],
         "question": "",
     })
