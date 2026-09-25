@@ -85,8 +85,8 @@ def check_metrics(model, results_file, output_file):
                 print("Warning! Couldn't get a score")
                 print(f"GPT-4 output: {o['output']}")
 
-            if scores is not None:
-                sum_score += scores["fluency"] * scores["correctness"]
+            if s is not None:
+                sum_score += s["fluency"] * s["correctness"]
                 count_score += 1
 
         d["gpt-4-scores"] = s
@@ -94,10 +94,15 @@ def check_metrics(model, results_file, output_file):
         if idx < 10:
             print("=====================================")
             print(f"Prompt: {all_inputs[idx]}")
-            print(f"Output: {o['output']}")
+            print(f"Output: {o['output'] if o is not None else None}")
             print(f"Final score: {s}")
 
+    if count_score == 0:
+        raise Exception("No scores found")
+
     results["averaged_metrics"]["gpt-4-score"] = sum_score / count_score
+    results["averaged_metrics"]["gpt-4-judged"] = count_score
+    results["averaged_metrics"]["gpt-4-judge_failed"] = len(results["data"]) - count_score
     with open(output_file, "w") as f:
         json.dump(results, f, indent=4)
 
