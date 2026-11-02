@@ -37,7 +37,9 @@ def normalize_answer(s):
     def lower(text):
         return text.lower()
 
-    return white_space_fix(remove_articles(remove_punc(lower(s))))
+    text = remove_punc(lower(s))
+    # an answer made only of articles (e.g. the choice letter "A") must not normalize to ""
+    return white_space_fix(remove_articles(text)) or white_space_fix(text)
 
 
 def remove_citations(sent):
